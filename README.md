@@ -23,7 +23,8 @@ A modern, high-performance website and salon management system built for **Zarah
   - Shift absence management & slot reassignment with automated customer SMS alerts
   - Facebook & Social Message Inbox with 1-click "Convert to Booking"
   - Schedule export to CSV for accounting
-
+## Live demo:
+https://zarahnailsmassey.vercel.app/
 ---
 
 ## Directory Structure
