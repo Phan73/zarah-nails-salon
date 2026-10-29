@@ -75,6 +75,30 @@
       }
     },
 
+    // Get Colors
+    getColors: function(defaultColors) {
+      try {
+        const stored = localStorage.getItem('zarah_colors');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {
+        console.warn('Storage read error', e);
+      }
+      return defaultColors !== undefined ? defaultColors : null;
+    },
+
+    // Save Colors
+    saveColors: function(colors) {
+      try {
+        localStorage.setItem('zarah_colors', JSON.stringify(colors));
+        window.dispatchEvent(new CustomEvent('zarah:colors-updated', { detail: colors }));
+      } catch (e) {
+        console.warn('Storage write error', e);
+      }
+    },
+
     // Get Salon Info
     getSalonInfo: function(defaultInfo) {
       try {

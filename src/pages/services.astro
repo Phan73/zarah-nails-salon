@@ -244,7 +244,10 @@ const colorCategories = ['All Shades', 'BIAB & Nudes', 'Chrome & Shimmer', 'Reds
       };
     });
 
-    // Sub-filters for color swatches
+    bindColorSubFilters();
+  }
+
+  function bindColorSubFilters() {
     const colorPills = document.querySelectorAll('#color-sub-filters .color-pill');
     const colorCards = document.querySelectorAll('.color-card');
 
@@ -266,11 +269,49 @@ const colorCategories = ['All Shades', 'BIAB & Nudes', 'Chrome & Shimmer', 'Reds
     });
   }
 
+  function hydrateDynamicColors() {
+    if (!window.SalonStore) return;
+    const storedColors = window.SalonStore.getColors(null);
+    if (!storedColors || !Array.isArray(storedColors) || storedColors.length === 0) return;
+
+    const container = document.getElementById('color-swatches-container');
+    if (!container) return;
+
+    container.innerHTML = storedColors.map(shade => `
+      <div class="color-card" data-category="${shade.category}">
+        <div class="color-swatch-wrap">
+          <div
+            class="color-swatch-circle"
+            style="${shade.isGradient ? `background: ${shade.gradient};` : `background-color: ${shade.colorHex};`}"
+          >
+            ${shade.category === 'Chrome & Shimmer' ? '<span class="shimmer-glint">✨</span>' : ''}
+            ${shade.category === 'Velvet Cat-Eye' ? '<span class="cat-eye-streak"></span>' : ''}
+          </div>
+          <span class="color-code">${shade.code}</span>
+        </div>
+        <div class="color-info">
+          <h4 class="color-title">${shade.name}</h4>
+          <span class="color-finish-badge">${shade.finish}</span>
+          <p class="color-desc">${shade.description}</p>
+          <div class="color-card-actions">
+            <a href="/booking?service=${shade.serviceMatch || 'gel-manicure'}" class="btn btn-primary btn-sm btn-block">
+              Book With This Color
+            </a>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    bindColorSubFilters();
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     hydrateDynamicServices();
+    hydrateDynamicColors();
     bindFilterPills();
   });
   window.addEventListener('zarah:services-updated', hydrateDynamicServices);
+  window.addEventListener('zarah:colors-updated', hydrateDynamicColors);
 </script>
 
 <style>

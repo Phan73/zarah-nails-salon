@@ -6,6 +6,7 @@ import galleryData from '../../data/gallery.json';
 import salonInfo from '../../data/salon-info.json';
 import customersData from '../../data/customers.json';
 import googleReviewsData from '../../data/google-reviews.json';
+import colorsData from '../../data/colors.json';
 
 const activeStaff = teamData.filter(t => t.id !== 'any-available');
 const allServices = servicesData.flatMap(cat => cat.items);
@@ -106,6 +107,9 @@ const allServices = servicesData.flatMap(cat => cat.items);
       </button>
       <button type="button" class="portal-tab admin-locked" data-tab-target="tab-admin-reviews" id="tab-btn-reviews">
         🔒 Google Reviews Manager
+      </button>
+      <button type="button" class="portal-tab admin-locked" data-tab-target="tab-admin-colors" id="tab-btn-colors">
+        🔒 Studio Colors &amp; Finishes
       </button>
     </div>
 
@@ -398,6 +402,50 @@ const allServices = servicesData.flatMap(cat => cat.items);
           <span style="font-size: 0.8rem; color: var(--text-muted);">
             Changes update instantly on the homepage without needing to rebuild the site.
           </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 8: ADMIN - STUDIO COLORS & FINISHES MANAGER (Admin Only)
+         ========================================== -->
+    <section class="tab-pane" id="tab-admin-colors">
+      <div class="admin-panel-card">
+        <div class="admin-panel-header">
+          <div>
+            <h2>🎨 Studio Color Bar &amp; Nail Shades Manager</h2>
+            <p class="admin-panel-sub">
+              Manage the 200+ salon-grade gel, BIAB builder, chrome, and magnetic finishes shown on the public Services page. Add new seasonal collections, adjust shade codes, or customize swatches in real-time.
+            </p>
+          </div>
+          <div class="admin-header-actions" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-subtle" id="btn-reset-colors-default" title="Restore default salon palette">
+              🔄 Reset to Defaults
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-add-new-color">
+              + Add New Color Shade
+            </button>
+          </div>
+        </div>
+
+        <!-- Color Management Filter & Search Bar -->
+        <div class="admin-color-controls" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <div class="admin-color-filter-pills" id="admin-color-cat-filters" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="filter-pill active" data-cat="all">All Shades (<span id="count-all-colors">0</span>)</button>
+            <button type="button" class="filter-pill" data-cat="BIAB & Nudes">BIAB &amp; Nudes</button>
+            <button type="button" class="filter-pill" data-cat="Chrome & Shimmer">Chrome &amp; Shimmer</button>
+            <button type="button" class="filter-pill" data-cat="Reds & Berries">Reds &amp; Berries</button>
+            <button type="button" class="filter-pill" data-cat="Velvet Cat-Eye">Velvet Cat-Eye</button>
+            <button type="button" class="filter-pill" data-cat="Modern Earth">Modern Earth</button>
+          </div>
+          <div style="min-width: 260px; flex: 1; max-width: 360px;">
+            <input type="text" id="admin-color-search-input" class="form-input" placeholder="🔍 Search by name or code (#01, Bare Rose)..." />
+          </div>
+        </div>
+
+        <!-- Color Cards Grid -->
+        <div class="admin-colors-grid" id="admin-colors-container">
+          <!-- Populated dynamically -->
         </div>
       </div>
     </section>
@@ -1004,9 +1052,132 @@ const allServices = servicesData.flatMap(cat => cat.items);
       </form>
     </div>
   </div>
+
+  <!-- ========================================================
+       MODAL: ADMIN ADD / EDIT COLOR SHADE
+       ======================================================== -->
+  <div class="modal-backdrop" id="color-edit-modal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header">
+        <div>
+          <h2 id="color-modal-title">Add New Color Shade</h2>
+          <p class="modal-sub">Add a gel, BIAB, chrome, or velvet shade to your public Studio Color Bar.</p>
+        </div>
+        <button type="button" class="modal-close" id="btn-close-color-modal">&times;</button>
+      </div>
+
+      <form id="color-edit-form" class="modal-body">
+        <input type="hidden" id="ce-id" value="" />
+        <input type="hidden" id="ce-index" value="-1" />
+
+        <!-- Live Swatch Preview Banner -->
+        <div class="color-preview-banner" style="display: flex; align-items: center; gap: 1.25rem; background: var(--bg-porcelain); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-delicate); margin-bottom: 1.25rem;">
+          <div id="ce-preview-circle" style="width: 58px; height: 58px; border-radius: 50%; border: 3px solid #FFFFFF; box-shadow: 0 4px 12px rgba(0,0,0,0.15); background-color: #F8E4DF; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span id="ce-preview-sparkle" style="display: none; font-size: 1.1rem;">✨</span>
+            <span id="ce-preview-streak" style="display: none; width: 6px; height: 130%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.85), transparent); transform: rotate(35deg); box-shadow: 0 0 8px rgba(255,255,255,0.8);"></span>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <h3 id="ce-preview-name" style="margin: 0; font-size: 1.15rem; color: var(--text-espresso);">Bare Rose</h3>
+              <span id="ce-preview-code" style="font-size: 0.75rem; font-weight: 700; background: var(--bg-stone); padding: 0.15rem 0.45rem; border-radius: var(--radius-sm);">#01 BIAB</span>
+            </div>
+            <p id="ce-preview-finish" style="margin: 0.25rem 0 0 0; font-size: 0.82rem; color: var(--accent-rose); font-weight: 600;">Translucent Blush</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1.4;">
+            <label class="form-label">Color Shade Name *</label>
+            <input type="text" id="ce-name" class="form-input" placeholder="e.g. Bare Rose or French Peach" required />
+          </div>
+          <div class="form-group" style="flex: 0.8;">
+            <label class="form-label">Shade / Bottle # *</label>
+            <input type="text" id="ce-code" class="form-input" placeholder="e.g. #19 BIAB or TGB #04" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Collection Category *</label>
+            <select id="ce-category" class="form-input" required>
+              <option value="BIAB & Nudes">BIAB &amp; Nudes</option>
+              <option value="Chrome & Shimmer">Chrome &amp; Shimmer</option>
+              <option value="Reds & Berries">Reds &amp; Berries</option>
+              <option value="Velvet Cat-Eye">Velvet Cat-Eye</option>
+              <option value="Modern Earth">Modern Earth</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Finish Type *</label>
+            <input type="text" id="ce-finish" class="form-input" placeholder="e.g. Translucent Blush or Mirror Chrome" required />
+          </div>
+        </div>
+
+        <!-- Color Appearance Selector: Solid vs Gradient/Shimmer -->
+        <div class="form-group">
+          <label class="form-label">Color Style Format</label>
+          <div style="display: flex; gap: 1.25rem; margin-bottom: 0.5rem;">
+            <label style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.88rem; cursor: pointer;">
+              <input type="radio" name="ce-format-type" value="solid" checked id="ce-type-solid" />
+              <span>Solid Hex Color</span>
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.88rem; cursor: pointer;">
+              <input type="radio" name="ce-format-type" value="gradient" id="ce-type-gradient" />
+              <span>Chrome / Shimmer / Velvet Gradient</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="ce-solid-wrap" class="form-row" style="align-items: center;">
+          <div class="form-group" style="flex: 0 0 54px;">
+            <label class="form-label">Picker</label>
+            <input type="color" id="ce-color-picker" value="#F8E4DF" style="width: 50px; height: 42px; border: 1px solid var(--border-delicate); border-radius: var(--radius-sm); cursor: pointer; padding: 2px;" />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Hex Color Code</label>
+            <input type="text" id="ce-hex" class="form-input" placeholder="#F8E4DF" value="#F8E4DF" />
+          </div>
+        </div>
+
+        <div id="ce-gradient-wrap" class="form-group" style="display: none;">
+          <label class="form-label">CSS Gradient / Reflection Formula</label>
+          <input type="text" id="ce-gradient" class="form-input" placeholder="linear-gradient(135deg, #FFFDFB 0%, #E8E5F0 50%, #FDEBF3 100%)" />
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.4rem;">
+            <button type="button" class="btn btn-subtle btn-sm gradient-preset-btn" data-preset="linear-gradient(135deg, #FFFDFB 0%, #E8E5F0 50%, #FDEBF3 100%)">Pearl Glaze</button>
+            <button type="button" class="btn btn-subtle btn-sm gradient-preset-btn" data-preset="linear-gradient(135deg, #FBE5E8 0%, #F1C3CC 100%)">Rose Gold</button>
+            <button type="button" class="btn btn-subtle btn-sm gradient-preset-btn" data-preset="linear-gradient(135deg, #FFF6D8 0%, #E8D397 100%)">Honey Gold</button>
+            <button type="button" class="btn btn-subtle btn-sm gradient-preset-btn" data-preset="linear-gradient(135deg, #CBB499 0%, #E8D7C2 50%, #9B8268 100%)">Velvet Cat-Eye</button>
+            <button type="button" class="btn btn-subtle btn-sm gradient-preset-btn" data-preset="linear-gradient(135deg, #0F382A 0%, #1E6B52 50%, #08241B 100%)">Emerald Cat-Eye</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description for Public Customers *</label>
+          <textarea id="ce-description" class="form-input" rows="2" placeholder="Describe the shade, undertones, and best occasions..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Recommended Matching Treatment</label>
+          <select id="ce-service" class="form-input">
+            <option value="biab-full-overlay">BIAB (Builder in a Bottle) Overlay</option>
+            <option value="gel-manicure">Signature Gel / Shellac Manicure</option>
+            <option value="glazed-chrome">Signature Gel + Mirror Chrome</option>
+            <option value="french-ombre">Modern French / Baby Boomer Ombre</option>
+            <option value="deluxe-gel-pedicure">Deluxe Gel Pedicure & Foot Massage</option>
+            <option value="acrylic-full-set">Full Set Acrylic Extensions (with Gel)</option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-color-edit">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-color">Save Color Shade</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </StaffLayout>
 
-<script is:inline define:vars={{ initialServices: servicesData, initialTeam: teamData, initialGallery: galleryData, initialInfo: salonInfo, initialCustomers: customersData, initialGoogleReviews: googleReviewsData }}>
+<script is:inline define:vars={{ initialServices: servicesData, initialTeam: teamData, initialGallery: galleryData, initialInfo: salonInfo, initialCustomers: customersData, initialGoogleReviews: googleReviewsData, initialColors: colorsData }}>
   // Application State & Direct Session Setup
   const loggedUser = window.SalonStore ? window.SalonStore.getLoggedInUser() : null;
   let currentRole = (loggedUser && (loggedUser.role === 'admin' || loggedUser.role === 'staff'))
@@ -1021,6 +1192,9 @@ const allServices = servicesData.flatMap(cat => cat.items);
   let activeTeam = window.SalonStore ? window.SalonStore.getTeam(initialTeam) : initialTeam;
   let activeGallery = window.SalonStore ? window.SalonStore.getGallery(initialGallery) : initialGallery;
   let activeCustomers = window.SalonStore ? window.SalonStore.getCustomers(initialCustomers) : initialCustomers;
+  let activeColors = (window.SalonStore && window.SalonStore.getColors(initialColors)) || [...initialColors];
+  let currentAdminColorCat = 'all';
+  let currentAdminColorSearch = '';
   let selectedCustomerForReward = null;
   let currentCustomerFilter = 'all';
   let customerSearchQuery = '';
@@ -1082,7 +1256,8 @@ const allServices = servicesData.flatMap(cat => cat.items);
       document.getElementById('tab-btn-services'),
       document.getElementById('tab-btn-gallery'),
       document.getElementById('tab-btn-team'),
-      document.getElementById('tab-btn-reviews')
+      document.getElementById('tab-btn-reviews'),
+      document.getElementById('tab-btn-colors')
     ];
 
     if (currentRole === 'admin') {
@@ -1165,6 +1340,8 @@ const allServices = servicesData.flatMap(cat => cat.items);
     setupStaffAccountListeners();
     renderAdminGoogleReviews();
     setupGoogleReviewsListeners();
+    renderAdminColors();
+    setupAdminColorsListeners();
     populateSelectDropdowns();
 
     const calDate = document.getElementById('calendar-date-picker');
@@ -3186,6 +3363,338 @@ const allServices = servicesData.flatMap(cat => cat.items);
     }
   }
 
+  // ==========================================
+  // ADMIN 8: STUDIO COLORS & FINISHES MANAGER
+  // ==========================================
+  function renderAdminColors(cat = currentAdminColorCat, query = currentAdminColorSearch) {
+    const container = document.getElementById('admin-colors-container');
+    const countBadge = document.getElementById('count-all-colors');
+    if (!container) return;
+
+    if (countBadge) countBadge.textContent = activeColors.length.toString();
+
+    let filtered = activeColors.filter(item => {
+      const matchCat = cat === 'all' || item.category === cat;
+      const q = query.trim().toLowerCase();
+      const matchQuery = !q ||
+        (item.name && item.name.toLowerCase().includes(q)) ||
+        (item.code && item.code.toLowerCase().includes(q)) ||
+        (item.finish && item.finish.toLowerCase().includes(q)) ||
+        (item.description && item.description.toLowerCase().includes(q));
+      return matchCat && matchQuery;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; background: var(--bg-porcelain); border-radius: var(--radius-md); border: 1px dashed var(--border-delicate);">
+          <span style="font-size: 2.2rem; display: block; margin-bottom: 0.5rem;">🎨</span>
+          <h3 style="margin: 0 0 0.5rem 0; color: var(--text-espresso);">No Color Shades Found</h3>
+          <p style="font-size: 0.9rem; color: var(--text-cocoa); max-width: 440px; margin: 0 auto 1.25rem auto;">
+            No colors match your search in this view. Click "+ Add New Color Shade" to introduce this new shade!
+          </p>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-empty-add-color">
+            + Add New Color Shade
+          </button>
+        </div>
+      `;
+      document.getElementById('btn-empty-add-color')?.addEventListener('click', () => openColorEditModal(null));
+      return;
+    }
+
+    container.innerHTML = filtered.map(item => {
+      const isGradient = !!item.isGradient || (item.gradient && item.gradient.length > 0);
+      const bgStyle = isGradient ? `background: ${item.gradient};` : `background-color: ${item.colorHex || '#F8E4DF'};`;
+      const isChrome = item.category === 'Chrome & Shimmer';
+      const isVelvet = item.category === 'Velvet Cat-Eye';
+
+      return `
+        <div class="admin-color-item" data-id="${item.id}">
+          <div class="admin-color-top">
+            <div class="admin-swatch-circle" style="${bgStyle}">
+              ${isChrome ? '<span style="font-size: 0.85rem;">✨</span>' : ''}
+              ${isVelvet ? '<span style="width: 5px; height: 130%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.85), transparent); transform: rotate(35deg); box-shadow: 0 0 6px rgba(255,255,255,0.8);"></span>' : ''}
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; background: var(--bg-stone); padding: 0.2rem 0.55rem; border-radius: var(--radius-sm); color: var(--text-muted);">${item.code || '#Shade'}</span>
+          </div>
+
+          <div class="admin-color-body">
+            <span class="admin-color-category-tag">${item.category || 'Collection'}</span>
+            <h4>${item.name}</h4>
+            <span class="admin-color-finish-badge">${item.finish || 'Studio Polish'}</span>
+            <p class="admin-color-desc">${item.description || ''}</p>
+            <div class="admin-color-service">
+              <strong>Matching Service:</strong> <code>${item.serviceMatch || 'gel-manicure'}</code>
+            </div>
+          </div>
+
+          <div class="admin-color-actions">
+            <button type="button" class="btn btn-subtle btn-sm btn-edit-color" data-id="${item.id}" style="flex: 1;">
+              ✏️ Edit
+            </button>
+            <button type="button" class="btn btn-subtle btn-sm btn-delete-color" data-id="${item.id}" style="color: var(--state-danger);" title="Delete shade">
+              🗑️ Delete
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateColorModalPreview() {
+    const nameInput = document.getElementById('ce-name');
+    const codeInput = document.getElementById('ce-code');
+    const finishInput = document.getElementById('ce-finish');
+    const previewCircle = document.getElementById('ce-preview-circle');
+    const previewName = document.getElementById('ce-preview-name');
+    const previewCode = document.getElementById('ce-preview-code');
+    const previewFinish = document.getElementById('ce-preview-finish');
+    const previewSparkle = document.getElementById('ce-preview-sparkle');
+    const previewStreak = document.getElementById('ce-preview-streak');
+    const categorySelect = document.getElementById('ce-category');
+    const isGradient = document.getElementById('ce-type-gradient')?.checked;
+
+    if (previewName && nameInput) previewName.textContent = nameInput.value.trim() || 'New Color Shade';
+    if (previewCode && codeInput) previewCode.textContent = codeInput.value.trim() || '#Code';
+    if (previewFinish && finishInput) previewFinish.textContent = finishInput.value.trim() || 'Studio Finish';
+
+    const cat = categorySelect ? categorySelect.value : '';
+    if (previewSparkle) previewSparkle.style.display = (cat === 'Chrome & Shimmer') ? 'inline-block' : 'none';
+    if (previewStreak) previewStreak.style.display = (cat === 'Velvet Cat-Eye') ? 'block' : 'none';
+
+    if (previewCircle) {
+      if (isGradient) {
+        const gradVal = document.getElementById('ce-gradient')?.value.trim() || 'linear-gradient(135deg, #FFFDFB 0%, #E8E5F0 50%, #FDEBF3 100%)';
+        previewCircle.style.background = gradVal;
+      } else {
+        const hexVal = document.getElementById('ce-hex')?.value.trim() || '#F8E4DF';
+        previewCircle.style.background = '';
+        previewCircle.style.backgroundColor = hexVal;
+      }
+    }
+  }
+
+  function openColorEditModal(colorId = null) {
+    const modal = document.getElementById('color-edit-modal');
+    const form = document.getElementById('color-edit-form');
+    const title = document.getElementById('color-modal-title');
+    if (!modal || !form) return;
+
+    if (colorId) {
+      const item = activeColors.find(c => c.id === colorId);
+      if (!item) return;
+      if (title) title.textContent = `Edit Shade: ${item.name}`;
+      document.getElementById('ce-id').value = item.id;
+      document.getElementById('ce-name').value = item.name;
+      document.getElementById('ce-code').value = item.code || '';
+      document.getElementById('ce-category').value = item.category || 'BIAB & Nudes';
+      document.getElementById('ce-finish').value = item.finish || '';
+      document.getElementById('ce-description').value = item.description || '';
+      document.getElementById('ce-service').value = item.serviceMatch || 'gel-manicure';
+
+      const isGrad = !!item.isGradient || (item.gradient && item.gradient.length > 0);
+      if (isGrad) {
+        document.getElementById('ce-type-gradient').checked = true;
+        document.getElementById('ce-solid-wrap').style.display = 'none';
+        document.getElementById('ce-gradient-wrap').style.display = 'block';
+        document.getElementById('ce-gradient').value = item.gradient || '';
+      } else {
+        document.getElementById('ce-type-solid').checked = true;
+        document.getElementById('ce-solid-wrap').style.display = 'flex';
+        document.getElementById('ce-gradient-wrap').style.display = 'none';
+        document.getElementById('ce-hex').value = item.colorHex || '#F8E4DF';
+        document.getElementById('ce-color-picker').value = (item.colorHex && item.colorHex.startsWith('#') && item.colorHex.length === 7) ? item.colorHex : '#F8E4DF';
+      }
+    } else {
+      if (title) title.textContent = 'Add New Color Shade';
+      form.reset();
+      document.getElementById('ce-id').value = 'color-' + Date.now();
+      document.getElementById('ce-code').value = '#' + (activeColors.length + 1) + ' Shade';
+      document.getElementById('ce-hex').value = '#F8E4DF';
+      document.getElementById('ce-color-picker').value = '#F8E4DF';
+      document.getElementById('ce-solid-wrap').style.display = 'flex';
+      document.getElementById('ce-gradient-wrap').style.display = 'none';
+      document.getElementById('ce-type-solid').checked = true;
+    }
+
+    updateColorModalPreview();
+    modal.style.display = 'flex';
+  }
+
+  function setupAdminColorsListeners() {
+    const addBtn = document.getElementById('btn-add-new-color');
+    const modal = document.getElementById('color-edit-modal');
+    const closeBtn = document.getElementById('btn-close-color-modal');
+    const cancelBtn = document.getElementById('btn-cancel-color-edit');
+    const form = document.getElementById('color-edit-form');
+    const resetBtn = document.getElementById('btn-reset-colors-default');
+
+    if (addBtn) addBtn.addEventListener('click', () => openColorEditModal(null));
+    if (closeBtn && modal) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    if (cancelBtn && modal) cancelBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+
+    // Live preview inputs
+    ['ce-name', 'ce-code', 'ce-finish', 'ce-category'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', updateColorModalPreview);
+      document.getElementById(id)?.addEventListener('change', updateColorModalPreview);
+    });
+
+    const picker = document.getElementById('ce-color-picker');
+    const hexInput = document.getElementById('ce-hex');
+    const gradInput = document.getElementById('ce-gradient');
+
+    if (picker && hexInput) {
+      picker.addEventListener('input', () => {
+        hexInput.value = picker.value;
+        updateColorModalPreview();
+      });
+      hexInput.addEventListener('input', () => {
+        if (hexInput.value.startsWith('#') && hexInput.value.length === 7) {
+          picker.value = hexInput.value;
+        }
+        updateColorModalPreview();
+      });
+    }
+
+    if (gradInput) {
+      gradInput.addEventListener('input', updateColorModalPreview);
+    }
+
+    // Gradient Presets
+    document.querySelectorAll('.gradient-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = btn.getAttribute('data-preset');
+        if (preset && gradInput) {
+          gradInput.value = preset;
+          updateColorModalPreview();
+        }
+      });
+    });
+
+    // Format radio toggle
+    const solidRadio = document.getElementById('ce-type-solid');
+    const gradRadio = document.getElementById('ce-type-gradient');
+    const solidWrap = document.getElementById('ce-solid-wrap');
+    const gradWrap = document.getElementById('ce-gradient-wrap');
+
+    function toggleFormat() {
+      if (gradRadio && gradRadio.checked) {
+        if (solidWrap) solidWrap.style.display = 'none';
+        if (gradWrap) gradWrap.style.display = 'block';
+      } else {
+        if (solidWrap) solidWrap.style.display = 'flex';
+        if (gradWrap) gradWrap.style.display = 'none';
+      }
+      updateColorModalPreview();
+    }
+
+    solidRadio?.addEventListener('change', toggleFormat);
+    gradRadio?.addEventListener('change', toggleFormat);
+
+    // Save Form
+    if (form && modal) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('ce-id').value;
+        const name = document.getElementById('ce-name').value.trim();
+        const code = document.getElementById('ce-code').value.trim();
+        const category = document.getElementById('ce-category').value;
+        const finish = document.getElementById('ce-finish').value.trim();
+        const desc = document.getElementById('ce-description').value.trim();
+        const service = document.getElementById('ce-service').value;
+        const isGradient = !!document.getElementById('ce-type-gradient')?.checked;
+        const colorHex = document.getElementById('ce-hex')?.value.trim() || '#F8E4DF';
+        const gradient = document.getElementById('ce-gradient')?.value.trim() || '';
+
+        if (!name || !code) {
+          alert('Please enter a color shade name and bottle code.');
+          return;
+        }
+
+        const newColor = {
+          id: id || ('color-' + Date.now()),
+          name,
+          code,
+          category,
+          colorHex,
+          isGradient,
+          gradient: isGradient ? gradient : undefined,
+          finish,
+          description: desc,
+          serviceMatch: service
+        };
+
+        const existingIdx = activeColors.findIndex(c => c.id === id);
+        if (existingIdx >= 0) {
+          activeColors[existingIdx] = newColor;
+        } else {
+          activeColors.unshift(newColor);
+        }
+
+        if (window.SalonStore) window.SalonStore.saveColors(activeColors);
+        modal.style.display = 'none';
+        renderAdminColors();
+        alert(`🎨 Color shade "${name}" (${code}) saved successfully!\n\nIt is now live on the public Services page.`);
+      });
+    }
+
+    // Edit and Delete delegation on container
+    const container = document.getElementById('admin-colors-container');
+    if (container) {
+      container.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.btn-edit-color');
+        if (editBtn) {
+          const id = editBtn.getAttribute('data-id');
+          openColorEditModal(id);
+          return;
+        }
+
+        const deleteBtn = e.target.closest('.btn-delete-color');
+        if (deleteBtn) {
+          const id = deleteBtn.getAttribute('data-id');
+          const item = activeColors.find(c => c.id === id);
+          const name = item ? item.name : 'this shade';
+          if (confirm(`Are you sure you want to delete "${name}" from the Studio Color Bar?`)) {
+            activeColors = activeColors.filter(c => c.id !== id);
+            if (window.SalonStore) window.SalonStore.saveColors(activeColors);
+            renderAdminColors();
+          }
+        }
+      });
+    }
+
+    // Category Filter Pills in Admin
+    const catPills = document.querySelectorAll('#admin-color-cat-filters .filter-pill');
+    catPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        catPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentAdminColorCat = pill.getAttribute('data-cat') || 'all';
+        renderAdminColors(currentAdminColorCat, currentAdminColorSearch);
+      });
+    });
+
+    // Search input
+    const searchInput = document.getElementById('admin-color-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        currentAdminColorSearch = searchInput.value;
+        renderAdminColors(currentAdminColorCat, currentAdminColorSearch);
+      });
+    }
+
+    // Reset Defaults
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (confirm('Restore the original 18 default salon colors? Any newly added colors will be replaced.')) {
+          activeColors = [...initialColors];
+          if (window.SalonStore) window.SalonStore.saveColors(activeColors);
+          renderAdminColors();
+          alert('Studio Color Bar restored to salon defaults!');
+        }
+      });
+    }
+  }
+
   // Export Bookings
   document.getElementById('btn-export-data')?.addEventListener('click', () => {
     const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
@@ -3846,6 +4355,101 @@ const allServices = servicesData.flatMap(cat => cat.items);
     cursor: pointer;
     line-height: 1;
     padding: 0.25rem;
+  }
+
+  /* Admin Colors Grid */
+  .admin-colors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .admin-color-item {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    box-shadow: var(--shadow-subtle);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .admin-color-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .admin-color-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .admin-swatch-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-color-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .admin-color-body h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--text-espresso);
+  }
+
+  .admin-color-category-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .admin-color-finish-badge {
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent-rose);
+    background-color: var(--accent-rose-soft);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .admin-color-desc {
+    font-size: 0.83rem;
+    color: var(--text-cocoa);
+    line-height: 1.45;
+    margin: 0.25rem 0 0 0;
+  }
+
+  .admin-color-service {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .admin-color-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-delicate);
   }
 
   /* Admin Gallery Grid */
