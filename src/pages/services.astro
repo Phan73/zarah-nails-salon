@@ -2,6 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import servicesData from '../data/services.json';
 import salonInfo from '../data/salon-info.json';
+import colorsData from '../data/colors.json';
+
+const colorCategories = ['All Shades', 'BIAB & Nudes', 'Chrome & Shimmer', 'Reds & Berries', 'Velvet Cat-Eye', 'Modern Earth'];
 ---
 
 <BaseLayout
@@ -14,7 +17,7 @@ import salonInfo from '../data/salon-info.json';
   <!-- Header -->
   <section class="page-intro-section">
     <div class="container text-center">
-      <p class="eyebrow">Price Menu</p>
+      <p class="eyebrow">Price Menu &amp; Color Bar</p>
       <h1>Treatments &amp; Transparent Pricing</h1>
       <p class="intro-description">
         Every service is carried out using medical-grade hygiene protocols, sanitized stainless steel implements, and premium non-toxic nail elixirs. Prices are in NZD with no hidden extras.
@@ -28,6 +31,9 @@ import salonInfo from '../data/salon-info.json';
             {cat.category}
           </button>
         ))}
+        <button class="filter-pill color-highlight-pill" data-category="Available Colors">
+          🎨 Available Colors &amp; Finishes
+        </button>
       </div>
     </div>
   </section>
@@ -74,6 +80,70 @@ import salonInfo from '../data/salon-info.json';
         </div>
       ))}
 
+      <!-- Available Colors & Finishes Section -->
+      <div class="category-block" data-category-group="Available Colors" id="salon-colors-section">
+        <div class="category-block-header color-section-header">
+          <div>
+            <h2>🎨 Studio Color Bar &amp; Available Finishes</h2>
+            <p class="category-block-desc">
+              Browse our curated collection of 200+ salon-grade gel, BIAB builder, chrome, and magnetic finishes in studio.
+            </p>
+          </div>
+          <span class="badge badge-gold">200+ Studio Shades</span>
+        </div>
+
+        <!-- Color Sub-filter Pills -->
+        <div class="color-filter-pills" id="color-sub-filters">
+          {colorCategories.map((cat, idx) => (
+            <button
+              class={`color-pill ${idx === 0 ? 'active' : ''}`}
+              data-color-cat={cat === 'All Shades' ? 'all' : cat}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <!-- Color Swatch Grid -->
+        <div class="color-swatches-grid" id="color-swatches-container">
+          {colorsData.map((shade) => (
+            <div class="color-card" data-category={shade.category}>
+              <div class="color-swatch-wrap">
+                <div
+                  class="color-swatch-circle"
+                  style={shade.isGradient ? `background: ${shade.gradient};` : `background-color: ${shade.colorHex};`}
+                >
+                  {shade.category === 'Chrome & Shimmer' && <span class="shimmer-glint">✨</span>}
+                  {shade.category === 'Velvet Cat-Eye' && <span class="cat-eye-streak"></span>}
+                </div>
+                <span class="color-code">{shade.code}</span>
+              </div>
+              <div class="color-info">
+                <h4 class="color-title">{shade.name}</h4>
+                <span class="color-finish-badge">{shade.finish}</span>
+                <p class="color-desc">{shade.description}</p>
+                <div class="color-card-actions">
+                  <a href={`/booking?service=${shade.serviceMatch || 'gel-manicure'}`} class="btn btn-primary btn-sm btn-block">
+                    Book With This Color
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Color Bar Reassurance Banner -->
+        <div class="color-reassurance-box">
+          <div class="reassurance-icon">💡</div>
+          <div class="reassurance-text">
+            <h4>Have a Specific Shade or Inspiration Photo?</h4>
+            <p>
+              We stock the full professional ranges of <strong>The GelBottle (TGB)</strong>, <strong>OPI GelColor</strong>, <strong>DND</strong>, and <strong>Apres</strong>. If you saw a shade on Pinterest, Instagram, or TikTok, simply bring a screenshot to your appointment and our nail artists will match or custom blend it for you at no extra charge!
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Service Preparation & Aftercare Notice -->
       <div class="salon-prep-box">
         <div class="prep-icon">✨</div>
@@ -94,14 +164,16 @@ import salonInfo from '../data/salon-info.json';
 <script is:inline define:vars={{ initialServices: servicesData, salonPhone: salonInfo.contact.phone }}>
   // Dynamic hydration from Owner/Admin updates
   function hydrateDynamicServices() {
+    if (!window.SalonStore) return;
     const storedServices = window.SalonStore.getServices(null);
-    if (!storedServices) return; // Use SSG render
+    if (!storedServices || !Array.isArray(storedServices) || storedServices.length === 0) return; // Keep server-rendered HTML
 
     const container = document.getElementById('services-main-container');
     if (!container) return;
 
     const prepBox = container.querySelector('.salon-prep-box');
-    const existingBlocks = container.querySelectorAll('.category-block');
+    const colorSection = document.getElementById('salon-colors-section');
+    const existingBlocks = container.querySelectorAll('.category-block:not(#salon-colors-section)');
     existingBlocks.forEach(b => b.remove());
 
     storedServices.forEach(cat => {
@@ -143,7 +215,8 @@ import salonInfo from '../data/salon-info.json';
         <div class="category-items-grid">${itemsHtml}</div>
       `;
 
-      if (prepBox) container.insertBefore(block, prepBox);
+      if (colorSection) container.insertBefore(block, colorSection);
+      else if (prepBox) container.insertBefore(block, prepBox);
       else container.appendChild(block);
     });
 
@@ -151,7 +224,7 @@ import salonInfo from '../data/salon-info.json';
   }
 
   function bindFilterPills() {
-    const filterPills = document.querySelectorAll('.filter-pill');
+    const filterPills = document.querySelectorAll('#category-filters .filter-pill');
     const categoryBlocks = document.querySelectorAll('.category-block');
 
     filterPills.forEach((pill) => {
@@ -159,13 +232,34 @@ import salonInfo from '../data/salon-info.json';
         filterPills.forEach((p) => p.classList.remove('active'));
         pill.classList.add('active');
 
-        const selected = pill.getAttribute('data-category');
+        const selected = (pill.getAttribute('data-category') || 'all').toLowerCase();
         categoryBlocks.forEach((block) => {
-          const blockCategory = block.getAttribute('data-category-group');
-          if (selected === 'all' || selected === blockCategory) {
+          const blockCategory = (block.getAttribute('data-category-group') || '').toLowerCase();
+          if (selected === 'all' || blockCategory === selected || blockCategory.includes(selected)) {
             block.style.display = 'block';
           } else {
             block.style.display = 'none';
+          }
+        });
+      };
+    });
+
+    // Sub-filters for color swatches
+    const colorPills = document.querySelectorAll('#color-sub-filters .color-pill');
+    const colorCards = document.querySelectorAll('.color-card');
+
+    colorPills.forEach((pill) => {
+      pill.onclick = () => {
+        colorPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+
+        const selectedCat = (pill.getAttribute('data-color-cat') || 'all').toLowerCase();
+        colorCards.forEach((card) => {
+          const cardCat = (card.getAttribute('data-category') || '').toLowerCase();
+          if (selectedCat === 'all' || cardCat.includes(selectedCat)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
           }
         });
       };
@@ -345,11 +439,204 @@ import salonInfo from '../data/salon-info.json';
     color: var(--accent-rose);
   }
 
+  /* Color Bar Styles */
+  .color-highlight-pill {
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+    border-color: #F59E0B;
+  }
+
+  .color-highlight-pill:hover,
+  .color-highlight-pill.active {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: #FFFFFF;
+    border-color: #B45309;
+  }
+
+  .color-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .color-filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.25rem 0 2rem 0;
+  }
+
+  .color-pill {
+    padding: 0.4rem 0.95rem;
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-cocoa);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .color-pill:hover {
+    background-color: var(--bg-stone-dark);
+    color: var(--text-espresso);
+  }
+
+  .color-pill.active {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    border-color: var(--text-espresso);
+  }
+
+  .color-swatches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .color-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    box-shadow: var(--shadow-subtle);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .color-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .color-swatch-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .color-swatch-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .shimmer-glint {
+    font-size: 0.9rem;
+    animation: pulseGlint 2s infinite ease-in-out;
+  }
+
+  @keyframes pulseGlint {
+    0%, 100% { opacity: 0.4; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+
+  .cat-eye-streak {
+    width: 6px;
+    height: 120%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.85), transparent);
+    transform: rotate(35deg);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  }
+
+  .color-code {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    background-color: var(--bg-stone);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .color-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+  }
+
+  .color-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+    margin: 0;
+  }
+
+  .color-finish-badge {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent-rose);
+    background-color: var(--accent-rose-soft);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.25rem;
+  }
+
+  .color-desc {
+    font-size: 0.84rem;
+    color: var(--text-cocoa);
+    line-height: 1.45;
+    margin: 0 0 0.75rem 0;
+    flex: 1;
+  }
+
+  .color-card-actions {
+    margin-top: auto;
+  }
+
+  .color-reassurance-box {
+    background-color: #FFFFFF;
+    border: 1px solid var(--gold-champagne);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .reassurance-icon {
+    font-size: 1.75rem;
+  }
+
+  .reassurance-text h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.35rem;
+    color: var(--text-espresso);
+  }
+
+  .reassurance-text p {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text-cocoa);
+    margin: 0;
+  }
+
   @media (max-width: 640px) {
     .category-items-grid {
       grid-template-columns: 1fr;
     }
-    .salon-prep-box {
+    .color-swatches-grid {
+      grid-template-columns: 1fr;
+    }
+    .salon-prep-box,
+    .color-reassurance-box {
       flex-direction: column;
     }
   }

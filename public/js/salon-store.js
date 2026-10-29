@@ -7,11 +7,14 @@
     getServices: function(defaultServices) {
       try {
         const stored = localStorage.getItem('zarah_services');
-        if (stored) return JSON.parse(stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
       } catch (e) {
         console.warn('Storage read error', e);
       }
-      return defaultServices || [];
+      return defaultServices !== undefined ? defaultServices : null;
     },
 
     // Save Services
@@ -28,11 +31,14 @@
     getTeam: function(defaultTeam) {
       try {
         const stored = localStorage.getItem('zarah_team');
-        if (stored) return JSON.parse(stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
       } catch (e) {
         console.warn('Storage read error', e);
       }
-      return defaultTeam || [];
+      return defaultTeam !== undefined ? defaultTeam : null;
     },
 
     // Save Team
@@ -49,11 +55,14 @@
     getGallery: function(defaultGallery) {
       try {
         const stored = localStorage.getItem('zarah_gallery');
-        if (stored) return JSON.parse(stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
       } catch (e) {
         console.warn('Storage read error', e);
       }
-      return defaultGallery || [];
+      return defaultGallery !== undefined ? defaultGallery : null;
     },
 
     // Save Gallery

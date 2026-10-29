@@ -27,6 +27,7 @@ import salonInfo from '../data/salon-info.json';
         <button class="filter-pill" data-tag="Chrome">Glazed Chrome</button>
         <button class="filter-pill" data-tag="French">French &amp; Ombre</button>
         <button class="filter-pill" data-tag="Nail Art">Custom Art</button>
+        <button class="filter-pill" data-tag="Velvet">Velvet Cat-Eye</button>
         <button class="filter-pill" data-tag="Pedicure">Pedicures</button>
         <button class="filter-pill" data-tag="Brows">Brows &amp; Beauty</button>
       </div>
@@ -62,6 +63,27 @@ import salonInfo from '../data/salon-info.json';
         ))}
       </div>
 
+      <!-- Available Colors Bar in Gallery -->
+      <div class="gallery-colors-highlight-card">
+        <div class="colors-highlight-left">
+          <span class="colors-icon">🎨</span>
+          <div>
+            <h3>Looking for Available Colors &amp; Custom Finishes?</h3>
+            <p>
+              Explore our full palette of 200+ salon-grade BIAB nudes, glazed chromes, velvet magnetic cat-eye, and timeless bordeaux shades.
+            </p>
+          </div>
+        </div>
+        <div class="colors-highlight-right">
+          <a href="/services#salon-colors-section" class="btn btn-secondary">
+            View Available Colors &rarr;
+          </a>
+          <a href="/services" class="btn btn-primary">
+            View Service Pricing Menu
+          </a>
+        </div>
+      </div>
+
       <!-- Social Community Invite -->
       <div class="social-invite-card">
         <div class="invite-content">
@@ -85,8 +107,9 @@ import salonInfo from '../data/salon-info.json';
 
 <script is:inline define:vars={{ initialGallery: galleryData }}>
   function hydrateDynamicGallery() {
+    if (!window.SalonStore) return;
     const storedGallery = window.SalonStore.getGallery(null);
-    if (!storedGallery) return;
+    if (!storedGallery || !Array.isArray(storedGallery) || storedGallery.length === 0) return;
 
     const container = document.getElementById('gallery-container');
     if (!container) return;
@@ -127,12 +150,13 @@ import salonInfo from '../data/salon-info.json';
         tagButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        const selectedTag = btn.getAttribute('data-tag');
+        const selectedTag = (btn.getAttribute('data-tag') || 'all').toLowerCase();
         galleryCards.forEach((card) => {
           const rawTags = card.getAttribute('data-tags');
           const tags = rawTags ? JSON.parse(rawTags) : [];
 
-          if (selectedTag === 'all' || tags.includes(selectedTag)) {
+          const matches = selectedTag === 'all' || tags.some(t => t.toLowerCase().includes(selectedTag));
+          if (matches) {
             card.style.display = 'flex';
           } else {
             card.style.display = 'none';
@@ -311,6 +335,65 @@ import salonInfo from '../data/salon-info.json';
     font-size: 1.15rem;
     font-weight: 600;
     color: var(--accent-rose);
+  }
+
+  /* Gallery Colors Highlight */
+  .gallery-colors-highlight-card {
+    margin-top: 3.5rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--gold-champagne);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  .colors-highlight-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex: 1;
+  }
+
+  .colors-icon {
+    font-size: 2.25rem;
+  }
+
+  .colors-highlight-left h3 {
+    font-size: 1.25rem;
+    color: var(--text-espresso);
+    margin-bottom: 0.35rem;
+  }
+
+  .colors-highlight-left p {
+    font-size: 0.92rem;
+    color: var(--text-cocoa);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .colors-highlight-right {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    .gallery-colors-highlight-card {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+    .colors-highlight-left {
+      flex-direction: column;
+      text-align: center;
+    }
+    .colors-highlight-right {
+      justify-content: center;
+    }
   }
 
   /* Social Invite */

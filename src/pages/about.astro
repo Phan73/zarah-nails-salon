@@ -143,8 +143,9 @@ const activeStaff = teamData.filter(t => t.id !== 'any-available');
 
 <script is:inline define:vars={{ initialStaff: teamData }}>
   function hydrateDynamicTeam() {
-    const storedTeam = window.SalonStore ? window.SalonStore.getTeam(null) : null;
-    if (!storedTeam) return;
+    if (!window.SalonStore) return;
+    const storedTeam = window.SalonStore.getTeam(null);
+    if (!storedTeam || !Array.isArray(storedTeam) || storedTeam.length === 0) return;
 
     const teamGrid = document.querySelector('.team-grid');
     if (!teamGrid) return;

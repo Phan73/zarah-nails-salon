@@ -1,0 +1,194 @@
+[
+  {
+    "id": "color-bare-rose",
+    "name": "Bare Rose",
+    "code": "#01 BIAB",
+    "category": "BIAB & Nudes",
+    "colorHex": "#F8E4DF",
+    "finish": "Translucent Blush",
+    "description": "Soft pink translucent glow, ideal for healthy natural nail overlays.",
+    "serviceMatch": "biab-full-overlay"
+  },
+  {
+    "id": "color-milky-cloud",
+    "name": "Milky Cloud",
+    "code": "#02 Jelly",
+    "category": "BIAB & Nudes",
+    "colorHex": "#FDF8F6",
+    "finish": "Soft Milk Sheer",
+    "description": "Viral clean-girl aesthetic with a pristine semi-sheer porcelain finish.",
+    "serviceMatch": "biab-full-overlay"
+  },
+  {
+    "id": "color-teddy-nude",
+    "name": "Teddy Nude",
+    "code": "#03 Cream",
+    "category": "BIAB & Nudes",
+    "colorHex": "#E6CEBE",
+    "finish": "Warm Biscuit Cream",
+    "description": "Flattering warm undertone designed for medium to deeper skin tones.",
+    "serviceMatch": "gel-manicure"
+  },
+  {
+    "id": "color-sandstone",
+    "name": "Sandstone Glaze",
+    "code": "#04 Neutral",
+    "category": "BIAB & Nudes",
+    "colorHex": "#DFC6B1",
+    "finish": "Neutral Buff",
+    "description": "Understated neutral almond tone for effortless everyday elegance.",
+    "serviceMatch": "gel-manicure"
+  },
+  {
+    "id": "color-glazed-pearl",
+    "name": "Glazed Pearl Chrome",
+    "code": "#05 Chrome",
+    "category": "Chrome & Shimmer",
+    "colorHex": "#FAF5F8",
+    "isGradient": true,
+    "gradient": "linear-gradient(135deg, #FFFDFB 0%, #E8E5F0 50%, #FDEBF3 100%)",
+    "finish": "Mirror Iridescent Chrome",
+    "description": "The viral Hailey Bieber pearlescent reflection buffed over bare nude base.",
+    "serviceMatch": "glazed-chrome"
+  },
+  {
+    "id": "color-rose-aurora",
+    "name": "Rose Gold Aurora",
+    "code": "#06 Chrome",
+    "category": "Chrome & Shimmer",
+    "colorHex": "#FBE5E8",
+    "isGradient": true,
+    "gradient": "linear-gradient(135deg, #FBE5E8 0%, #F1C3CC 100%)",
+    "finish": "Liquid Rose Mirror",
+    "description": "Warm rose metallic powder buffed to diamond reflection sheen.",
+    "serviceMatch": "glazed-chrome"
+  },
+  {
+    "id": "color-honey-champagne",
+    "name": "Honey Champagne",
+    "code": "#07 Chrome",
+    "category": "Chrome & Shimmer",
+    "colorHex": "#FFF6D8",
+    "isGradient": true,
+    "gradient": "linear-gradient(135deg, #FFF6D8 0%, #E8D397 100%)",
+    "finish": "Golden Mirror Chrome",
+    "description": "Luminous champagne gold powder buffed for warm festive brilliance.",
+    "serviceMatch": "glazed-chrome"
+  },
+  {
+    "id": "color-cherry-noir",
+    "name": "Cherry Noir",
+    "code": "#08 Deep",
+    "category": "Reds & Berries",
+    "colorHex": "#540914",
+    "finish": "Deep Bordeaux Gloss",
+    "description": "Rich vampire burgundy-cherry, the salon's top requested dark classic.",
+    "serviceMatch": "gel-manicure"
+  },
+  {
+    "id": "color-classic-scarlet",
+    "name": "Ruby Scarlet",
+    "code": "#09 Classic",
+    "category": "Reds & Berries",
+    "colorHex": "#A31623",
+    "finish": "True Crimson Cream",
+    "description": "The quintessential red with high-impact glossy pigmentation.",
+    "serviceMatch": "gel-manicure"
+  },
+  {
+    "id": "color-mulled-wine",
+    "name": "Mulled Wine",
+    "code": "#10 Berry",
+    "category": "Reds & Berries",
+    "colorHex": "#751A2D",
+    "finish": "Rich Plum Wine",
+    "description": "Moody, sophisticated berry-toned red that elevates short and long nails alike.",
+    "serviceMatch": "deluxe-gel-pedicure"
+  },
+  {
+    "id": "color-dusty-petal",
+    "name": "Dusty Rose Petal",
+    "code": "#11 Floral",
+    "category": "Reds & Berries",
+    "colorHex": "#C47A89",
+    "finish": "Muted Mauve Rose",
+    "description": "Soft vintage bridal rose, flattering for any season or occasion.",
+    "serviceMatch": "biab-full-overlay"
+  },
+  {
+    "id": "color-champagne-velvet",
+    "name": "Champagne Velvet",
+    "code": "#12 Cat-Eye",
+    "category": "Velvet Cat-Eye",
+    "colorHex": "#CBB499",
+    "isGradient": true,
+    "gradient": "linear-gradient(135deg, #CBB499 0%, #E8D7C2 50%, #9B8268 100%)",
+    "finish": "3D Magnetic Velvet",
+    "description": "Multi-dimensional silk velvet particles that shift with every movement.",
+    "serviceMatch": "glazed-chrome"
+  },
+  {
+    "id": "color-emerald-velvet",
+    "name": "Emerald Jewel Velvet",
+    "code": "#13 Cat-Eye",
+    "category": "Velvet Cat-Eye",
+    "colorHex": "#0F382A",
+    "isGradient": true,
+    "gradient": "linear-gradient(135deg, #0F382A 0%, #1E6B52 50%, #08241B 100%)",
+    "finish": "Forest Magnetic Glow",
+    "description": "Deep jewel emerald with shimmering multi-spectrum magnetic particles.",
+    "serviceMatch": "glazed-chrome"
+  },
+  {
+    "id": "color-bronze-amber",
+    "name": "Molten Bronze Cat-Eye",
+    "code": "#14 Cat-Eye",
+    "category": "Velvet Cat-Eye",
+    "colorHex": "#5C3A21",
+    "isGradient": true,
+    "gradient": "linear-gradient(135deg, #5C3A21 0%, #A36B42 50%, #3D2312 100%)",
+    "finish": "Molten Copper Shimmer",
+    "description": "Warm autumnal amber with laser-sharp magnetic cat-eye light beam.",
+    "serviceMatch": "glazed-chrome"
+  },
+  {
+    "id": "color-dark-espresso",
+    "name": "Dark Espresso",
+    "code": "#15 Earth",
+    "category": "Modern Earth",
+    "colorHex": "#2E1E19",
+    "finish": "Rich Roast Cream",
+    "description": "Ultra-sleek dark roast mocha brown, chic and minimalist.",
+    "serviceMatch": "gel-manicure"
+  },
+  {
+    "id": "color-matcha-sage",
+    "name": "Matcha Sage",
+    "code": "#16 Earth",
+    "category": "Modern Earth",
+    "colorHex": "#A2B29A",
+    "finish": "Creamy Herbal Pastel",
+    "description": "Calming earthy matcha tone with a fresh, contemporary satin finish.",
+    "serviceMatch": "gel-manicure"
+  },
+  {
+    "id": "color-french-white",
+    "name": "French Tip Chalk White",
+    "code": "#17 Classic",
+    "category": "Modern Earth",
+    "colorHex": "#FFFFFF",
+    "finish": "Opaque Crisp White",
+    "description": "Razor-sharp, non-yellowing white for classic and modern micro-French smile lines.",
+    "serviceMatch": "french-ombre"
+  },
+  {
+    "id": "color-buttercup",
+    "name": "Buttercup Cream",
+    "code": "#18 Pastel",
+    "category": "Modern Earth",
+    "colorHex": "#FCEBB7",
+    "finish": "Warm Butter Pastel",
+    "description": "Sunny, soft pastel yellow that looks stunning against any skin tone.",
+    "serviceMatch": "gel-manicure"
+  }
+]
