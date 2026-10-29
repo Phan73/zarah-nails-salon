@@ -10,12 +10,12 @@ const env = (typeof import.meta !== 'undefined' && import.meta.env)
   : (typeof process !== 'undefined' && process.env ? process.env : {});
 
 const firebaseConfig = {
-  apiKey: env.PUBLIC_FIREBASE_API_KEY,
-  authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: env.PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: env.PUBLIC_FIREBASE_APP_ID,
+  apiKey: env.PUBLIC_FIREBASE_API_KEY || "AIzaSyDzDzRbW10mVJkKr271xFGp47QNlt1akxY",
+  authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN || "zarah-nails-web.firebaseapp.com",
+  projectId: env.PUBLIC_FIREBASE_PROJECT_ID || "zarah-nails-web",
+  storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET || "zarah-nails-web.firebasestorage.app",
+  messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "691136287503",
+  appId: env.PUBLIC_FIREBASE_APP_ID || "1:691136287503:web:e588373269dcee3666647a",
 };
 
 /**
