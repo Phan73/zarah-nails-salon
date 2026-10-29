@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="favGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C782" />
+      <stop offset="100%" stop-color="#9E7E52" />
+    </linearGradient>
+    <linearGradient id="favRose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2D0C4" />
+      <stop offset="100%" stop-color="#C2988B" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background tile with subtle luxury tint -->
+  <rect width="64" height="64" rx="14" fill="#241E1C"/>
+  <rect x="2" y="2" width="60" height="60" rx="12" stroke="url(#favGold)" stroke-width="1" opacity="0.6"/>
+
+  <!-- Stylized Z Monogram -->
+  <path d="M 20 20 L 44 20 C 45.5 20 46 21 45 22.5 L 21 44 C 20 45 21 46 23 46 L 44 46" 
+        stroke="url(#favGold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Rose Gold accent curve -->
+  <path d="M 28 17 C 40 17 48 26 48 37 C 48 45 42 49 35 49" 
+        stroke="url(#favRose)" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.9"/>
+        
+  <!-- Sparkle dot -->
+  <circle cx="45" cy="18" r="2" fill="#E5C782"/>
+</svg>

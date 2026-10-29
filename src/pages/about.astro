@@ -1,0 +1,410 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import teamData from '../data/team.json';
+import salonInfo from '../data/salon-info.json';
+
+const activeStaff = teamData.filter(t => t.id !== 'any-available');
+---
+
+<BaseLayout
+  currentPath="/about"
+  title="About Us & Our Team | Zarah Nails & Beauty Massey"
+  description="Meet the passionate nail technicians and beauty specialists behind Zarah Nails & Beauty in Massey, Auckland. Our philosophy on natural nail health and hospital-grade hygiene."
+>
+  <script src="/js/salon-store.js" is:inline></script>
+  <!-- Hero Intro -->
+  <section class="about-hero-section">
+    <div class="container about-hero-grid">
+      <div class="about-hero-text">
+        <p class="eyebrow">Our Story</p>
+        <h1>Crafted With Heart in Massey, Auckland</h1>
+        <p class="lead-text">
+          Founded as an intimate family-owned beauty studio, Zarah Nails &amp; Beauty was born from a singular conviction: that salon visits should be an unhurried, restorative experience where creativity and natural nail health flourish side by side.
+        </p>
+        <p>
+          Located conveniently at Shop 12, 3 Red Hills Road, we serve a vibrant community across Massey, Westgate, Hobsonville, Henderson, and greater West Auckland. Whether you are seeking a resilient BIAB natural nail overlay, a customized bridal set, or a soothing spa pedicure, our door is always open.
+        </p>
+      </div>
+
+      <div class="about-hero-media">
+        <div class="media-frame">
+          <img src="/images/gallery/glazed-pearl.svg" alt="Zarah Nails & Beauty Salon Studio Craft" />
+          <div class="media-caption">
+            <span>Shop 12, 3 Red Hills Road • Massey</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Standards & Values -->
+  <section class="section values-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <p class="eyebrow">The Zarah Difference</p>
+        <h2>Our Uncompromising Salon Standards</h2>
+      </div>
+
+      <div class="values-grid">
+        <div class="value-item">
+          <div class="value-badge">01</div>
+          <h3>Hospital-Grade Hygiene</h3>
+          <p>
+            All metal implements undergo medical-grade ultrasonic cleaning and autoclave sterilization, sealed in sterile pouches until opened directly before your treatment. Disposable single-use buffers, files, and foot-tub liners ensure absolute peace of mind.
+          </p>
+        </div>
+
+        <div class="value-item">
+          <div class="value-badge">02</div>
+          <h3>Natural Nail Preservation</h3>
+          <p>
+            We strictly avoid over-drilling or aggressive filing that thins the nail plate. Our specialized BIAB (Builder in a Bottle) technique fortifies your own natural nails, allowing brittle or damaged nails to heal and grow with natural architectural strength.
+          </p>
+        </div>
+
+        <div class="value-item">
+          <div class="value-badge">03</div>
+          <h3>Cruelty-Free, Premium Formulations</h3>
+          <p>
+            We curate high-performance, non-toxic, vegan-friendly gel and lacquer systems with exceptional pigment density and long-wearing shine—free from harsh formaldehydes and harsh odors.
+          </p>
+        </div>
+
+        <div class="value-item">
+          <div class="value-badge">04</div>
+          <h3>Transparent, Honest Service</h3>
+          <p>
+            No hidden upcharges or surprise fees at checkout. We explain every step, advise on realistic nail art times, and provide free repairs if any enhancement chips within 72 hours of your visit.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Profiles -->
+  <section class="section team-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <p class="eyebrow">Meet The Artists</p>
+        <h2>Our Skilled Technicians &amp; Aestheticians</h2>
+        <p class="section-subtitle">
+          Passionate specialists dedicated to delivering immaculate results and gentle, attentive care.
+        </p>
+      </div>
+
+      <div class="team-grid">
+        {activeStaff.map((member) => (
+          <div class="team-card">
+            <div class="team-avatar-wrap">
+              <div class="team-avatar-placeholder">
+                <span class="avatar-initial">{member.name.charAt(0)}</span>
+              </div>
+            </div>
+            <div class="team-info">
+              <h3 class="team-name">{member.name}</h3>
+              <p class="team-role">{member.role}</p>
+              <p class="team-bio">{member.bio}</p>
+              
+              <div class="team-specialties">
+                <span class="spec-label">Specialties:</span>
+                <div class="spec-pills">
+                  {member.specialties.map((s) => (
+                    <span class="spec-pill">{s}</span>
+                  ))}
+                </div>
+              </div>
+
+              <a href={`/booking?staff=${member.id}`} class="btn btn-subtle btn-sm team-book-btn">
+                Book with {member.name}
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="about-cta-section">
+    <div class="container text-center">
+      <h2>Experience the Calm at Zarah Nails</h2>
+      <p class="cta-p">
+        Convenient booking online, welcoming walk-ins, and free parking right at our doorstep.
+      </p>
+      <div class="cta-buttons">
+        <a href="/booking" class="btn btn-primary">Book Your Visit Online</a>
+        <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="btn btn-secondary">
+          Call: {salonInfo.contact.phoneDisplay}
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline define:vars={{ initialStaff: teamData }}>
+  function hydrateDynamicTeam() {
+    const storedTeam = window.SalonStore ? window.SalonStore.getTeam(null) : null;
+    if (!storedTeam) return;
+
+    const teamGrid = document.querySelector('.team-grid');
+    if (!teamGrid) return;
+
+    const activeTechs = storedTeam.filter(t => t.id !== 'any-available');
+    teamGrid.innerHTML = activeTechs.map(member => `
+      <div class="team-card">
+        <div class="team-avatar-wrap">
+          <div class="team-avatar-placeholder">
+            <span class="avatar-initial">${member.name.charAt(0)}</span>
+          </div>
+        </div>
+        <div class="team-info">
+          <h3 class="team-name">${member.name}</h3>
+          <p class="team-role">${member.role}</p>
+          <p class="team-bio">${member.bio}</p>
+          <div class="team-specialties">
+            <span class="spec-label">Specialties:</span>
+            <div class="spec-pills">
+              ${(member.specialties || []).map(s => `<span class="spec-pill">${s}</span>`).join('')}
+            </div>
+          </div>
+          <a href="/booking?staff=${member.id}" class="btn btn-subtle btn-sm team-book-btn">
+            Book with ${member.name}
+          </a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', hydrateDynamicTeam);
+  window.addEventListener('zarah:team-updated', hydrateDynamicTeam);
+</script>
+
+<style>
+  .about-hero-section {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--border-delicate);
+    padding: clamp(3rem, 6vw, 5rem) 0;
+  }
+
+  .about-hero-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr;
+    gap: 3.5rem;
+    align-items: center;
+  }
+
+  .lead-text {
+    font-size: 1.15rem;
+    line-height: 1.65;
+    color: var(--text-espresso);
+    margin: 1.25rem 0 1rem 0;
+  }
+
+  .about-hero-text p:last-child {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-cocoa);
+  }
+
+  .media-frame {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-modal);
+    border: 6px solid #FFFFFF;
+  }
+
+  .media-frame img {
+    width: 100%;
+    aspect-ratio: 4 / 4.2;
+    object-fit: cover;
+  }
+
+  .media-caption {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    background-color: rgba(36, 30, 28, 0.85);
+    color: #FAF8F5;
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    text-align: center;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Values */
+  .values-section {
+    background-color: var(--bg-stone);
+    border-bottom: 1px solid var(--border-delicate);
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+  }
+
+  .value-item {
+    background-color: #FFFFFF;
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-delicate);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .value-badge {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gold-champagne-dark);
+  }
+
+  .value-item h3 {
+    font-size: 1.2rem;
+  }
+
+  .value-item p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  /* Team */
+  .team-section {
+    padding: 4.5rem 0;
+  }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .team-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .team-avatar-wrap {
+    margin-bottom: 1.25rem;
+  }
+
+  .team-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-rose) 0%, var(--gold-champagne) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .avatar-initial {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 600;
+  }
+
+  .team-name {
+    font-size: 1.3rem;
+  }
+
+  .team-role {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent-rose);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0.25rem 0 1rem 0;
+  }
+
+  .team-bio {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-cocoa);
+    margin-bottom: 1.25rem;
+  }
+
+  .team-specialties {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+
+  .spec-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .spec-pills {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .spec-pill {
+    font-size: 0.72rem;
+    background-color: var(--bg-stone);
+    color: var(--text-cocoa);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+  }
+
+  .team-book-btn {
+    width: 100%;
+    margin-top: auto;
+  }
+
+  /* About CTA */
+  .about-cta-section {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    padding: 4.5rem 0;
+  }
+
+  .about-cta-section h2 {
+    color: #FFFFFF;
+    margin-bottom: 1rem;
+  }
+
+  .cta-p {
+    color: #D6CBC4;
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+  }
+
+  .cta-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  @media (max-width: 860px) {
+    .about-hero-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

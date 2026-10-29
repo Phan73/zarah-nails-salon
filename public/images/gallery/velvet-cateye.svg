@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBF9F7"/>
+      <stop offset="100%" stop-color="#EBE3DB"/>
+    </linearGradient>
+    <linearGradient id="velvetBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#735C53"/>
+      <stop offset="50%" stop-color="#4A3B35"/>
+      <stop offset="100%" stop-color="#342823"/>
+    </linearGradient>
+    <linearGradient id="catEyeShimmer" x1="20%" y1="80%" x2="80%" y2="20%">
+      <stop offset="0%" stop-color="rgba(240,215,165,0)"/>
+      <stop offset="40%" stop-color="rgba(245,230,195,0.7)"/>
+      <stop offset="50%" stop-color="rgba(255,250,230,0.95)"/>
+      <stop offset="60%" stop-color="rgba(245,230,195,0.7)"/>
+      <stop offset="100%" stop-color="rgba(240,215,165,0)"/>
+    </linearGradient>
+    <filter id="softShadow6" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#241E1C" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="600" height="700" fill="url(#bg6)"/>
+
+  <g filter="url(#softShadow6)" transform="translate(190, 110)">
+    <!-- Base almond shape -->
+    <path d="M60,30 C110,30 150,75 150,190 L150,390 C150,410 70,410 70,390 L70,190 C70,75 60,30 60,30 Z" 
+          fill="url(#velvetBase)"/>
+    <!-- Velvet Magnetic Diagonal Band -->
+    <path d="M60,30 C110,30 150,75 150,190 L150,390 C150,410 70,410 70,390 L70,190 C70,75 60,30 60,30 Z" 
+          fill="url(#catEyeShimmer)"/>
+    <!-- Cuticle crescent -->
+    <path d="M75,375 C95,395 125,395 145,375" fill="none" stroke="#A88B7D" stroke-width="2" opacity="0.6"/>
+  </g>
+
+  <!-- Title Badge overlay -->
+  <rect x="50" y="580" width="500" height="75" rx="12" fill="#FFFFFF" opacity="0.92" filter="url(#softShadow6)"/>
+  <text x="80" y="614" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#241E1C">Champagne Velvet Cat-Eye</text>
+  <text x="80" y="636" font-family="sans-serif" font-size="13" font-weight="500" letter-spacing="1.5" fill="#8C7A70">MAGNETIC SILK FINISH &amp; DEPTH</text>
+  <text x="470" y="625" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#B58A7E" text-anchor="end">$60</text>
+</svg>

@@ -1,0 +1,183 @@
+---
+import Logo from '../components/Logo.astro';
+import salonInfo from '../data/salon-info.json';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  activeTab?: 'calendar' | 'walkin' | 'reassign' | 'messages';
+}
+
+const { title = "Staff Portal | Zarah Nails & Beauty", activeTab = 'calendar' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en-NZ">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="robots" content="noindex, nofollow" />
+    <script src="/js/salon-store.js" is:inline></script>
+  </head>
+  <body class="staff-portal-body">
+    <!-- Staff Portal Top Bar -->
+    <header class="staff-header">
+      <div class="staff-header-content">
+        <div class="staff-brand">
+          <a href="/" class="back-to-site" title="Back to public site">&larr; Public Site</a>
+          <div class="divider-v"></div>
+          <Logo variant="compact" />
+          <span class="staff-portal-badge" id="header-role-badge">Staff Workspace</span>
+        </div>
+
+        <div class="staff-user-meta">
+          <div class="salon-status-indicator">
+            <span class="status-pulse"></span>
+            <span id="header-user-label">Massey Studio • Live</span>
+          </div>
+
+          <button type="button" class="btn-staff-lock" id="btn-lock-portal" title="Sign Out of Salon Workspace">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="staff-main-container">
+      <slot />
+    </div>
+
+    <style>
+      .staff-portal-body {
+        background-color: #F4EFEA;
+        color: var(--text-espresso);
+      }
+
+      .staff-header {
+        background-color: var(--text-espresso);
+        color: #FAF8F5;
+        padding: 0.75rem 1.5rem;
+        border-bottom: 2px solid var(--accent-rose);
+      }
+
+      .staff-header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .staff-brand {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .back-to-site {
+        font-size: 0.82rem;
+        color: var(--gold-champagne-light);
+        font-weight: 500;
+      }
+      .back-to-site:hover {
+        color: #FFFFFF;
+        text-decoration: underline;
+      }
+
+      .divider-v {
+        width: 1px;
+        height: 20px;
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .staff-portal-badge {
+        background-color: var(--accent-rose);
+        color: #FFFFFF;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.25rem 0.55rem;
+        border-radius: var(--radius-sm);
+      }
+
+      .staff-portal-badge.admin {
+        background-color: var(--gold-champagne-dark);
+      }
+
+      .staff-user-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .salon-status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.8rem;
+        color: #D6CBC4;
+      }
+
+      .status-pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #48BB78;
+        box-shadow: 0 0 0 2px rgba(72, 187, 120, 0.3);
+      }
+
+      .btn-role-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background-color: rgba(197, 168, 128, 0.2);
+        border: 1px solid var(--gold-champagne);
+        color: var(--gold-champagne-light);
+        padding: 0.35rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-role-switch:hover {
+        background-color: var(--gold-champagne);
+        color: var(--text-espresso);
+      }
+
+      .btn-staff-lock {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #FAF8F5;
+        padding: 0.35rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .btn-staff-lock:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .staff-main-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .staff-main-container {
+          padding: 1rem 0.75rem;
+        }
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,356 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import servicesData from '../data/services.json';
+import salonInfo from '../data/salon-info.json';
+---
+
+<BaseLayout
+  currentPath="/services"
+  title="Services & Pricing Menu | Zarah Nails & Beauty Massey"
+  description="Transparent pricing for manicures, pedicures, BIAB builder gel overlays, acrylic extensions, custom nail art, threading, waxing, and facials in Massey, Auckland."
+>
+  <script src="/js/salon-store.js" is:inline></script>
+
+  <!-- Header -->
+  <section class="page-intro-section">
+    <div class="container text-center">
+      <p class="eyebrow">Price Menu</p>
+      <h1>Treatments &amp; Transparent Pricing</h1>
+      <p class="intro-description">
+        Every service is carried out using medical-grade hygiene protocols, sanitized stainless steel implements, and premium non-toxic nail elixirs. Prices are in NZD with no hidden extras.
+      </p>
+
+      <!-- Category Filter Pills -->
+      <div class="category-filter-pills" id="category-filters">
+        <button class="filter-pill active" data-category="all">All Services</button>
+        {servicesData.map((cat) => (
+          <button class="filter-pill" data-category={cat.category}>
+            {cat.category}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Service List Container -->
+  <section class="section services-page-content">
+    <div class="container" id="services-main-container">
+      {servicesData.map((categoryGroup) => (
+        <div class="category-block" data-category-group={categoryGroup.category}>
+          <div class="category-block-header">
+            <h2>{categoryGroup.category}</h2>
+            <p class="category-block-desc">{categoryGroup.description}</p>
+          </div>
+
+          <div class="category-items-grid">
+            {categoryGroup.items.map((item) => (
+              <div class="menu-item-card" data-service-id={item.id}>
+                <div class="menu-item-top">
+                  <div>
+                    <div class="menu-item-title-row">
+                      <h3 class="menu-item-name">{item.name}</h3>
+                      {item.popular && <span class="badge badge-gold">Popular Choice</span>}
+                    </div>
+                    <span class="menu-item-duration">Estimated time: {item.duration}</span>
+                  </div>
+                  <div class="menu-item-price-tag">
+                    {item.priceDisplay}
+                  </div>
+                </div>
+
+                <p class="menu-item-desc">{item.description}</p>
+
+                <div class="menu-item-actions">
+                  <a href={`/booking?service=${item.id}`} class="btn btn-primary btn-sm">
+                    Book Service
+                  </a>
+                  <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="btn btn-subtle btn-sm" title="Call to ask a question">
+                    Call to Inquire
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <!-- Service Preparation & Aftercare Notice -->
+      <div class="salon-prep-box">
+        <div class="prep-icon">✨</div>
+        <div class="prep-content">
+          <h3>Preparation &amp; What to Expect</h3>
+          <p>
+            Please let us know in advance if you currently have existing acrylics, SNS, or foreign gel that requires removal so we can allocate sufficient time. We never rush removals to preserve your natural nail matrix.
+          </p>
+          <p class="prep-note">
+            Need custom nail art? Feel free to save screenshots from Pinterest or Instagram and show them to your technician upon arrival!
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline define:vars={{ initialServices: servicesData, salonPhone: salonInfo.contact.phone }}>
+  // Dynamic hydration from Owner/Admin updates
+  function hydrateDynamicServices() {
+    const storedServices = window.SalonStore.getServices(null);
+    if (!storedServices) return; // Use SSG render
+
+    const container = document.getElementById('services-main-container');
+    if (!container) return;
+
+    const prepBox = container.querySelector('.salon-prep-box');
+    const existingBlocks = container.querySelectorAll('.category-block');
+    existingBlocks.forEach(b => b.remove());
+
+    storedServices.forEach(cat => {
+      const block = document.createElement('div');
+      block.className = 'category-block';
+      block.setAttribute('data-category-group', cat.category);
+
+      const itemsHtml = cat.items.map(item => `
+        <div class="menu-item-card" data-service-id="${item.id}">
+          <div class="menu-item-top">
+            <div>
+              <div class="menu-item-title-row">
+                <h3 class="menu-item-name">${item.name}</h3>
+                ${item.popular ? '<span class="badge badge-gold">Popular Choice</span>' : ''}
+              </div>
+              <span class="menu-item-duration">Estimated time: ${item.duration}</span>
+            </div>
+            <div class="menu-item-price-tag">
+              ${item.priceDisplay}
+            </div>
+          </div>
+          <p class="menu-item-desc">${item.description}</p>
+          <div class="menu-item-actions">
+            <a href="/booking?service=${item.id}" class="btn btn-primary btn-sm">
+              Book Service
+            </a>
+            <a href="tel:${salonPhone.replace(/\s+/g, '')}" class="btn btn-subtle btn-sm">
+              Call to Inquire
+            </a>
+          </div>
+        </div>
+      `).join('');
+
+      block.innerHTML = `
+        <div class="category-block-header">
+          <h2>${cat.category}</h2>
+          <p class="category-block-desc">${cat.description}</p>
+        </div>
+        <div class="category-items-grid">${itemsHtml}</div>
+      `;
+
+      if (prepBox) container.insertBefore(block, prepBox);
+      else container.appendChild(block);
+    });
+
+    bindFilterPills();
+  }
+
+  function bindFilterPills() {
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const categoryBlocks = document.querySelectorAll('.category-block');
+
+    filterPills.forEach((pill) => {
+      pill.onclick = () => {
+        filterPills.forEach((p) => p.classList.remove('active'));
+        pill.classList.add('active');
+
+        const selected = pill.getAttribute('data-category');
+        categoryBlocks.forEach((block) => {
+          const blockCategory = block.getAttribute('data-category-group');
+          if (selected === 'all' || selected === blockCategory) {
+            block.style.display = 'block';
+          } else {
+            block.style.display = 'none';
+          }
+        });
+      };
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    hydrateDynamicServices();
+    bindFilterPills();
+  });
+  window.addEventListener('zarah:services-updated', hydrateDynamicServices);
+</script>
+
+<style>
+  .page-intro-section {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--border-delicate);
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
+  }
+
+  .intro-description {
+    max-width: 650px;
+    margin: 1rem auto 2rem auto;
+    font-size: 1.05rem;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  /* Filter Pills */
+  .category-filter-pills {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.5rem;
+  }
+
+  .filter-pill {
+    padding: 0.55rem 1.15rem;
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-cocoa);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .filter-pill:hover {
+    background-color: var(--bg-stone-dark);
+    color: var(--text-espresso);
+  }
+
+  .filter-pill.active {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    border-color: var(--text-espresso);
+  }
+
+  /* Categories */
+  .services-page-content {
+    padding: 3.5rem 0;
+  }
+
+  .category-block {
+    margin-bottom: 4rem;
+  }
+
+  .category-block-header {
+    margin-bottom: 1.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-delicate);
+  }
+
+  .category-block-desc {
+    margin-top: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .category-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .menu-item-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .menu-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .menu-item-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .menu-item-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .menu-item-duration {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .menu-item-price-tag {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--accent-rose);
+    white-space: nowrap;
+  }
+
+  .menu-item-desc {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-cocoa);
+  }
+
+  .menu-item-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* Prep Box */
+  .salon-prep-box {
+    margin-top: 4rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--gold-champagne);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    box-shadow: var(--shadow-card);
+  }
+
+  .prep-icon {
+    font-size: 2rem;
+  }
+
+  .prep-content h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .prep-content p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .prep-note {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: var(--accent-rose);
+  }
+
+  @media (max-width: 640px) {
+    .category-items-grid {
+      grid-template-columns: 1fr;
+    }
+    .salon-prep-box {
+      flex-direction: column;
+    }
+  }
+</style>

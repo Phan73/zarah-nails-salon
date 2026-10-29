@@ -1,0 +1,98 @@
+[
+  {
+    "id": "look-glazed-chrome",
+    "title": "Ethereal Glazed Pearlescent Chrome",
+    "category": "Nail Art",
+    "serviceId": "glazed-chrome",
+    "serviceName": "Signature Gel + Mirror Chrome",
+    "price": "$60 NZD",
+    "duration": "55 mins",
+    "description": "Subtle iridescent glazed pearl over soft nude BIAB base. The salon's top trending look for natural nails.",
+    "tags": ["Chrome", "Minimalist", "BIAB", "Clean Girl"],
+    "image": "/images/gallery/glazed-pearl.svg"
+  },
+  {
+    "id": "look-french-ombre",
+    "title": "Soft Rose French Ombre (Baby Boomer)",
+    "category": "Enhancements",
+    "serviceId": "french-ombre",
+    "serviceName": "Full Set Acrylic / BIAB + French Ombre",
+    "price": "$85 NZD",
+    "duration": "75 mins",
+    "description": "Seamless fade from delicate petal pink to soft chalk white, finished in high-gloss diamond topcoat.",
+    "tags": ["Ombre", "French", "Bridal", "Classic"],
+    "image": "/images/gallery/french-ombre.svg"
+  },
+  {
+    "id": "look-aura-sunset",
+    "title": "Aura Airbrush in Warm Terracotta & Champagne",
+    "category": "Nail Art",
+    "serviceId": "intricate-full-art",
+    "serviceName": "Gel Manicure + Aura Nail Art",
+    "price": "$80 NZD",
+    "duration": "75 mins",
+    "description": "Airbrush halo aura blending champagne gold and soft rose quartz on almond shaped extensions.",
+    "tags": ["Nail Art", "Aura", "Airbrush", "Trend"],
+    "image": "/images/gallery/aura-sunset.svg"
+  },
+  {
+    "id": "look-biab-natural",
+    "title": "Structured BIAB Bare Rose Overlay",
+    "category": "Natural Care",
+    "serviceId": "biab-full-overlay",
+    "serviceName": "BIAB (Builder in a Bottle) Overlay",
+    "price": "$60 NZD",
+    "duration": "60 mins",
+    "description": "Fortifying builder gel designed to strengthen brittle natural nails while imparting a glossy, understated rose glow.",
+    "tags": ["Natural Nails", "BIAB", "Healthy Nails", "Everyday"],
+    "image": "/images/gallery/biab-rose.svg"
+  },
+  {
+    "id": "look-espresso-microfrench",
+    "title": "Espresso & Tortoiseshell Micro French",
+    "category": "Nail Art",
+    "serviceId": "feature-nail-art",
+    "serviceName": "Gel Manicure + Micro French Detail",
+    "price": "$55 NZD",
+    "duration": "60 mins",
+    "description": "Razor-thin deep espresso tips paired with organic tortoiseshell feature nails on square-oval nails.",
+    "tags": ["Autumn", "French", "Tortoiseshell", "Chic"],
+    "image": "/images/gallery/espresso-micro.svg"
+  },
+  {
+    "id": "look-velvet-cateye",
+    "title": "Champagne Velvet Magnetic Cat-Eye",
+    "category": "Nail Art",
+    "serviceId": "glazed-chrome",
+    "serviceName": "Gel Set + Velvet Magnetic Cat-Eye",
+    "price": "$60 NZD",
+    "duration": "60 mins",
+    "description": "Multi-dimensional magnetic particles shifted into a silk velvet effect that shimmers under indoor and natural daylight.",
+    "tags": ["Cat Eye", "Velvet", "Luxury", "Evening"],
+    "image": "/images/gallery/velvet-cateye.svg"
+  },
+  {
+    "id": "look-deluxe-pedi",
+    "title": "Restorative Mineral Foot Ritual & Gel Toes",
+    "category": "Pedicures",
+    "serviceId": "deluxe-gel-pedicure",
+    "serviceName": "Deluxe Gel Pedicure & Foot Massage",
+    "price": "$65 NZD",
+    "duration": "60 mins",
+    "description": "Epsom mineral soak, organic scrub, intensive callus treatment, and high-shine cherry or nude gel polish.",
+    "tags": ["Pedicure", "Foot Spa", "Self Care", "Summer"],
+    "image": "/images/gallery/deluxe-pedicure.svg"
+  },
+  {
+    "id": "look-brow-sculpt",
+    "title": "Custom Brow Architecture & Tint",
+    "category": "Beauty",
+    "serviceId": "brow-shape-tint",
+    "serviceName": "Eyebrow Shape & Henna/Custom Tint",
+    "price": "$30 NZD",
+    "duration": "25 mins",
+    "description": "Precision cotton-thread shaping matched with personalized brow tone to frame facial symmetry flawlessly.",
+    "tags": ["Brows", "Threading", "Tint", "Grooming"],
+    "image": "/images/gallery/brow-sculpt.svg"
+  }
+]

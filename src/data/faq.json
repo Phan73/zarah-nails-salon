@@ -1,0 +1,53 @@
+[
+  {
+    "category": "Bookings & Walk-ins",
+    "questions": [
+      {
+        "q": "Do I need an appointment or do you take walk-ins?",
+        "a": "We welcome walk-ins whenever a technician is free! However, to guarantee your preferred time slot and nail artist, we strongly recommend booking in advance through our online calendar or calling us at 0210 839 8791."
+      },
+      {
+        "q": "What happens if I need to cancel or reschedule my appointment?",
+        "a": "We understand that life happens. We kindly request at least 24 hours notice for any cancellations or rescheduling so we can offer the slot to someone on our waiting list. You can reschedule easily through your confirmation text or by calling the salon."
+      },
+      {
+        "q": "What if my assigned technician is unavailable on the day?",
+        "a": "In the rare event that your chosen technician is unwell, our system will notify you immediately via SMS alert and offer another qualified artist or reschedule to your preferred next slot."
+      }
+    ]
+  },
+  {
+    "category": "Services & Preparation",
+    "questions": [
+      {
+        "q": "What is BIAB and how is it different from normal gel or acrylics?",
+        "a": "BIAB (Builder in a Bottle) is a thick, highly flexible, strengthening gel overlay applied over your natural nails. Unlike acrylics, it causes zero damage to the nail bed and flexes naturally with your nail, preventing cracking and allowing short or bitten nails to grow long and healthy."
+      },
+      {
+        "q": "How long does a Gel / Shellac Manicure last?",
+        "a": "Our gel manicures typically last between 2 to 3 weeks with zero chipping, depending on your daily routine and nail growth. We recommend cuticle oil daily to maximize longevity."
+      },
+      {
+        "q": "Can I bring my own nail design or Pinterest reference?",
+        "a": "Absolutely! We love creative sets. You can show your technician any photo or reference at the start of your appointment, or mention it when booking so we allocate the proper time for intricate art."
+      }
+    ]
+  },
+  {
+    "category": "Salon & Payment",
+    "questions": [
+      {
+        "q": "What payment methods do you accept at the salon?",
+        "a": "We accept EFTPOS, Visa, Mastercard, and Cash. No credit card surcharges on standard local EFTPOS transactions."
+      },
+      {
+        "q": "Where is the salon located and is there parking?",
+        "a": "We are located at Shop 12, 3 Red Hills Road, Massey, Auckland 0614 (near the corner of Don Buck Road). There is generous, free customer parking directly in front of the salon."
+      },
+      {
+        "q": "Do you offer nail repairs if a nail chips?",
+        "a": "Yes! If an enhancement or gel polish chips within 72 hours of your appointment through normal wear, stop by or call us and we will gladly repair it free of charge."
+      }
+    ]
+  }
+]

@@ -1,0 +1,4854 @@
+---
+import StaffLayout from '../../layouts/StaffLayout.astro';
+import servicesData from '../../data/services.json';
+import teamData from '../../data/team.json';
+import galleryData from '../../data/gallery.json';
+import salonInfo from '../../data/salon-info.json';
+import customersData from '../../data/customers.json';
+import googleReviewsData from '../../data/google-reviews.json';
+
+const activeStaff = teamData.filter(t => t.id !== 'any-available');
+const allServices = servicesData.flatMap(cat => cat.items);
+---
+
+<StaffLayout title="Salon Staff & Management Workspace | Zarah Nails & Beauty">
+  <!-- 1. INSTANT AUTH VERIFICATION (0-Second Login & Direct Access) -->
+  <script is:inline>
+    (function() {
+      try {
+        var user = null;
+        var stored = localStorage.getItem('zarah_logged_in_user');
+        if (stored) user = JSON.parse(stored);
+        var staffAuth = sessionStorage.getItem('zarah_staff_auth') === 'true';
+        var hasValidRole = staffAuth || (user && (user.role === 'admin' || user.role === 'staff'));
+
+        if (!hasValidRole) {
+          window.location.replace('/?openLogin=1&redirect=' + encodeURIComponent(window.location.pathname));
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- 2. AUTHENTICATED WORKSPACE (Rendered Directly) -->
+  <div id="staff-portal-content" class="staff-workspace">
+    <!-- Top Action Toolbar -->
+    <div class="staff-toolbar">
+      <div class="toolbar-left">
+        <div class="active-role-indicator" id="active-role-tag">
+          <span class="role-icon">👤</span>
+          <span class="role-name">Role: Normal Staff</span>
+        </div>
+        <h1>Salon Operations &amp; Management</h1>
+        <p class="toolbar-sub">Shop 12, 3 Red Hills Road, Massey • Auckland</p>
+      </div>
+
+      <div class="toolbar-right">
+        <button type="button" class="btn btn-accent" id="btn-open-walkin-modal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Log Walk-in / Phone Booking</span>
+        </button>
+        <button type="button" class="btn btn-subtle" id="btn-export-data">
+          <span>Export Bookings (CSV)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="stats-overview-grid">
+      <div class="stat-card">
+        <span class="stat-label">Today's Appointments</span>
+        <span class="stat-value" id="stat-today-count">4</span>
+        <span class="stat-meta">Active on calendar</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">On-Duty Technicians</span>
+        <span class="stat-value" id="stat-active-staff-count">3</span>
+        <span class="stat-meta" id="stat-staff-names">Zarah • Priya • Chloe</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Facebook &amp; Social Inquiries</span>
+        <span class="stat-value" id="stat-msg-count" style="color: var(--accent-rose);">2 New</span>
+        <span class="stat-meta">Ready for 1-click booking</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Catalog Services</span>
+        <span class="stat-value" id="stat-services-count">{allServices.length}</span>
+        <span class="stat-meta">Active menu items</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="portal-tab-bar">
+      <!-- Staff Tabs -->
+      <button type="button" class="portal-tab active" data-tab-target="tab-calendar">
+        📅 Appointments &amp; Calendar
+      </button>
+      <button type="button" class="portal-tab" data-tab-target="tab-messages">
+        💬 Facebook &amp; Social Inbox
+        <span class="tab-badge" id="inbox-badge-count">2</span>
+      </button>
+      <button type="button" class="portal-tab" data-tab-target="tab-staff-shifts">
+        👥 Staff Schedules &amp; Reassignment
+      </button>
+      <button type="button" class="portal-tab" data-tab-target="tab-customers-loyalty" id="tab-btn-loyalty">
+        🌟 Customers &amp; 10-Dot Loyalty
+      </button>
+
+      <!-- Admin Only Tabs (Protected) -->
+      <button type="button" class="portal-tab admin-locked" data-tab-target="tab-admin-services" id="tab-btn-services">
+        🔒 Services &amp; Pricing Editor
+      </button>
+      <button type="button" class="portal-tab admin-locked" data-tab-target="tab-admin-gallery" id="tab-btn-gallery">
+        🔒 Gallery Photo Manager
+      </button>
+      <button type="button" class="portal-tab admin-locked" data-tab-target="tab-admin-team" id="tab-btn-team">
+        🔒 Staff Roster Manager
+      </button>
+      <button type="button" class="portal-tab admin-locked" data-tab-target="tab-admin-reviews" id="tab-btn-reviews">
+        🔒 Google Reviews Manager
+      </button>
+    </div>
+
+    <!-- ==========================================
+         TAB 1: CALENDAR & APPOINTMENTS (All Staff)
+         ========================================== -->
+    <section class="tab-pane active" id="tab-calendar">
+      <div class="calendar-header-filter">
+        <div class="filter-group">
+          <label class="filter-label">Filter by Staff Member:</label>
+          <div class="staff-filter-pills" id="staff-calendar-filters">
+            <button type="button" class="staff-filter-pill active" data-staff="all">All Technicians</button>
+            {activeStaff.map(s => (
+              <button type="button" class="staff-filter-pill" data-staff={s.id}>{s.name}</button>
+            ))}
+          </div>
+        </div>
+
+        <div class="date-jump-box">
+          <label class="filter-label">Date:</label>
+          <input type="date" id="calendar-date-picker" class="staff-date-input" />
+        </div>
+      </div>
+
+      <div class="appointments-list-container" id="appointments-container">
+        <!-- Rendered dynamically from localStorage -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 2: FACEBOOK & SOCIAL INBOX (All Staff)
+         ========================================== -->
+    <section class="tab-pane" id="tab-messages">
+      <div class="inbox-header-box">
+        <div>
+          <h2>Facebook Messages &amp; Online Inquiries</h2>
+          <p class="inbox-sub">
+            Inquiries sent from your Facebook Page (<strong>@zarahnailsandbeauty</strong>) or the website contact form appear here. Click <strong>"1-Click Convert to Booking"</strong> to turn any message into a scheduled appointment.
+          </p>
+        </div>
+        <button type="button" class="btn btn-subtle btn-sm" id="btn-refresh-messages">
+          Refresh Inquiries
+        </button>
+      </div>
+
+      <div class="messages-list" id="messages-container">
+        <!-- Rendered dynamically from localStorage -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 3: STAFF SHIFTS & REASSIGNMENT (All Staff)
+         ========================================== -->
+    <section class="tab-pane" id="tab-staff-shifts">
+      <div class="shifts-panel">
+        <h2>Active Staff Roster &amp; Absence Cover</h2>
+        <p class="shifts-sub">
+          If a staff member cannot make it in on the day, select their name below to reassign their slots to another technician. The client will automatically receive an SMS alert notification.
+        </p>
+
+        <div class="staff-roster-grid" id="staff-roster-container">
+          <!-- Populated from store -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 3.5: CUSTOMER DIRECTORY & 10-DOT LOYALTY (All Staff)
+         ========================================== -->
+    <section class="tab-pane" id="tab-customers-loyalty">
+      <div class="loyalty-mgmt-panel">
+        <div class="loyalty-mgmt-header">
+          <div>
+            <h2>Customer Directory &amp; 10-Dot Loyalty Tracker</h2>
+            <p class="loyalty-mgmt-sub">
+              Every completed service or minimum spend ($50 NZD) earns 1 point.
+              <span class="legend-chip"><span class="loyalty-dot dot-white"></span> White = Unearned</span>
+              <span class="legend-chip"><span class="loyalty-dot dot-orange"></span> Orange = Active Booking (Temporary)</span>
+              <span class="legend-chip"><span class="loyalty-dot dot-green"></span> Green = Completed at Salon</span>.
+              Completing <strong>10 Green Dots</strong> unlocks a free salon service!
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary" id="btn-open-register-customer">
+            + Register Walk-In Client / Log Visit
+          </button>
+        </div>
+
+        <!-- Directory Search & Filter Controls -->
+        <div class="customer-search-filter-bar">
+          <div class="search-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="customer-search-input" placeholder="Search by name, NZ phone (e.g. 021 123 4567), or email..." class="search-field" />
+          </div>
+
+          <div class="customer-filter-chips" id="customer-filter-chips">
+            <button type="button" class="cust-filter-chip active" data-filter="all">All Clients</button>
+            <button type="button" class="cust-filter-chip highlight-gold" data-filter="reward-ready">🎁 Free Service Ready (10 🟢)</button>
+            <button type="button" class="cust-filter-chip" data-filter="has-pending">🟠 Has Bookings</button>
+            <button type="button" class="cust-filter-chip" data-filter="regulars">💎 Regulars (5+ Visits)</button>
+          </div>
+        </div>
+
+        <!-- Customers Grid / List -->
+        <div class="customers-directory-grid" id="customers-directory-container">
+          <!-- Populated dynamically from window.SalonStore.getCustomers() -->
+        </div>
+      </div>
+    </section>
+    <section class="tab-pane" id="tab-admin-services">
+      <div class="admin-panel-card">
+        <div class="admin-panel-header">
+          <div>
+            <h2>Services &amp; Pricing Management</h2>
+            <p class="admin-panel-sub">
+              Easily update prices, change service durations, or add new treatments without touching any code. Changes appear live on the public menu instantly.
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary" id="btn-add-new-service">
+            + Add New Service
+          </button>
+        </div>
+
+        <div class="admin-services-list" id="admin-services-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 5: ADMIN — GALLERY PHOTO MANAGER (Admin Only)
+         ========================================== -->
+    <section class="tab-pane" id="tab-admin-gallery">
+      <div class="admin-panel-card">
+        <div class="admin-panel-header">
+          <div>
+            <h2>Nail Art Lookbook &amp; Photo Manager</h2>
+            <p class="admin-panel-sub">
+              Upload customer photos directly from your phone/PC, or auto-generate custom nail styles, colors &amp; artwork from text prompts.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-accent" id="btn-open-prompt-studio">
+              ✨ Auto-Generate from Prompt
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-add-gallery-item">
+              📷 Upload Photo Look
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-gallery-grid" id="admin-gallery-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 6: ADMIN — STAFF ROSTER MANAGER (Admin Only)
+         ========================================== -->
+    <section class="tab-pane" id="tab-admin-team">
+      <div class="admin-panel-card">
+        <div class="admin-panel-header">
+          <div>
+            <h2>Staff Technicians &amp; Roles</h2>
+            <p class="admin-panel-sub">
+              Add new team members, update bios and specialties, or remove technicians who have left the salon.
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary" id="btn-add-new-staff">
+            + Add New Staff Member
+          </button>
+        </div>
+
+        <div class="admin-team-list" id="admin-team-container">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- STAFF PORTAL LOGINS & PERMISSIONS (Admin Only) -->
+        <div class="admin-accounts-section" style="margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border-delicate);">
+          <div class="admin-panel-header" style="margin-bottom: 1.25rem;">
+            <div>
+              <h2>Staff Portal Logins &amp; Access Control</h2>
+              <p class="admin-panel-sub">
+                Create and manage login accounts for your technicians. Staff members can log in through the main website <strong>"Login"</strong> button using their username and password to access the staff portal.
+              </p>
+            </div>
+            <button type="button" class="btn btn-primary" id="btn-create-staff-account">
+              + Create Staff Login
+            </button>
+          </div>
+
+          <div class="staff-accounts-table-wrap">
+            <table class="staff-accounts-table">
+              <thead>
+                <tr>
+                  <th>Staff Member</th>
+                  <th>Username</th>
+                  <th>Password</th>
+                  <th>Portal Permissions</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="staff-accounts-tbody">
+                <!-- Populated dynamically from window.SalonStore.getStaffAccounts() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 7: ADMIN - GOOGLE REVIEWS MANAGER (Admin Only)
+         ========================================== -->
+    <section class="tab-pane" id="tab-admin-reviews">
+      <div class="admin-panel-card">
+        <div class="admin-panel-header">
+          <div>
+            <h2>⭐ Google Reviews &amp; Ratings Control</h2>
+            <p class="admin-panel-sub">
+              Manage verified Google Business reviews for Zarah Nails &amp; Beauty Massey. Per salon policy, only real customer reviews rated <strong>4★ and 5★</strong> are showcased on the public website.
+            </p>
+          </div>
+          <div class="admin-header-actions" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="https://www.google.com/search?q=zara+nail+massey" target="_blank" rel="noopener noreferrer" class="btn btn-subtle" title="Open Google Business profile in Massey">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              View on Google Search
+            </a>
+            <button type="button" class="btn btn-secondary" id="btn-copy-review-invite">
+              📋 Copy SMS Review Request
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-add-google-review">
+              + Add Google Review
+            </button>
+          </div>
+        </div>
+
+        <!-- Google Stats KPI Bar -->
+        <div class="google-admin-kpi-bar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+          <div class="kpi-mini-card" style="background: var(--bg-porcelain); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-delicate);">
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Average Rating</div>
+            <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.35rem;">
+              <span id="admin-google-avg-score" style="font-size: 2rem; font-weight: 700; color: var(--text-espresso);">4.9</span>
+              <span style="color: #D4AF37; font-size: 1.2rem;">★★★★★</span>
+            </div>
+            <span style="font-size: 0.75rem; color: #3D6A52; font-weight: 600;">✓ Google Verified Listing</span>
+          </div>
+
+          <div class="kpi-mini-card" style="background: var(--bg-porcelain); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-delicate);">
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Displayed Reviews</div>
+            <div style="margin-top: 0.35rem;">
+              <span id="admin-google-count" style="font-size: 2rem; font-weight: 700; color: var(--text-espresso);">0</span>
+              <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 0.35rem;">active on website</span>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--accent-rose); font-weight: 600;">⭐ 4 &amp; 5 Stars Only</span>
+          </div>
+
+          <div class="kpi-mini-card" style="background: var(--bg-porcelain); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-delicate);">
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Listing Location</div>
+            <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-espresso); margin-top: 0.35rem;">Shop 12, 3 Red Hills Rd</div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Massey, Auckland • +64 210 839 8791</span>
+          </div>
+        </div>
+
+        <!-- Google Reviews Table -->
+        <div class="admin-reviews-table-wrap" style="overflow-x: auto;">
+          <table class="portal-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Reviewer</th>
+                <th>Rating</th>
+                <th>Service Tag</th>
+                <th>Date / Time</th>
+                <th>Review Text</th>
+                <th>Source</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-reviews-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <button type="button" class="btn btn-subtle btn-sm" id="btn-reset-google-reviews">
+            🔄 Restore Real Google Defaults
+          </button>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">
+            Changes update instantly on the homepage without needing to rebuild the site.
+          </span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ========================================================
+       MODAL: 10-DOT CELEBRATION REWARD OVERLAY (Free Service)
+       ======================================================== -->
+  <div class="modal-backdrop reward-overlay-backdrop" id="loyalty-reward-overlay-modal" style="display: none;">
+    <div class="reward-overlay-dialog">
+      <div class="celebration-confetti-ribbon">
+        <span class="confetti-icon">🎉</span>
+        <span class="confetti-icon">✨</span>
+        <span class="confetti-icon">👑</span>
+      </div>
+
+      <div class="reward-overlay-header">
+        <span class="reward-eyebrow">MILESTONE ACHIEVED</span>
+        <h2>Customer Entitled to Free Service!</h2>
+        <p class="reward-sub">10 Green Loyalty Stamps have been completed at Zarah Nails &amp; Beauty Massey.</p>
+      </div>
+
+      <div class="reward-customer-spotlight">
+        <div class="spotlight-avatar" id="reward-modal-avatar">S</div>
+        <div class="spotlight-info">
+          <h3 id="reward-modal-client-name">Sarah Jenkins</h3>
+          <span id="reward-modal-client-phone">021 123 4567</span>
+          <span id="reward-modal-client-email">sarah.jenkins@example.co.nz</span>
+        </div>
+        <div class="spotlight-free-tag">FREE SERVICE</div>
+      </div>
+
+      <!-- 10 Full Green Dots Preview -->
+      <div class="reward-dots-stage">
+        <div class="loyalty-dots-track large milestone-unlocked" id="reward-modal-dots-track">
+          <!-- 10 glowing green dots -->
+        </div>
+        <span class="reward-completion-label">10 of 10 Completed Visits / Qualifying Services (🟢)</span>
+      </div>
+
+      <div class="reward-privilege-notice">
+        <strong>Salon Privilege:</strong> This client has qualified for 1 complimentary salon service today (e.g. Signature Gel Manicure, Deluxe Pedicure treatment, or BIAB Infill) as a reward for their salon loyalty.
+      </div>
+
+      <div class="reward-modal-actions">
+        <button type="button" class="btn btn-accent btn-lg" id="btn-redeem-free-service-now">
+          🎁 Claim &amp; Redeem Free Service Now (Reset Stamp Card)
+        </button>
+        <button type="button" class="btn btn-subtle" id="btn-close-reward-overlay">
+          Save for Next Visit (Keep 10 Stamps)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: REGISTER CLIENT / LOG IN-STORE VISIT
+       ======================================================== -->
+  <div class="modal-backdrop" id="register-client-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="reg-client-modal-title">Register Client / Add Visit Point</h2>
+        <button type="button" class="modal-close" id="btn-close-register-client">&times;</button>
+      </div>
+      <form id="register-client-form" class="modal-body">
+        <input type="hidden" id="rc-customer-id" value="" />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Client Full Name *</label>
+            <input type="text" id="rc-name" class="form-input" placeholder="e.g. Kelly Roberts" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">NZ Mobile Number *</label>
+            <input type="tel" id="rc-phone" class="form-input" placeholder="021 555 7890" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email Address (Optional)</label>
+            <input type="email" id="rc-email" class="form-input" placeholder="kelly@example.co.nz" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Favorite / Today's Service</label>
+            <input type="text" id="rc-service" class="form-input" placeholder="BIAB Natural Overlay" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Service Price / Spend ($ NZD)</label>
+            <input type="number" id="rc-spend" class="form-input" value="65" min="0" step="5" />
+            <span class="auth-hint">Rule: Each service or $50 minimum spend earns 1 Green Dot (🟢)</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Action</label>
+            <select id="rc-action" class="form-input">
+              <option value="add-point">Mark Today's Visit (+1 Green Dot 🟢)</option>
+              <option value="just-register">Just Register Contact Info</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Staff Notes (Nail shapes, cuticle sensitivity, etc.)</label>
+          <textarea id="rc-notes" class="form-textarea" rows="2" placeholder="e.g. Likes short squoval, prefers Chloe"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-register-client">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-register-client">Save Client &amp; Update Points</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: FAST WALK-IN / PHONE BOOKING -->
+  <div class="modal-backdrop" id="walkin-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>Log Walk-In or Phone Booking</h2>
+        <button type="button" class="modal-close" id="btn-close-walkin">&times;</button>
+      </div>
+      <form id="walkin-form" class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Client Name *</label>
+            <input type="text" id="w-client-name" class="form-input" placeholder="e.g. Rachel Miller" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number *</label>
+            <input type="tel" id="w-client-phone" class="form-input" placeholder="021 555 1234" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Service Treatment *</label>
+          <select id="w-service" class="form-input" required>
+            <!-- Populated from store -->
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Assign Technician *</label>
+            <select id="w-staff" class="form-input" required>
+              <!-- Populated from store -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Booking Type</label>
+            <select id="w-source" class="form-input">
+              <option value="Walk-in (In Store)">Walk-in (In Store)</option>
+              <option value="Phone Call">Phone Call (0210 839 8791)</option>
+              <option value="Facebook Message">Facebook Message</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" id="w-date" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time Slot *</label>
+            <input type="text" id="w-time" class="form-input" placeholder="e.g. 10:30 AM" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Staff Notes (Optional)</label>
+          <input type="text" id="w-notes" class="form-input" placeholder="e.g. Wants micro-french tips, short almond shape" />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-walkin">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save to Salon Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REASSIGN STAFF & SEND SMS ALERT -->
+  <div class="modal-backdrop" id="reassign-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>Reassign Appointment &amp; Trigger SMS Alert</h2>
+        <button type="button" class="modal-close" id="btn-close-reassign">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="reassign-desc">
+          Reassigning this client to another qualified technician will update your schedule and automatically prepare the customer notification text message.
+        </p>
+
+        <div class="reassign-summary-box">
+          <p><strong>Client:</strong> <span id="r-client-name">-</span> (<span id="r-client-phone">-</span>)</p>
+          <p><strong>Service:</strong> <span id="r-service-name">-</span></p>
+          <p><strong>Scheduled:</strong> <span id="r-datetime">-</span></p>
+          <p><strong>Current Technician:</strong> <span id="r-current-staff">-</span></p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Replacement Technician *</label>
+          <select id="r-new-staff" class="form-input">
+            <!-- Populated from store -->
+          </select>
+        </div>
+
+        <div class="sms-preview-card">
+          <div class="sms-header">
+            <span>📱 SMS Notification Alert to Customer</span>
+            <span class="sms-tag">Automated Alert</span>
+          </div>
+          <div class="sms-bubble" id="sms-text-preview">
+            <!-- Dynamic SMS content -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-reassign">Cancel</button>
+          <button type="button" class="btn btn-accent" id="btn-confirm-reassign-sms">
+            Confirm Reassignment &amp; Send SMS
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADMIN EDIT / ADD SERVICE -->
+  <div class="modal-backdrop" id="service-edit-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="service-modal-title">Edit Service Details</h2>
+        <button type="button" class="modal-close" id="btn-close-service-modal">&times;</button>
+      </div>
+      <form id="service-edit-form" class="modal-body">
+        <input type="hidden" id="se-id" />
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select id="se-category" class="form-input" required>
+            <option value="Nails & Natural Care">Nails &amp; Natural Care</option>
+            <option value="Nail Enhancements & BIAB">Nail Enhancements &amp; BIAB</option>
+            <option value="Bespoke Nail Art & Upgrades">Bespoke Nail Art &amp; Upgrades</option>
+            <option value="Facials & Skin Rejuvenation">Facials &amp; Skin Rejuvenation</option>
+            <option value="Threading, Waxing & Brows">Threading, Waxing &amp; Brows</option>
+            <option value="Makeup & Special Occasions">Makeup &amp; Special Occasions</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Service Treatment Name *</label>
+          <input type="text" id="se-name" class="form-input" placeholder="e.g. Signature Gel / Shellac Manicure" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Price in NZD ($) *</label>
+            <input type="number" id="se-price" class="form-input" placeholder="45" min="5" step="1" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estimated Duration *</label>
+            <input type="text" id="se-duration" class="form-input" placeholder="e.g. 45 mins" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description for Customers</label>
+          <textarea id="se-description" class="form-textarea" rows="3" placeholder="Explain what the service includes..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox-label">
+            <input type="checkbox" id="se-popular" />
+            <span>Mark as "Popular Choice" badge on menu</span>
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-service-edit">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-service">Save Service Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADMIN ADD / EDIT GALLERY LOOK (Photo Upload & AI Prompt Generator) -->
+  <div class="modal-backdrop" id="gallery-edit-modal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 720px;">
+      <div class="modal-header">
+        <h2 id="gallery-modal-title">Nail Look Creator &amp; Studio</h2>
+        <button type="button" class="modal-close" id="btn-close-gallery-modal">&times;</button>
+      </div>
+
+      <!-- Mode Selector -->
+      <div class="gallery-creator-mode-tabs">
+        <button type="button" class="creator-mode-btn active" id="btn-tab-mode-ai">
+          ✨ Auto-Generate from Prompt
+        </button>
+        <button type="button" class="creator-mode-btn" id="btn-tab-mode-upload">
+          📷 Upload Photo from Device
+        </button>
+      </div>
+
+      <form id="gallery-edit-form" class="modal-body">
+        <input type="hidden" id="ge-id" />
+
+        <!-- MODE A: AI PROMPT DESIGN GENERATOR -->
+        <div id="ai-generator-panel" class="creator-mode-panel">
+          <div class="ai-generator-inner-box">
+            <label class="form-label">Type Any Design Idea (or click an inspiration preset below):</label>
+            <div class="prompt-bar-row">
+              <input type="text" id="ai-prompt-input" class="form-input" placeholder="e.g. Emerald green velvet cat-eye with gold stars on almond nails" />
+              <button type="button" class="btn btn-accent" id="btn-run-ai-generate">
+                ✨ Generate Art
+              </button>
+            </div>
+
+            <!-- Inspiration Preset Chips -->
+            <div class="prompt-presets-container">
+              <span class="presets-label">Click to auto-generate:</span>
+              <div class="presets-chips-grid">
+                <button type="button" class="prompt-chip" data-prompt="Glazed pearlescent chrome over bare rose almond nails">✨ Glazed Pearl Chrome</button>
+                <button type="button" class="prompt-chip" data-prompt="Deep emerald velvet magnetic cat-eye with gold sparkle">💫 Velvet Cat-Eye Emerald</button>
+                <button type="button" class="prompt-chip" data-prompt="Classic baby boomer french ombre with high gloss topcoat">🌸 French Ombre Fade</button>
+                <button type="button" class="prompt-chip" data-prompt="Sunset peach and pink aura airbrush on almond nails">🌅 Peach Sunset Aura</button>
+                <button type="button" class="prompt-chip" data-prompt="Espresso dark chocolate with gold pinstripe micro french">🍫 Espresso Micro French</button>
+                <button type="button" class="prompt-chip" data-prompt="Burgundy wine velvet shimmer with 3D pearl crystal">🍷 Velvet Burgundy Pearl</button>
+                <button type="button" class="prompt-chip" data-prompt="Lavender lilac mirror chrome sheen on squoval nails">💜 Lavender Chrome Sheen</button>
+                <button type="button" class="prompt-chip" data-prompt="Baby blue pastel glazed chrome with star sparkle">🩵 Glazed Baby Blue</button>
+              </div>
+            </div>
+
+            <!-- Optional Fine Tuning Dropdowns -->
+            <details class="tuning-accordion">
+              <summary>🎨 Fine-Tune Shape, Color &amp; Accents (Optional)</summary>
+              <div class="tuning-controls-grid">
+                <div class="form-group">
+                  <label class="form-label">Nail Shape</label>
+                  <select id="tune-shape" class="form-input">
+                    <option value="almond">Almond (Signature)</option>
+                    <option value="coffin">Coffin / Ballerina</option>
+                    <option value="squoval">Squoval</option>
+                    <option value="square">Square</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Art Technique</label>
+                  <select id="tune-technique" class="form-input">
+                    <option value="chrome">Glazed Chrome Sheen</option>
+                    <option value="cateye">Velvet Magnetic Cat-Eye</option>
+                    <option value="aura">Aura Radial Airbrush</option>
+                    <option value="ombre">French Ombre Fade</option>
+                    <option value="french">Micro French Tip</option>
+                    <option value="solid">High-Gloss Solid Polish</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Color Theme</label>
+                  <select id="tune-color" class="form-input">
+                    <option value="rose">Soft Petal Rose / Nude</option>
+                    <option value="pearl">Glazed Pearl White</option>
+                    <option value="emerald">Deep Emerald Green</option>
+                    <option value="espresso">Espresso Chocolate</option>
+                    <option value="burgundy">Rich Burgundy Wine</option>
+                    <option value="peach">Sunset Peach Coral</option>
+                    <option value="lavender">Lavender Lilac</option>
+                    <option value="blue">Baby Blue Sky</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Embellishments</label>
+                  <select id="tune-embellish" class="form-input">
+                    <option value="star">Gold Star Sparkle</option>
+                    <option value="pearl">3D Pearl Gem</option>
+                    <option value="gold-flakes">Gold Leaf Flakes</option>
+                    <option value="none">Clean Minimal (No Accents)</option>
+                  </select>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- MODE B: DEVICE PHOTO UPLOAD -->
+        <div id="upload-photo-panel" class="creator-mode-panel" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Select Photo from Smartphone or Computer *</label>
+            <input type="file" id="ge-file" accept="image/*" class="form-input" />
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">
+              Choose any photo from your camera roll or downloads folder.
+            </p>
+          </div>
+        </div>
+
+        <!-- SHARED PREVIEW & DETAILS CARD -->
+        <div class="look-editor-preview-card">
+          <div class="preview-canvas-col">
+            <div class="preview-media-frame">
+              <img id="ge-image-preview" src="" alt="Look Preview" class="photo-preview-img" style="display: none;" />
+              <div id="ge-preview-placeholder" class="preview-empty-placeholder">
+                <span style="font-size: 2rem;">✨</span>
+                <p>Click "Generate Art" or upload a photo to preview your look.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-details-col">
+            <div class="form-group">
+              <label class="form-label">Look Title *</label>
+              <input type="text" id="ge-title" class="form-input" placeholder="e.g. Milky Rose French Micro-Tips" required />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Price Tag *</label>
+                <input type="text" id="ge-price" class="form-input" placeholder="$65 NZD" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tags (comma separated)</label>
+                <input type="text" id="ge-tags" class="form-input" placeholder="BIAB, French, Clean Girl" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea id="ge-desc" class="form-textarea" rows="2" placeholder="Brief description of the look..." required></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-gallery-edit">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-gallery-look">
+            Publish to Public Gallery &rarr;
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADMIN ADD / EDIT STAFF MEMBER -->
+  <div class="modal-backdrop" id="staff-edit-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="staff-modal-title">Add / Edit Technician</h2>
+        <button type="button" class="modal-close" id="btn-close-staff-modal">&times;</button>
+      </div>
+      <form id="staff-edit-form" class="modal-body">
+        <input type="hidden" id="ste-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Technician Name *</label>
+            <input type="text" id="ste-name" class="form-input" placeholder="e.g. Nina" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number *</label>
+            <input type="tel" id="ste-phone" class="form-input" placeholder="0210 839 8791" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Job Role &amp; Title *</label>
+          <input type="text" id="ste-role" class="form-input" placeholder="e.g. Senior Nail Artist &amp; BIAB Specialist" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Specialties (comma separated)</label>
+          <input type="text" id="ste-specialties" class="form-input" placeholder="BIAB, Ombre, Custom Nail Art" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Short Bio for About Page</label>
+          <textarea id="ste-bio" class="form-textarea" rows="3" placeholder="Brief background of their training and passion..." required></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-staff-edit">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Technician Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADMIN ACCESS VERIFICATION (When Staff clicks Admin Tab) -->
+  <div class="modal-backdrop" id="admin-challenge-modal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 400px; text-align: center;">
+      <div class="modal-header" style="justify-content: center;">
+        <h2>🔒 Owner / Admin Verification</h2>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          This management section is reserved for the salon administrator. Please enter the Owner password to continue.
+        </p>
+        <input type="password" id="challenge-pin-input" placeholder="••••••••" class="form-input" style="margin-bottom: 1rem; text-align: center;" />
+      </div>
+      <div class="modal-footer" style="justify-content: center;">
+        <button type="button" class="btn btn-subtle" id="btn-cancel-challenge">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-submit-challenge">Unlock Admin Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: CREATE / EDIT STAFF ACCOUNT
+       ======================================================== -->
+  <div class="modal-backdrop" id="create-staff-account-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="staff-modal-form-title">Create Staff Portal Login</h2>
+        <button type="button" class="modal-close" id="btn-close-staff-account-modal">&times;</button>
+      </div>
+      <form id="staff-account-form" class="modal-body">
+        <input type="hidden" id="sa-id" value="" />
+        
+        <div class="form-group">
+          <label class="form-label">Staff Member *</label>
+          <select id="sa-staff-select" class="form-input" required>
+            <!-- Populated dynamically from team -->
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Username *</label>
+            <input type="text" id="sa-username" class="form-input" placeholder="e.g. chloe or priya" required />
+            <span class="auth-hint">Used to sign in via the website "Login" button</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="text" id="sa-password" class="form-input" placeholder="e.g. staff123" required />
+            <span class="auth-hint">Share this securely with your technician</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Portal Access Level &amp; Permissions *</label>
+          <select id="sa-role" class="form-input" required>
+            <option value="staff">Normal Staff (Front Desk, Calendar, Walk-ins, SMS, Social Inbox, Loyalty)</option>
+            <option value="admin">Owner / Admin (Full Access + Price, Service, Photo &amp; Staff Editors)</option>
+          </select>
+          <span class="auth-hint">Normal staff are protected from altering prices, deleting staff, or modifying the public menu.</span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-staff-account">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-staff-account">Save Staff Login</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: ADMIN ADD / EDIT GOOGLE REVIEW
+       ======================================================== -->
+  <div class="modal-backdrop" id="google-review-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h2 id="grev-modal-title">Add Verified Google Review</h2>
+          <p class="modal-sub">Add a review from your Google Business Profile to display on the public website.</p>
+        </div>
+        <button type="button" class="modal-close" id="btn-close-google-review-modal">&times;</button>
+      </div>
+
+      <form id="google-review-form" class="modal-body">
+        <input type="hidden" id="grev-id" value="" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Reviewer Full Name *</label>
+            <input type="text" id="grev-author" class="form-input" placeholder="e.g. Kylie Harrison" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Google Star Rating *</label>
+            <select id="grev-rating" class="form-input" required>
+              <option value="5" selected>★★★★★ 5 Stars (Exceptional)</option>
+              <option value="4">★★★★☆ 4 Stars (Very Good)</option>
+            </select>
+            <span class="auth-hint">Per salon policy, only 4★ &amp; 5★ reviews are published.</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Service Received</label>
+            <input type="text" id="grev-service" class="form-input" placeholder="e.g. BIAB Builder Gel Overlay & Art" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Relative Time / Description</label>
+            <input type="text" id="grev-time" class="form-input" placeholder="e.g. 2 weeks ago or Recently" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Review Comment *</label>
+          <textarea id="grev-text" class="form-input" rows="4" placeholder="Paste the real customer review from Google Search / Maps..." required></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancel-google-review">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-google-review">Publish Review to Site</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</StaffLayout>
+
+<script is:inline define:vars={{ initialServices: servicesData, initialTeam: teamData, initialGallery: galleryData, initialInfo: salonInfo, initialCustomers: customersData, initialGoogleReviews: googleReviewsData }}>
+  // Application State & Direct Session Setup
+  const loggedUser = window.SalonStore ? window.SalonStore.getLoggedInUser() : null;
+  let currentRole = (loggedUser && (loggedUser.role === 'admin' || loggedUser.role === 'staff'))
+    ? loggedUser.role
+    : (sessionStorage.getItem('zarah_role') || 'staff');
+
+  sessionStorage.setItem('zarah_staff_auth', 'true');
+  sessionStorage.setItem('zarah_role', currentRole);
+
+  let pendingAdminTab = null;
+  let activeServices = window.SalonStore ? window.SalonStore.getServices(initialServices) : initialServices;
+  let activeTeam = window.SalonStore ? window.SalonStore.getTeam(initialTeam) : initialTeam;
+  let activeGallery = window.SalonStore ? window.SalonStore.getGallery(initialGallery) : initialGallery;
+  let activeCustomers = window.SalonStore ? window.SalonStore.getCustomers(initialCustomers) : initialCustomers;
+  let selectedCustomerForReward = null;
+  let currentCustomerFilter = 'all';
+  let customerSearchQuery = '';
+  let selectedAppointmentForReassign = null;
+  let uploadedPhotoBase64 = null;
+
+  // Sign out & Exit Button
+  document.getElementById('btn-lock-portal')?.addEventListener('click', () => {
+    if (confirm('Sign out of the salon workspace?')) {
+      sessionStorage.removeItem('zarah_staff_auth');
+      sessionStorage.removeItem('zarah_role');
+      if (window.SalonStore) window.SalonStore.logoutAll();
+      window.location.href = '/';
+    }
+  });
+
+  // Admin Verification Challenge (When staff attempts admin-only actions)
+  function openAdminChallenge(targetTab) {
+    pendingAdminTab = targetTab;
+    const challengeModal = document.getElementById('admin-challenge-modal');
+    const cInput = document.getElementById('challenge-pin-input');
+    if (challengeModal) challengeModal.style.display = 'flex';
+    if (cInput) {
+      cInput.value = '';
+      cInput.focus();
+    }
+  }
+
+  document.getElementById('btn-cancel-challenge')?.addEventListener('click', () => {
+    const challengeModal = document.getElementById('admin-challenge-modal');
+    if (challengeModal) challengeModal.style.display = 'none';
+    pendingAdminTab = null;
+  });
+
+  document.getElementById('btn-submit-challenge')?.addEventListener('click', () => {
+    const cInput = document.getElementById('challenge-pin-input');
+    const val = cInput ? cInput.value.trim() : '';
+    if (val === '258046' || val === '8888') {
+      currentRole = 'admin';
+      sessionStorage.setItem('zarah_role', 'admin');
+      updateRoleUI();
+      const challengeModal = document.getElementById('admin-challenge-modal');
+      if (challengeModal) challengeModal.style.display = 'none';
+      if (pendingAdminTab) {
+        pendingAdminTab.click();
+      }
+      pendingAdminTab = null;
+    } else {
+      alert('Incorrect admin credentials. Please try again.');
+    }
+  });
+
+  function updateRoleUI() {
+    const roleTag = document.getElementById('active-role-tag');
+    const headerBadge = document.getElementById('header-role-badge');
+    const headerLabel = document.getElementById('header-user-label');
+
+    const adminTabs = [
+      document.getElementById('tab-btn-services'),
+      document.getElementById('tab-btn-gallery'),
+      document.getElementById('tab-btn-team'),
+      document.getElementById('tab-btn-reviews')
+    ];
+
+    if (currentRole === 'admin') {
+      if (roleTag) {
+        roleTag.innerHTML = '<span class="role-icon">👑</span><span class="role-name">Owner / Admin Mode</span>';
+        roleTag.className = 'active-role-indicator admin';
+      }
+      if (headerBadge) {
+        headerBadge.textContent = '👑 Admin Workspace';
+        headerBadge.classList.add('admin');
+      }
+      if (headerLabel) headerLabel.textContent = 'Salon Owner Active';
+
+      adminTabs.forEach(t => {
+        if (t) {
+          t.classList.remove('admin-locked');
+          t.textContent = t.textContent.replace('🔒 ', '⚙️ ');
+        }
+      });
+    } else {
+      if (roleTag) {
+        roleTag.innerHTML = '<span class="role-icon">👤</span><span class="role-name">Normal Staff Mode</span>';
+        roleTag.className = 'active-role-indicator';
+      }
+      if (headerBadge) {
+        headerBadge.textContent = 'Staff Workspace';
+        headerBadge.classList.remove('admin');
+      }
+      if (headerLabel) headerLabel.textContent = 'Staff Front Desk Active';
+
+      adminTabs.forEach(t => {
+        if (t) {
+          t.classList.add('admin-locked');
+          if (!t.textContent.includes('🔒')) {
+            t.textContent = t.textContent.replace('⚙️ ', '🔒 ');
+          }
+        }
+      });
+    }
+  }
+
+  // Direct Portal Initialization
+  updateRoleUI();
+  setTimeout(initPortal, 20);
+
+  // Tab Switching
+  const tabs = document.querySelectorAll('.portal-tab');
+  const panes = document.querySelectorAll('.tab-pane');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', (e) => {
+      if (tab.classList.contains('admin-locked') && currentRole !== 'admin') {
+        e.preventDefault();
+        openAdminChallenge(tab);
+        return;
+      }
+
+      tabs.forEach(t => t.classList.remove('active'));
+      panes.forEach(p => p.classList.remove('active'));
+
+      tab.classList.add('active');
+      const targetId = tab.getAttribute('data-tab-target');
+      if (targetId) {
+        document.getElementById(targetId)?.classList.add('active');
+      }
+    });
+  });
+
+  // Initialize Data & Render
+  function initPortal() {
+    renderAppointments();
+    renderMessages();
+    renderStaffRosters();
+    renderCustomerDirectory();
+    setupLoyaltyEventListeners();
+    renderAdminServices();
+    renderAdminGallery();
+    renderAdminTeam();
+    renderStaffAccounts();
+    setupStaffAccountListeners();
+    renderAdminGoogleReviews();
+    setupGoogleReviewsListeners();
+    populateSelectDropdowns();
+
+    const calDate = document.getElementById('calendar-date-picker');
+    if (calDate) {
+      calDate.value = new Date().toISOString().split('T')[0];
+      calDate.addEventListener('change', renderAppointments);
+    }
+  }
+
+  // Populate Select Dropdowns in Walk-in & Reassign modals
+  function populateSelectDropdowns() {
+    const wServiceSelect = document.getElementById('w-service');
+    const wStaffSelect = document.getElementById('w-staff');
+    const rStaffSelect = document.getElementById('r-new-staff');
+
+    if (wServiceSelect) {
+      const flattened = [];
+      activeServices.forEach(cat => {
+        cat.items.forEach(item => flattened.push(item));
+      });
+      wServiceSelect.innerHTML = flattened.map(s => `
+        <option value="${s.id}" data-name="${s.name}" data-price="${s.priceDisplay}" data-duration="${s.duration}">
+          ${s.name} — ${s.priceDisplay} (${s.duration})
+        </option>
+      `).join('');
+    }
+
+    const activeTechs = activeTeam.filter(t => t.id !== 'any-available');
+    if (wStaffSelect) {
+      wStaffSelect.innerHTML = activeTechs.map(t => `
+        <option value="${t.id}" data-name="${t.name}">${t.name} (${t.role})</option>
+      `).join('');
+    }
+    if (rStaffSelect) {
+      rStaffSelect.innerHTML = activeTechs.map(t => `
+        <option value="${t.id}" data-name="${t.name}">${t.name} (${t.role})</option>
+      `).join('');
+    }
+  }
+
+  // Render Appointments
+  function renderAppointments() {
+    const container = document.getElementById('appointments-container');
+    if (!container) return;
+
+    const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+    const activeStaffPill = document.querySelector('#staff-calendar-filters .staff-filter-pill.active');
+    const staffFilter = activeStaffPill?.getAttribute('data-staff') || 'all';
+    const datePicker = document.getElementById('calendar-date-picker');
+    const selectedDate = datePicker?.value || '';
+
+    const filtered = appointments.filter((app) => {
+      const matchStaff = staffFilter === 'all' || app.staffId === staffFilter || (staffFilter === 'zarah' && app.staffName === 'Zarah');
+      const matchDate = !selectedDate || app.date === selectedDate;
+      return matchStaff && matchDate;
+    });
+
+    const statToday = document.getElementById('stat-today-count');
+    if (statToday) statToday.textContent = filtered.length.toString();
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state-card">
+          <p>No appointments found for this filter or date.</p>
+          <button type="button" class="btn btn-subtle btn-sm" onclick="document.getElementById('btn-open-walkin-modal').click()">
+            + Log an Appointment
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map((app) => `
+      <div class="appointment-card ${app.status}" data-id="${app.id}">
+        <div class="app-time-col">
+          <span class="app-time">${app.time}</span>
+          <span class="app-date">${app.date}</span>
+          <span class="app-badge ${app.source.includes('Walk-in') ? 'walkin' : 'online'}">${app.source}</span>
+        </div>
+
+        <div class="app-details-col">
+          <div class="app-client-row">
+            <h3 class="app-client-name">${app.clientName}</h3>
+            <span class="app-ref">${app.refCode}</span>
+          </div>
+          <div class="app-service-row">
+            <strong>${app.serviceName}</strong>
+            <span class="app-price">${app.price}</span>
+            <span class="app-dur">(${app.duration})</span>
+          </div>
+          <div class="app-contact-row">
+            <span>📞 <a href="tel:${app.clientPhone}">${app.clientPhone}</a></span>
+            ${app.clientNotes ? `<p class="app-notes"><em>Note:</em> ${app.clientNotes}</p>` : ''}
+          </div>
+        </div>
+
+        <div class="app-staff-col">
+          <span class="staff-tag">Artist: <strong>${app.staffName}</strong></span>
+          <div class="app-card-actions">
+            <button type="button" class="btn-action-reassign" data-app-id="${app.id}">
+              Reassign &amp; SMS
+            </button>
+            <button type="button" class="btn-action-complete" data-app-id="${app.id}">
+              ${app.status === 'completed' ? '✓ Done' : 'Mark Done'}
+            </button>
+            <button type="button" class="btn-action-cancel" data-app-id="${app.id}" title="Cancel booking">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach actions
+    document.querySelectorAll('.btn-action-reassign').forEach(btn => {
+      btn.addEventListener('click', (e) => openReassignModal(e.currentTarget.getAttribute('data-app-id')));
+    });
+    document.querySelectorAll('.btn-action-complete').forEach(btn => {
+      btn.addEventListener('click', (e) => toggleComplete(e.currentTarget.getAttribute('data-app-id')));
+    });
+    document.querySelectorAll('.btn-action-cancel').forEach(btn => {
+      btn.addEventListener('click', (e) => cancelBooking(e.currentTarget.getAttribute('data-app-id')));
+    });
+  }
+
+  function toggleComplete(id) {
+    if (!id) return;
+    const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+    const target = appointments.find(a => a.id === id);
+    if (target) {
+      const willBeCompleted = target.status !== 'completed';
+      target.status = willBeCompleted ? 'completed' : 'confirmed';
+      localStorage.setItem('zarah_appointments', JSON.stringify(appointments));
+      renderAppointments();
+
+      // Automatic Loyalty Dot Transition: Orange (Temporary Booked) -> Green (Completed at Salon)
+      if (willBeCompleted && window.SalonStore) {
+        const identifier = target.clientPhone || target.clientEmail || target.clientName;
+        const res = window.SalonStore.completeCustomerVisit(identifier, target.price);
+        renderCustomerDirectory();
+
+        if (res && res.isEligibleForFree) {
+          // Trigger the 10-Dot Free Service Celebration Overlay Window!
+          setTimeout(() => {
+            openLoyaltyRewardOverlay(res.customer);
+          }, 300);
+        }
+      }
+    }
+  }
+
+  function cancelBooking(id) {
+    if (!id) return;
+    if (confirm('Are you sure you want to cancel this booking? This will remove the slot from the schedule.')) {
+      const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+      const updated = appointments.filter(a => a.id !== id);
+      localStorage.setItem('zarah_appointments', JSON.stringify(updated));
+      renderAppointments();
+    }
+  }
+
+  // Staff Calendar Filter Pills
+  document.querySelectorAll('#staff-calendar-filters .staff-filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#staff-calendar-filters .staff-filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      renderAppointments();
+    });
+  });
+
+  // Reassign Modal
+  function openReassignModal(appId) {
+    if (!appId) return;
+    const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+    const app = appointments.find(a => a.id === appId);
+    if (!app) return;
+
+    selectedAppointmentForReassign = app;
+    document.getElementById('r-client-name').textContent = app.clientName;
+    document.getElementById('r-client-phone').textContent = app.clientPhone;
+    document.getElementById('r-service-name').textContent = app.serviceName;
+    document.getElementById('r-datetime').textContent = `${app.date} at ${app.time}`;
+    document.getElementById('r-current-staff').textContent = app.staffName;
+
+    updateSmsPreview();
+    const modal = document.getElementById('reassign-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  const newStaffSelect = document.getElementById('r-new-staff');
+  newStaffSelect?.addEventListener('change', updateSmsPreview);
+
+  function updateSmsPreview() {
+    if (!selectedAppointmentForReassign) return;
+    const selOpt = newStaffSelect.options[newStaffSelect.selectedIndex];
+    const newStaffName = selOpt ? selOpt.getAttribute('data-name') || selOpt.text : 'our senior artist';
+
+    const smsText = `Kia ora ${selectedAppointmentForReassign.clientName}, this is Zarah Nails & Beauty Massey. Your appointment on ${selectedAppointmentForReassign.date} at ${selectedAppointmentForReassign.time} for ${selectedAppointmentForReassign.serviceName} has been reassigned to our specialist ${newStaffName}. All other details remain confirmed. Questions? Call 0210 839 8791. See you at Shop 12, 3 Red Hills Road!`;
+
+    const previewEl = document.getElementById('sms-text-preview');
+    if (previewEl) previewEl.textContent = smsText;
+  }
+
+  document.getElementById('btn-close-reassign')?.addEventListener('click', () => {
+    document.getElementById('reassign-modal').style.display = 'none';
+  });
+  document.getElementById('btn-cancel-reassign')?.addEventListener('click', () => {
+    document.getElementById('reassign-modal').style.display = 'none';
+  });
+
+  document.getElementById('btn-confirm-reassign-sms')?.addEventListener('click', () => {
+    if (!selectedAppointmentForReassign) return;
+    const selOpt = newStaffSelect.options[newStaffSelect.selectedIndex];
+    const newStaffName = selOpt ? selOpt.getAttribute('data-name') || selOpt.text : 'Chloe';
+    const newStaffId = newStaffSelect.value;
+
+    const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+    const target = appointments.find(a => a.id === selectedAppointmentForReassign.id);
+    if (target) {
+      target.staffName = newStaffName;
+      target.staffId = newStaffId;
+      target.reassigned = true;
+      localStorage.setItem('zarah_appointments', JSON.stringify(appointments));
+    }
+
+    alert(`Slot successfully reassigned to ${newStaffName}! SMS alert has been transmitted to ${selectedAppointmentForReassign.clientPhone}.`);
+    document.getElementById('reassign-modal').style.display = 'none';
+    renderAppointments();
+  });
+
+  // Track message currently being converted via modal
+  let activeConvertingMessageId = null;
+
+  // Render Messages
+  function renderMessages() {
+    const container = document.getElementById('messages-container');
+    if (!container) return;
+
+    let messages = [];
+    try {
+      const stored = localStorage.getItem('zarah_messages');
+      if (stored) {
+        messages = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn('Error reading zarah_messages', e);
+    }
+
+    // Default sample messages if empty so staff can immediately test 1-Click Convert
+    if (!messages || messages.length === 0) {
+      const defaultMessages = [
+        {
+          id: 'msg-fb-1',
+          senderName: 'Michelle Zhang',
+          senderPhone: '021 555 8192',
+          senderEmail: 'michelle.z@example.com',
+          message: 'Hi Zarah! Can I book an Ombre Gel Full Set for this Friday 2pm? Love your Instagram work!',
+          source: 'Facebook Messenger',
+          date: 'Today, 10:15 AM',
+          status: 'unread'
+        },
+        {
+          id: 'msg-fb-2',
+          senderName: 'Sophie Bennett',
+          senderPhone: '027 492 1102',
+          senderEmail: '',
+          message: 'Hey team! Do you have any walk-in or phone slots tomorrow afternoon for a Deluxe Spa Pedicure + Chrome Art?',
+          source: 'Facebook Message',
+          date: 'Yesterday, 4:30 PM',
+          status: 'unread'
+        }
+      ];
+      try {
+        localStorage.setItem('zarah_messages', JSON.stringify(defaultMessages));
+        messages = defaultMessages;
+      } catch (e) {}
+    }
+
+    const badge = document.getElementById('inbox-badge-count');
+    const statBadge = document.getElementById('stat-msg-count');
+    if (badge) badge.textContent = messages.length.toString();
+    if (statBadge) statBadge.textContent = `${messages.length} Active`;
+
+    if (messages.length === 0) {
+      container.innerHTML = `
+        <div class="empty-inbox-card" style="text-align: center; padding: 2.5rem 1rem; background: #FFFFFF; border: 1px dashed var(--border-delicate); border-radius: var(--radius-md);">
+          <p class="empty-msg" style="margin-bottom: 1rem; color: var(--text-muted);">No active inquiries in your inbox.</p>
+          <button type="button" class="btn btn-subtle btn-sm" id="btn-reseed-demo-msgs">
+            + Load Demo Facebook Messages
+          </button>
+        </div>
+      `;
+      document.getElementById('btn-reseed-demo-msgs')?.addEventListener('click', seedDemoMessages);
+      return;
+    }
+
+    container.innerHTML = messages.map(m => `
+      <div class="message-card" data-id="${m.id}">
+        <div class="message-header">
+          <div class="message-sender-meta">
+            <span class="source-icon">💬</span>
+            <div>
+              <h3>${m.senderName}</h3>
+              <span class="msg-meta-sub">${m.source} • ${m.date}</span>
+            </div>
+          </div>
+          <span class="msg-phone-chip">📞 ${m.senderPhone || 'Social Profile'}</span>
+        </div>
+
+        <p class="message-body">"${m.message}"</p>
+
+        <div class="message-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+          <button type="button" class="btn btn-accent btn-sm btn-convert-direct" 
+                  data-id="${m.id}"
+                  title="Directly convert to appointment and add 1 Orange Stamp to 10-Dot Loyalty Card">
+            ⚡ 1-Click Convert to Booking
+          </button>
+          <button type="button" class="btn btn-subtle btn-sm btn-customise-msg" 
+                  data-id="${m.id}"
+                  title="Open booking modal to customise date, time, technician or service">
+            ✏️ Customise &amp; Book
+          </button>
+          ${m.senderPhone ? `<a href="tel:${m.senderPhone}" class="btn btn-subtle btn-sm">📞 Call</a>` : ''}
+          <button type="button" class="btn btn-subtle btn-sm btn-dismiss-msg" data-id="${m.id}" style="color: var(--text-muted);" title="Dismiss message">
+            ✕
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // Bind Direct 1-Click Convert Buttons
+    document.querySelectorAll('.btn-convert-direct').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (id) convertMessageDirectly(id);
+      });
+    });
+
+    // Bind Customise & Book Buttons
+    document.querySelectorAll('.btn-customise-msg').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (id) openWalkinModalForMessage(id);
+      });
+    });
+
+    // Bind Dismiss Buttons
+    document.querySelectorAll('.btn-dismiss-msg').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (id) dismissMessage(id);
+      });
+    });
+  }
+
+  // 1-Click Convert Directly: Schedules appointment, awards 1 Orange Dot, and clears from inbox
+  function convertMessageDirectly(msgId) {
+    let messages = [];
+    try {
+      messages = JSON.parse(localStorage.getItem('zarah_messages') || '[]');
+    } catch (e) {}
+
+    const targetMsg = messages.find(m => m.id === msgId);
+    if (!targetMsg) {
+      alert('Inquiry not found or already converted.');
+      return;
+    }
+
+    // Determine appropriate service and pricing based on message content
+    const text = (targetMsg.message || '').toLowerCase();
+    let serviceName = 'Signature Gel Manicure';
+    let servicePrice = '$55 NZD';
+    let serviceDur = '45 mins';
+
+    if (text.includes('ombre') || text.includes('art') || text.includes('chrome')) {
+      serviceName = 'Custom Nail Art Set';
+      servicePrice = '$75 NZD';
+      serviceDur = '60 mins';
+    } else if (text.includes('pedicure') || text.includes('spa')) {
+      serviceName = 'Deluxe Spa Pedicure';
+      servicePrice = '$75 NZD';
+      serviceDur = '60 mins';
+    } else if (text.includes('biab') || text.includes('builder')) {
+      serviceName = 'BIAB Builder Gel Overlay';
+      servicePrice = '$70 NZD';
+      serviceDur = '60 mins';
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const defaultTime = '2:00 PM';
+    const assignedStaff = activeTeam.find(t => t.id !== 'any-available') || { name: 'Chloe', id: 'chloe' };
+
+    // 1. Create Appointment
+    const newApp = {
+      id: 'app-fb-' + Date.now(),
+      refCode: 'ZN-' + Math.floor(1000 + Math.random() * 9000),
+      clientName: targetMsg.senderName,
+      clientPhone: targetMsg.senderPhone || '',
+      clientEmail: targetMsg.senderEmail || '',
+      serviceName: serviceName,
+      price: servicePrice,
+      duration: serviceDur,
+      staffName: assignedStaff.name,
+      staffId: assignedStaff.id,
+      date: todayStr,
+      time: defaultTime,
+      status: 'confirmed',
+      source: targetMsg.source || 'Facebook Message',
+      clientNotes: `Converted from Facebook: "${targetMsg.message}"`
+    };
+
+    const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+    appointments.unshift(newApp);
+    localStorage.setItem('zarah_appointments', JSON.stringify(appointments));
+
+    // 2. Automatically register into 10-Dot Loyalty Point System with 1 Pending Orange Dot (🟠)
+    let custRecord = null;
+    if (window.SalonStore) {
+      custRecord = window.SalonStore.registerCustomerBooking({
+        name: targetMsg.senderName,
+        phone: targetMsg.senderPhone || '',
+        email: targetMsg.senderEmail || '',
+        serviceName: serviceName,
+        notes: targetMsg.message,
+        source: targetMsg.source || 'Facebook Message'
+      });
+    }
+
+    // 3. Remove message from inbox
+    const updatedMessages = messages.filter(m => m.id !== msgId);
+    localStorage.setItem('zarah_messages', JSON.stringify(updatedMessages));
+
+    // 4. Update UI
+    renderAppointments();
+    renderMessages();
+    renderCustomerDirectory();
+
+    // 5. Friendly confirmation alert
+    const dotsInfo = custRecord && window.SalonStore ? window.SalonStore.calculateDots(custRecord) : null;
+    alert(
+      `⚡ 1-CLICK CONVERSION COMPLETE!\n\n` +
+      `• Client: ${targetMsg.senderName}\n` +
+      `• Scheduled: ${serviceName} on ${todayStr} at ${defaultTime}\n` +
+      `• Assigned Staff: ${assignedStaff.name}\n\n` +
+      `🌟 10-Dot Loyalty Program Updated:\n` +
+      `1 Orange Pending Stamp (🟠) has been credited to ${targetMsg.senderName}'s account!\n` +
+      (dotsInfo ? `Status: ${dotsInfo.green} Completed (🟢) | ${dotsInfo.orange} Pending (🟠) | ${dotsInfo.white} Empty (⚪)\n\n` : '\n') +
+      `You can view their active stamp card under "🌟 Customers & 10-Dot Loyalty".`
+    );
+  }
+
+  // Open Walk-in Modal for a specific message
+  function openWalkinModalForMessage(msgId) {
+    const messages = JSON.parse(localStorage.getItem('zarah_messages') || '[]');
+    const msg = messages.find(m => m.id === msgId);
+    if (!msg) return;
+
+    activeConvertingMessageId = msg.id;
+    openWalkinModalWithPrefill(
+      msg.senderName,
+      msg.senderPhone || '',
+      `Inquiry: "${msg.message}"`
+    );
+
+    const srcSelect = document.getElementById('w-source');
+    if (srcSelect) {
+      srcSelect.value = 'Facebook Message';
+    }
+  }
+
+  // Dismiss message
+  function dismissMessage(msgId) {
+    if (confirm('Dismiss this inquiry from your inbox?')) {
+      const messages = JSON.parse(localStorage.getItem('zarah_messages') || '[]');
+      const filtered = messages.filter(m => m.id !== msgId);
+      localStorage.setItem('zarah_messages', JSON.stringify(filtered));
+      renderMessages();
+    }
+  }
+
+  // Seed demo messages
+  function seedDemoMessages() {
+    const defaultMessages = [
+      {
+        id: 'msg-fb-' + Date.now(),
+        senderName: 'Michelle Zhang',
+        senderPhone: '021 555 8192',
+        senderEmail: 'michelle.z@example.com',
+        message: 'Hi Zarah! Can I book an Ombre Gel Full Set for this Friday 2pm? Love your Instagram work!',
+        source: 'Facebook Messenger',
+        date: 'Today, 10:15 AM',
+        status: 'unread'
+      },
+      {
+        id: 'msg-fb-' + (Date.now() + 1),
+        senderName: 'Sophie Bennett',
+        senderPhone: '027 492 1102',
+        senderEmail: '',
+        message: 'Hey team! Do you have any walk-in or phone slots tomorrow afternoon for a Deluxe Spa Pedicure + Chrome Art?',
+        source: 'Facebook Message',
+        date: 'Yesterday, 4:30 PM',
+        status: 'unread'
+      }
+    ];
+    localStorage.setItem('zarah_messages', JSON.stringify(defaultMessages));
+    renderMessages();
+  }
+
+  // Refresh Inquiries Button Listener
+  document.getElementById('btn-refresh-messages')?.addEventListener('click', () => {
+    renderMessages();
+    alert('Inbox refreshed! Inquiries are synchronized.');
+  });
+
+  // Walk-in Modal Handlers
+  const walkinModal = document.getElementById('walkin-modal');
+  document.getElementById('btn-open-walkin-modal')?.addEventListener('click', () => {
+    activeConvertingMessageId = null;
+    openWalkinModalWithPrefill('', '', '');
+  });
+
+  function openWalkinModalWithPrefill(name, phone, notes) {
+    if (walkinModal) walkinModal.style.display = 'flex';
+    const nameInput = document.getElementById('w-client-name');
+    const phoneInput = document.getElementById('w-client-phone');
+    const notesInput = document.getElementById('w-notes');
+    if (nameInput) nameInput.value = name || '';
+    if (phoneInput) phoneInput.value = phone || '';
+    if (notesInput) notesInput.value = notes || '';
+
+    const wDate = document.getElementById('w-date');
+    if (wDate && !wDate.value) {
+      wDate.value = new Date().toISOString().split('T')[0];
+    }
+    const wTime = document.getElementById('w-time');
+    if (wTime && !wTime.value) {
+      wTime.value = '11:00 AM';
+    }
+  }
+
+  document.getElementById('btn-close-walkin')?.addEventListener('click', () => {
+    if (walkinModal) walkinModal.style.display = 'none';
+    activeConvertingMessageId = null;
+  });
+  document.getElementById('btn-cancel-walkin')?.addEventListener('click', () => {
+    if (walkinModal) walkinModal.style.display = 'none';
+    activeConvertingMessageId = null;
+  });
+
+  document.getElementById('walkin-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('w-client-name').value;
+    const phone = document.getElementById('w-client-phone').value;
+    const serviceSelect = document.getElementById('w-service');
+    const opt = serviceSelect.options[serviceSelect.selectedIndex];
+    const sName = opt.getAttribute('data-name') || opt.text;
+    const sPrice = opt.getAttribute('data-price') || '$50 NZD';
+    const sDur = opt.getAttribute('data-duration') || '45 mins';
+
+    const staffSelect = document.getElementById('w-staff');
+    const stOpt = staffSelect.options[staffSelect.selectedIndex];
+    const staffName = stOpt.getAttribute('data-name') || stOpt.text;
+    const staffId = staffSelect.value;
+
+    const dateVal = document.getElementById('w-date').value;
+    const timeVal = document.getElementById('w-time').value;
+    const sourceVal = document.getElementById('w-source').value;
+    const notesVal = document.getElementById('w-notes').value;
+
+    const newApp = {
+      id: 'app-w-' + Date.now(),
+      refCode: 'ZN-' + Math.floor(1000 + Math.random() * 9000),
+      clientName: name,
+      clientPhone: phone,
+      serviceName: sName,
+      price: sPrice,
+      duration: sDur,
+      staffName,
+      staffId,
+      date: dateVal,
+      time: timeVal,
+      status: 'confirmed',
+      source: sourceVal,
+      clientNotes: notesVal
+    };
+
+    const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+    appointments.unshift(newApp);
+    localStorage.setItem('zarah_appointments', JSON.stringify(appointments));
+
+    // Automatically add the customer to the 10-Dot Loyalty Point System!
+    if (window.SalonStore) {
+      window.SalonStore.registerCustomerBooking({
+        name: name,
+        phone: phone,
+        email: '',
+        serviceName: sName,
+        notes: notesVal,
+        source: sourceVal
+      });
+      renderCustomerDirectory();
+    }
+
+    // If this booking converted an inbox message, remove it from the inbox
+    if (activeConvertingMessageId) {
+      try {
+        const msgs = JSON.parse(localStorage.getItem('zarah_messages') || '[]');
+        const filtered = msgs.filter(m => m.id !== activeConvertingMessageId);
+        localStorage.setItem('zarah_messages', JSON.stringify(filtered));
+        activeConvertingMessageId = null;
+        renderMessages();
+      } catch (err) {}
+    }
+
+    alert(`Appointment for ${name} has been added to ${staffName}'s calendar! 1 Orange loyalty stamp (🟠) has been reserved on their account.`);
+    document.getElementById('walkin-form').reset();
+    if (walkinModal) walkinModal.style.display = 'none';
+    renderAppointments();
+  });
+
+  // Render Staff Roster & Reassignment
+  function renderStaffRosters() {
+    const container = document.getElementById('staff-roster-container');
+    if (!container) return;
+
+    const activeTechs = activeTeam.filter(t => t.id !== 'any-available');
+    container.innerHTML = activeTechs.map(staff => `
+      <div class="roster-card" data-staff-id="${staff.id}">
+        <div class="roster-card-header">
+          <div>
+            <h3>${staff.name}</h3>
+            <span class="roster-role">${staff.role}</span>
+          </div>
+          <span class="status-chip active">On Duty Today</span>
+        </div>
+        <p class="roster-specialties">Specialties: ${staff.specialties.join(', ')}</p>
+        <div class="roster-actions">
+          <button type="button" class="btn btn-subtle btn-sm btn-mark-away" data-staff-name="${staff.name}" data-staff-id="${staff.id}">
+            Mark Away &amp; Reassign Slots
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.btn-mark-away').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const name = e.currentTarget.getAttribute('data-staff-name');
+        const staffId = e.currentTarget.getAttribute('data-staff-id');
+        const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+        const affected = appointments.filter(a => a.staffId === staffId && a.status === 'confirmed');
+
+        if (affected.length === 0) {
+          alert(`${name} has no booked appointments today that need reassigning.`);
+          return;
+        }
+
+        if (confirm(`${name} has ${affected.length} booked slots today. Would you like to review and reassign them with automated SMS alerts?`)) {
+          document.querySelector('.portal-tab[data-tab-target="tab-calendar"]')?.click();
+          document.querySelector(`#staff-calendar-filters .staff-filter-pill[data-staff="${staffId}"]`)?.click();
+        }
+      });
+    });
+  }
+
+  // ==========================================
+  // CUSTOMER DIRECTORY & 10-DOT LOYALTY CONTROLLER
+  // ==========================================
+  function renderCustomerDirectory() {
+    const container = document.getElementById('customers-directory-container');
+    if (!container) return;
+
+    activeCustomers = window.SalonStore ? window.SalonStore.getCustomers(initialCustomers) : [];
+
+    // Filter by search query and active chip
+    const filtered = activeCustomers.filter(c => {
+      // 1. Search Query
+      if (customerSearchQuery) {
+        const query = customerSearchQuery.toLowerCase();
+        const matchName = (c.name || '').toLowerCase().includes(query);
+        const matchPhone = (c.phone || '').replace(/\D/g, '').includes(query.replace(/\D/g, ''));
+        const matchEmail = (c.email || '').toLowerCase().includes(query);
+        if (!matchName && !matchPhone && !matchEmail) return false;
+      }
+
+      // 2. Filter Chip
+      if (currentCustomerFilter === 'reward-ready') {
+        return (c.completedPoints || 0) >= 10;
+      }
+      if (currentCustomerFilter === 'has-pending') {
+        return (c.pendingPoints || 0) > 0;
+      }
+      if (currentCustomerFilter === 'regulars') {
+        return (c.totalVisits || 0) >= 5;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-customers-box">
+          <p>No customer records found matching your filter.</p>
+          <button type="button" class="btn btn-subtle btn-sm" onclick="document.getElementById('btn-open-register-customer').click()">
+            + Register New Client
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(c => {
+      const dots = window.SalonStore.calculateDots(c);
+      const isRewardReady = dots.isEligibleForFree;
+
+      return `
+        <div class="customer-mgmt-card ${isRewardReady ? 'reward-unlocked-card' : ''}" data-cust-id="${c.id}">
+          <div class="cust-card-top-row">
+            <div class="cust-card-profile">
+              <div class="cust-avatar-circle ${isRewardReady ? 'gold' : ''}">${(c.name || 'C').charAt(0).toUpperCase()}</div>
+              <div>
+                <div class="cust-name-line">
+                  <h3 class="cust-name-title">${c.name}</h3>
+                  ${isRewardReady ? '<span class="free-reward-badge">🎉 FREE SERVICE UNLOCKED</span>' : ''}
+                </div>
+                <div class="cust-contact-chips">
+                  <a href="tel:${c.phone}" class="cust-chip">📞 ${c.phone || 'No phone'}</a>
+                  ${c.email ? `<span class="cust-chip">✉️ ${c.email}</span>` : ''}
+                  <span class="cust-chip provider-chip">${c.loginProvider || 'email'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="cust-points-status-box">
+              <span class="points-pill-label ${isRewardReady ? 'gold' : ''}">
+                ${isRewardReady ? '⭐ 10/10 STAMPS COMPLETE' : `${dots.green}/10 Completed • ${dots.orange} Booked`}
+              </span>
+            </div>
+          </div>
+
+          <!-- The 10-Dot Stamp Card Track -->
+          <div class="cust-dots-track-wrap">
+            ${window.SalonStore.renderDotsHtml(c, false)}
+            <div class="cust-dots-caption">
+              <span><strong>${dots.green}</strong> Completed (🟢)</span>
+              <span><strong>${dots.orange}</strong> Active Booking (🟠)</span>
+              <span><strong>${dots.white}</strong> Unearned (⚪)</span>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="cust-stats-row">
+            <div class="cust-stat-col">
+              <span class="c-stat-label">Total Visits</span>
+              <strong class="c-stat-val">${c.totalVisits || 0}</strong>
+            </div>
+            <div class="cust-stat-col">
+              <span class="c-stat-label">Spend ($NZD)</span>
+              <strong class="c-stat-val">$${c.totalSpent || 0}</strong>
+            </div>
+            <div class="cust-stat-col">
+              <span class="c-stat-label">Rewards Redeemed</span>
+              <strong class="c-stat-val">${c.rewardsRedeemed || 0}</strong>
+            </div>
+            <div class="cust-stat-col">
+              <span class="c-stat-label">Favorite Tech</span>
+              <span class="c-stat-val-sm">${c.preferredStaff || 'Any'}</span>
+            </div>
+          </div>
+
+          ${c.notes ? `<div class="cust-notes-bar"><em>Client Notes:</em> ${c.notes}</div>` : ''}
+
+          <div class="cust-card-actions">
+            ${isRewardReady ? `
+              <button type="button" class="btn btn-accent btn-sm btn-claim-reward" data-cust-id="${c.id}">
+                🎁 Claim Free Service (Open Overlay)
+              </button>
+            ` : `
+              <button type="button" class="btn btn-primary btn-sm btn-add-point" data-cust-id="${c.id}" data-name="${c.name}">
+                +1 Green Point (Log $50+ Visit)
+              </button>
+            `}
+            <button type="button" class="btn btn-subtle btn-sm btn-edit-client" data-cust-id="${c.id}">
+              Edit Info
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach button events
+    document.querySelectorAll('.btn-claim-reward').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const custId = e.currentTarget.getAttribute('data-cust-id');
+        const cust = activeCustomers.find(c => c.id === custId);
+        if (cust) openLoyaltyRewardOverlay(cust);
+      });
+    });
+
+    document.querySelectorAll('.btn-add-point').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const custId = e.currentTarget.getAttribute('data-cust-id');
+        const cust = activeCustomers.find(c => c.id === custId);
+        if (cust) {
+          const res = window.SalonStore.completeCustomerVisit(cust.id, 65);
+          renderCustomerDirectory();
+          if (res && res.isEligibleForFree) {
+            openLoyaltyRewardOverlay(res.customer);
+          } else {
+            alert(`+1 Green Point logged for ${cust.name}! They now have ${res.customer.completedPoints}/10 stamps.`);
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-edit-client').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const custId = e.currentTarget.getAttribute('data-cust-id');
+        const cust = activeCustomers.find(c => c.id === custId);
+        if (cust) openRegisterClientModal(cust);
+      });
+    });
+  }
+
+  // Open the 10-Dot Celebration Reward Overlay Modal
+  function openLoyaltyRewardOverlay(customer) {
+    if (!customer) return;
+    selectedCustomerForReward = customer;
+
+    const modal = document.getElementById('loyalty-reward-overlay-modal');
+    if (!modal) return;
+
+    document.getElementById('reward-modal-avatar').textContent = (customer.name || 'C').charAt(0).toUpperCase();
+    document.getElementById('reward-modal-client-name').textContent = customer.name;
+    document.getElementById('reward-modal-client-phone').textContent = customer.phone || 'No phone';
+    document.getElementById('reward-modal-client-email').textContent = customer.email || 'No email registered';
+
+    const dotsTrackEl = document.getElementById('reward-modal-dots-track');
+    if (dotsTrackEl) {
+      dotsTrackEl.innerHTML = window.SalonStore.renderDotsHtml(customer, false);
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  // Open Register / Add Visit Modal
+  function openRegisterClientModal(existingCust) {
+    const modal = document.getElementById('register-client-modal');
+    const form = document.getElementById('register-client-form');
+    const title = document.getElementById('reg-client-modal-title');
+    if (!modal || !form) return;
+
+    if (existingCust) {
+      title.textContent = `Edit Client: ${existingCust.name}`;
+      document.getElementById('rc-customer-id').value = existingCust.id;
+      document.getElementById('rc-name').value = existingCust.name || '';
+      document.getElementById('rc-phone').value = existingCust.phone || '';
+      document.getElementById('rc-email').value = existingCust.email || '';
+      document.getElementById('rc-service').value = existingCust.favoriteService || '';
+      document.getElementById('rc-notes').value = existingCust.notes || '';
+    } else {
+      title.textContent = 'Register Walk-In Client / Add Visit Point';
+      form.reset();
+      document.getElementById('rc-customer-id').value = '';
+      document.getElementById('rc-spend').value = '65';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  // Setup Loyalty Event Listeners
+  function setupLoyaltyEventListeners() {
+    // Search input
+    const searchInput = document.getElementById('customer-search-input');
+    searchInput?.addEventListener('input', (e) => {
+      customerSearchQuery = e.target.value;
+      renderCustomerDirectory();
+    });
+
+    // Filter chips
+    document.querySelectorAll('#customer-filter-chips .cust-filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#customer-filter-chips .cust-filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentCustomerFilter = chip.getAttribute('data-filter') || 'all';
+        renderCustomerDirectory();
+      });
+    });
+
+    // Open Register Client Modal Button
+    document.getElementById('btn-open-register-customer')?.addEventListener('click', () => {
+      openRegisterClientModal(null);
+    });
+
+    // Close Register Client Modal
+    document.getElementById('btn-close-register-client')?.addEventListener('click', () => {
+      document.getElementById('register-client-modal').style.display = 'none';
+    });
+    document.getElementById('btn-cancel-register-client')?.addEventListener('click', () => {
+      document.getElementById('register-client-modal').style.display = 'none';
+    });
+
+    // Save Register Client Form
+    document.getElementById('register-client-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const custId = document.getElementById('rc-customer-id').value;
+      const name = document.getElementById('rc-name').value.trim();
+      const phone = document.getElementById('rc-phone').value.trim();
+      const email = document.getElementById('rc-email').value.trim();
+      const service = document.getElementById('rc-service').value.trim();
+      const spend = parseFloat(document.getElementById('rc-spend').value) || 50;
+      const action = document.getElementById('rc-action').value;
+      const notes = document.getElementById('rc-notes').value.trim();
+
+      let cust = custId ? window.SalonStore.findCustomer(custId) : null;
+      if (!cust) {
+        cust = window.SalonStore.addOrUpdateCustomer({
+          name: name,
+          phone: phone,
+          email: email,
+          favoriteService: service,
+          notes: notes,
+          loginProvider: 'phone',
+          completedPoints: 0,
+          pendingPoints: 0,
+          totalSpent: 0,
+          totalVisits: 0
+        });
+      } else {
+        cust.name = name;
+        cust.phone = phone;
+        cust.email = email;
+        cust.favoriteService = service;
+        cust.notes = notes;
+        window.SalonStore.addOrUpdateCustomer(cust);
+      }
+
+      document.getElementById('register-client-modal').style.display = 'none';
+
+      if (action === 'add-point') {
+        const res = window.SalonStore.completeCustomerVisit(cust.id, spend);
+        renderCustomerDirectory();
+        if (res && res.isEligibleForFree) {
+          openLoyaltyRewardOverlay(res.customer);
+        } else {
+          alert(`Visit logged! ${name} now has ${res.customer.completedPoints}/10 stamps.`);
+        }
+      } else {
+        renderCustomerDirectory();
+        alert(`Client details saved for ${name}.`);
+      }
+    });
+
+    // Celebration Overlay: Close Button
+    document.getElementById('btn-close-reward-overlay')?.addEventListener('click', () => {
+      document.getElementById('loyalty-reward-overlay-modal').style.display = 'none';
+    });
+
+    // Celebration Overlay: Redeem Free Service Button
+    document.getElementById('btn-redeem-free-service-now')?.addEventListener('click', () => {
+      if (!selectedCustomerForReward) return;
+      const updated = window.SalonStore.redeemReward(selectedCustomerForReward.id);
+      document.getElementById('loyalty-reward-overlay-modal').style.display = 'none';
+      renderCustomerDirectory();
+      alert(`🎉 FREE SERVICE REDEEMED!\n\n${selectedCustomerForReward.name}'s complimentary treatment has been claimed at front desk. Their stamp card has been reset to 0 green dots for their next 10-visit reward cycle!`);
+    });
+  }
+
+  // ==========================================
+  // ADMIN 1: SERVICES & PRICING MANAGER
+  // ==========================================
+  function renderAdminServices() {
+    const container = document.getElementById('admin-services-container');
+    if (!container) return;
+
+    let totalCount = 0;
+    container.innerHTML = activeServices.map((cat, catIdx) => {
+      const itemsHtml = cat.items.map((item, itemIdx) => {
+        totalCount++;
+        return `
+          <div class="admin-item-row" data-cat-idx="${catIdx}" data-item-idx="${itemIdx}" data-id="${item.id}">
+            <div class="item-main-col">
+              <div class="item-name-line">
+                <strong>${item.name}</strong>
+                ${item.popular ? '<span class="badge badge-gold">Popular</span>' : ''}
+              </div>
+              <span class="item-sub-info">${item.duration} • ${item.description}</span>
+            </div>
+            <div class="item-price-col">
+              <span class="admin-price-display">${item.priceDisplay}</span>
+            </div>
+            <div class="item-actions-col">
+              <button type="button" class="btn btn-subtle btn-sm btn-edit-service" data-cat-idx="${catIdx}" data-item-idx="${itemIdx}">
+                Edit Price &amp; Info
+              </button>
+              <button type="button" class="btn-delete-item btn-delete-service" data-cat-idx="${catIdx}" data-item-idx="${itemIdx}" title="Delete service">
+                &times;
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="admin-category-box">
+          <div class="admin-cat-header">
+            <h3>${cat.category}</h3>
+            <span>(${cat.items.length} items)</span>
+          </div>
+          <div class="admin-items-table">${itemsHtml}</div>
+        </div>
+      `;
+    }).join('');
+
+    const statServices = document.getElementById('stat-services-count');
+    if (statServices) statServices.textContent = totalCount.toString();
+
+    // Attach Edit and Delete buttons
+    document.querySelectorAll('.btn-edit-service').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const catIdx = parseInt(e.currentTarget.getAttribute('data-cat-idx') || '0', 10);
+        const itemIdx = parseInt(e.currentTarget.getAttribute('data-item-idx') || '0', 10);
+        openServiceEditModal(catIdx, itemIdx);
+      });
+    });
+
+    document.querySelectorAll('.btn-delete-service').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const catIdx = parseInt(e.currentTarget.getAttribute('data-cat-idx') || '0', 10);
+        const itemIdx = parseInt(e.currentTarget.getAttribute('data-item-idx') || '0', 10);
+        const item = activeServices[catIdx].items[itemIdx];
+        if (confirm(`Are you sure you want to remove "${item.name}" from your salon menu?`)) {
+          activeServices[catIdx].items.splice(itemIdx, 1);
+          window.SalonStore.saveServices(activeServices);
+          renderAdminServices();
+          populateSelectDropdowns();
+        }
+      });
+    });
+  }
+
+  // Open Service Edit Modal
+  const serviceModal = document.getElementById('service-edit-modal');
+  let editingCatIdx = -1;
+  let editingItemIdx = -1;
+
+  function openServiceEditModal(catIdx, itemIdx) {
+    editingCatIdx = catIdx;
+    editingItemIdx = itemIdx;
+
+    if (catIdx >= 0 && itemIdx >= 0) {
+      const item = activeServices[catIdx].items[itemIdx];
+      document.getElementById('service-modal-title').textContent = 'Edit Service: ' + item.name;
+      document.getElementById('se-id').value = item.id;
+      document.getElementById('se-category').value = activeServices[catIdx].category;
+      document.getElementById('se-name').value = item.name;
+      document.getElementById('se-price').value = item.price.toString();
+      document.getElementById('se-duration').value = item.duration;
+      document.getElementById('se-description').value = item.description;
+      document.getElementById('se-popular').checked = !!item.popular;
+    } else {
+      document.getElementById('service-modal-title').textContent = 'Add New Salon Treatment';
+      document.getElementById('service-edit-form').reset();
+      document.getElementById('se-id').value = 'service-' + Date.now();
+    }
+
+    if (serviceModal) serviceModal.style.display = 'flex';
+  }
+
+  document.getElementById('btn-add-new-service')?.addEventListener('click', () => {
+    openServiceEditModal(-1, -1);
+  });
+  document.getElementById('btn-close-service-modal')?.addEventListener('click', () => {
+    if (serviceModal) serviceModal.style.display = 'none';
+  });
+  document.getElementById('btn-cancel-service-edit')?.addEventListener('click', () => {
+    if (serviceModal) serviceModal.style.display = 'none';
+  });
+
+  document.getElementById('service-edit-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('se-id').value;
+    const catName = document.getElementById('se-category').value;
+    const name = document.getElementById('se-name').value;
+    const price = parseFloat(document.getElementById('se-price').value);
+    const duration = document.getElementById('se-duration').value;
+    const desc = document.getElementById('se-description').value;
+    const popular = document.getElementById('se-popular').checked;
+
+    const newItem = {
+      id,
+      name,
+      duration,
+      price,
+      priceDisplay: `$${price} NZD`,
+      description: desc,
+      popular
+    };
+
+    if (editingCatIdx >= 0 && editingItemIdx >= 0) {
+      activeServices[editingCatIdx].items[editingItemIdx] = newItem;
+    } else {
+      // Find category or add to first
+      let targetCat = activeServices.find(c => c.category === catName);
+      if (!targetCat) {
+        targetCat = { category: catName, description: 'Custom Treatments', items: [] };
+        activeServices.push(targetCat);
+      }
+      targetCat.items.push(newItem);
+    }
+
+    window.SalonStore.saveServices(activeServices);
+    alert(`Service "${name}" saved! Price is now $${price} NZD.`);
+    if (serviceModal) serviceModal.style.display = 'none';
+    renderAdminServices();
+    populateSelectDropdowns();
+  });
+
+  // ==========================================
+  // ADMIN 2: GALLERY PHOTO MANAGER
+  // ==========================================
+  function renderAdminGallery() {
+    const container = document.getElementById('admin-gallery-container');
+    if (!container) return;
+
+    container.innerHTML = activeGallery.map((look, idx) => `
+      <div class="admin-gallery-card" data-idx="${idx}">
+        <div class="admin-gallery-thumb">
+          <img src="${look.image}" alt="${look.title}" />
+        </div>
+        <div class="admin-gallery-info">
+          <h4>${look.title}</h4>
+          <span class="gallery-card-price">${look.price}</span>
+          <p class="gallery-card-tags">${look.tags ? look.tags.join(', ') : ''}</p>
+        </div>
+        <div class="admin-gallery-actions">
+          <button type="button" class="btn-delete-item btn-delete-gallery" data-idx="${idx}" title="Delete photo look">
+            &times; Remove Look
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.btn-delete-gallery').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(e.currentTarget.getAttribute('data-idx') || '0', 10);
+        if (confirm(`Remove "${activeGallery[idx].title}" from public gallery?`)) {
+          activeGallery.splice(idx, 1);
+          window.SalonStore.saveGallery(activeGallery);
+          renderAdminGallery();
+        }
+      });
+    });
+  }
+
+  const galleryModal = document.getElementById('gallery-edit-modal');
+  const geFile = document.getElementById('ge-file');
+  const geImagePreview = document.getElementById('ge-image-preview');
+  const gePlaceholder = document.getElementById('ge-preview-placeholder');
+
+  const btnTabModeAi = document.getElementById('btn-tab-mode-ai');
+  const btnTabModeUpload = document.getElementById('btn-tab-mode-upload');
+  const aiGeneratorPanel = document.getElementById('ai-generator-panel');
+  const uploadPhotoPanel = document.getElementById('upload-photo-panel');
+
+  let currentGalleryMode = 'ai'; // 'ai' | 'upload'
+
+  function setGalleryMode(mode) {
+    currentGalleryMode = mode;
+    if (mode === 'ai') {
+      btnTabModeAi?.classList.add('active');
+      btnTabModeUpload?.classList.remove('active');
+      if (aiGeneratorPanel) aiGeneratorPanel.style.display = 'block';
+      if (uploadPhotoPanel) uploadPhotoPanel.style.display = 'none';
+    } else {
+      btnTabModeUpload?.classList.add('active');
+      btnTabModeAi?.classList.remove('active');
+      if (uploadPhotoPanel) uploadPhotoPanel.style.display = 'block';
+      if (aiGeneratorPanel) aiGeneratorPanel.style.display = 'none';
+    }
+  }
+
+  btnTabModeAi?.addEventListener('click', () => setGalleryMode('ai'));
+  btnTabModeUpload?.addEventListener('click', () => setGalleryMode('upload'));
+
+  document.getElementById('btn-open-prompt-studio')?.addEventListener('click', () => {
+    document.getElementById('gallery-edit-form').reset();
+    uploadedPhotoBase64 = null;
+    setGalleryMode('ai');
+    if (galleryModal) galleryModal.style.display = 'flex';
+    runPromptGeneration("Glazed pearlescent chrome over bare rose almond nails");
+  });
+
+  document.getElementById('btn-add-gallery-item')?.addEventListener('click', () => {
+    document.getElementById('gallery-edit-form').reset();
+    uploadedPhotoBase64 = null;
+    if (geImagePreview) geImagePreview.style.display = 'none';
+    if (gePlaceholder) gePlaceholder.style.display = 'flex';
+    setGalleryMode('upload');
+    if (galleryModal) galleryModal.style.display = 'flex';
+  });
+
+  geFile?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        uploadedPhotoBase64 = evt.target.result;
+        if (geImagePreview) {
+          geImagePreview.src = uploadedPhotoBase64;
+          geImagePreview.style.display = 'block';
+        }
+        if (gePlaceholder) gePlaceholder.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Prompt Generative Color Palettes & Shape Paths
+  const COLOR_PALETTES = {
+    rose: {
+      name: 'Petal Rose',
+      bg1: '#FAF8F5', bg2: '#EDE4DC',
+      base: '#F4D4CB', dark: '#DEABA0', accent: '#EAA99E',
+      highlight: '#FFFFFF'
+    },
+    pearl: {
+      name: 'Glazed Pearl',
+      bg1: '#F9F7F4', bg2: '#ECE5DE',
+      base: '#FFFFFF', dark: '#EAD9D5', accent: '#D4AF37',
+      highlight: '#FFFFFF'
+    },
+    emerald: {
+      name: 'Emerald Velvet',
+      bg1: '#FAF8F5', bg2: '#E5EBE6',
+      base: '#1E4738', dark: '#112D23', accent: '#3FA57F',
+      highlight: '#E8F5E9'
+    },
+    espresso: {
+      name: 'Deep Espresso',
+      bg1: '#FAF8F5', bg2: '#EBE2DC',
+      base: '#2C1E1A', dark: '#1A1210', accent: '#C5A880',
+      highlight: '#FAF8F5'
+    },
+    burgundy: {
+      name: 'Velvet Burgundy',
+      bg1: '#FBF8F7', bg2: '#ECE0E0',
+      base: '#58131E', dark: '#370A11', accent: '#8F2637',
+      highlight: '#FCE4EC'
+    },
+    peach: {
+      name: 'Sunset Peach',
+      bg1: '#FAF8F5', bg2: '#F4E7DF',
+      base: '#F8B195', dark: '#E87D65', accent: '#FFD3B6',
+      highlight: '#FFFFFF'
+    },
+    lavender: {
+      name: 'Lavender Lilac',
+      bg1: '#FAF8F7', bg2: '#EBE5F2',
+      base: '#D6C7EC', dark: '#9F88C5', accent: '#ECE2F9',
+      highlight: '#FFFFFF'
+    },
+    blue: {
+      name: 'Baby Blue',
+      bg1: '#FAF8F5', bg2: '#E3ECF5',
+      base: '#B8D5E5', dark: '#7FA8C5', accent: '#DDF0FA',
+      highlight: '#FFFFFF'
+    }
+  };
+
+  const SHAPE_PATHS = {
+    almond: 'M70,30 C120,30 160,80 160,200 L160,390 C160,410 80,410 80,390 L80,200 C80,80 70,30 70,30 Z',
+    coffin: 'M60,40 L150,40 L165,130 L165,390 C165,410 75,410 75,390 L75,130 Z',
+    squoval: 'M65,40 C105,40 145,40 145,100 L145,390 C145,410 65,410 65,390 L65,100 C65,40 65,40 65,40 Z',
+    square: 'M60,40 L150,40 L150,390 C150,410 60,410 60,390 Z'
+  };
+
+  function parseNailPrompt(promptText) {
+    const text = (promptText || '').toLowerCase();
+    
+    let shape = 'almond';
+    if (text.includes('coffin') || text.includes('ballerina')) shape = 'coffin';
+    else if (text.includes('squoval')) shape = 'squoval';
+    else if (text.includes('square')) shape = 'square';
+
+    let technique = 'chrome';
+    if (text.includes('cat eye') || text.includes('cat-eye') || text.includes('magnetic') || text.includes('velvet')) technique = 'cateye';
+    else if (text.includes('aura') || text.includes('airbrush') || text.includes('halo')) technique = 'aura';
+    else if (text.includes('ombre') || text.includes('baby boomer') || text.includes('fade')) technique = 'ombre';
+    else if (text.includes('french') || text.includes('micro') || text.includes('tip')) technique = 'french';
+    else if (text.includes('chrome') || text.includes('glazed') || text.includes('pearl') || text.includes('hailey')) technique = 'chrome';
+    else if (text.includes('solid') || text.includes('gloss')) technique = 'solid';
+
+    let colorTheme = 'rose';
+    if (text.includes('emerald') || text.includes('green') || text.includes('sage') || text.includes('forest')) colorTheme = 'emerald';
+    else if (text.includes('lavender') || text.includes('lilac') || text.includes('purple')) colorTheme = 'lavender';
+    else if (text.includes('peach') || text.includes('sunset') || text.includes('coral') || text.includes('apricot')) colorTheme = 'peach';
+    else if (text.includes('espresso') || text.includes('chocolate') || text.includes('brown') || text.includes('tortoiseshell')) colorTheme = 'espresso';
+    else if (text.includes('burgundy') || text.includes('wine') || text.includes('cherry') || text.includes('red')) colorTheme = 'burgundy';
+    else if (text.includes('pearl') || text.includes('white') || text.includes('chalk') || text.includes('milky')) colorTheme = 'pearl';
+    else if (text.includes('blue') || text.includes('sky') || text.includes('ocean')) colorTheme = 'blue';
+
+    let embellish = 'none';
+    if (text.includes('star') || text.includes('sparkle') || text.includes('twinkle')) embellish = 'star';
+    else if (text.includes('pearl') || text.includes('gem') || text.includes('crystal')) embellish = 'pearl';
+    else if (text.includes('gold') || text.includes('flake') || text.includes('foil')) embellish = 'gold-flakes';
+
+    return { shape, technique, colorTheme, embellish };
+  }
+
+  function generateNailArtSVG(opts) {
+    const pal = COLOR_PALETTES[opts.colorTheme] || COLOR_PALETTES.rose;
+    const nailPath = SHAPE_PATHS[opts.shape] || SHAPE_PATHS.almond;
+
+    let techniqueMarkup = '';
+    if (opts.technique === 'chrome') {
+      techniqueMarkup = `
+        <defs>
+          <linearGradient id="chromeShine" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${pal.highlight}" stop-opacity="0.9"/>
+            <stop offset="40%" stop-color="${pal.accent}" stop-opacity="0.5"/>
+            <stop offset="70%" stop-color="#D4AF37" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="${pal.base}" stop-opacity="0.8"/>
+          </linearGradient>
+        </defs>
+        <path d="${nailPath}" fill="url(#chromeShine)"/>
+        <path d="M95,70 Q125,140 130,320" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" opacity="0.85"/>
+        <path d="M88,90 Q105,130 110,240" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+      `;
+    } else if (opts.technique === 'cateye') {
+      techniqueMarkup = `
+        <defs>
+          <linearGradient id="catEyeBand" x1="20%" y1="80%" x2="80%" y2="20%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="42%" stop-color="${pal.accent}" stop-opacity="0.8"/>
+            <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+            <stop offset="58%" stop-color="${pal.accent}" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </linearGradient>
+        </defs>
+        <path d="${nailPath}" fill="url(#catEyeBand)"/>
+        <path d="M95,70 Q125,140 130,320" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+      `;
+    } else if (opts.technique === 'aura') {
+      techniqueMarkup = `
+        <defs>
+          <radialGradient id="auraGlow" cx="50%" cy="45%" r="48%">
+            <stop offset="0%" stop-color="${pal.dark}" stop-opacity="0.95"/>
+            <stop offset="35%" stop-color="${pal.accent}" stop-opacity="0.75"/>
+            <stop offset="70%" stop-color="${pal.base}" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="${pal.base}" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="108" cy="210" r="95" fill="url(#auraGlow)"/>
+        <path d="M95,70 Q125,140 130,320" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+      `;
+    } else if (opts.technique === 'ombre') {
+      techniqueMarkup = `
+        <defs>
+          <linearGradient id="ombreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF"/>
+            <stop offset="30%" stop-color="#FCF8F5"/>
+            <stop offset="60%" stop-color="${pal.base}"/>
+            <stop offset="100%" stop-color="${pal.dark}"/>
+          </linearGradient>
+        </defs>
+        <path d="${nailPath}" fill="url(#ombreGrad)"/>
+        <path d="M95,70 Q125,140 130,320" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.75"/>
+      `;
+    } else if (opts.technique === 'french') {
+      techniqueMarkup = `
+        <path d="M60,30 C110,30 150,75 150,90 C125,70 85,70 60,90 Z" fill="${pal.dark}"/>
+        <path d="M62,88 C85,68 125,68 148,88" fill="none" stroke="#D4AF37" stroke-width="1.8"/>
+        <path d="M95,70 Q125,140 130,320" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+      `;
+    } else {
+      techniqueMarkup = `
+        <path d="M95,70 Q125,140 130,320" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.65"/>
+      `;
+    }
+
+    let embellishMarkup = '';
+    if (opts.embellish === 'star') {
+      embellishMarkup = `
+        <path d="M145,90 Q145,102 157,102 Q145,102 145,114 Q145,102 133,102 Q145,102 145,90 Z" fill="#D4AF37"/>
+        <path d="M80,180 Q80,190 90,190 Q80,190 80,200 Q80,190 70,190 Q80,190 80,180 Z" fill="#D4AF37" opacity="0.85"/>
+        <circle cx="145" cy="102" r="2" fill="#FFFFFF"/>
+      `;
+    } else if (opts.embellish === 'pearl') {
+      embellishMarkup = `
+        <g transform="translate(105, 195)">
+          <circle cx="0" cy="2" r="8" fill="rgba(0,0,0,0.15)"/>
+          <circle cx="0" cy="0" r="7.5" fill="#FFFFFF"/>
+          <circle cx="-2" cy="-2" r="2.5" fill="#FFF" opacity="0.9"/>
+        </g>
+      `;
+    } else if (opts.embellish === 'gold-flakes') {
+      embellishMarkup = `
+        <polygon points="120,80 126,82 124,88 118,85" fill="#D4AF37" opacity="0.9"/>
+        <polygon points="140,110 148,114 144,120 138,116" fill="#D4AF37" opacity="0.85"/>
+        <polygon points="90,140 96,142 93,148 88,145" fill="#D4AF37" opacity="0.8"/>
+        <polygon points="135,160 142,163 139,170 133,166" fill="#D4AF37" opacity="0.75"/>
+      `;
+    }
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="600" height="700">
+        <defs>
+          <linearGradient id="canvasBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${pal.bg1}"/>
+            <stop offset="100%" stop-color="${pal.bg2}"/>
+          </linearGradient>
+          <filter id="nailShadow" x="-10%" y="-10%" width="130%" height="130%">
+            <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#241E1C" flood-opacity="0.14"/>
+          </filter>
+        </defs>
+        <rect width="600" height="700" fill="url(#canvasBg)"/>
+        <path d="M-50,200 Q200,100 450,350 T800,600" fill="none" stroke="${pal.dark}" stroke-width="1.5" opacity="0.25"/>
+        <circle cx="500" cy="180" r="140" fill="${pal.dark}" opacity="0.08"/>
+
+        <g filter="url(#nailShadow)" transform="translate(185, 110)">
+          <path d="${nailPath}" fill="${pal.base}"/>
+          ${techniqueMarkup}
+          <path d="M85,385 C105,405 135,405 155,385" fill="none" stroke="${pal.dark}" stroke-width="2.5" opacity="0.5"/>
+          ${embellishMarkup}
+        </g>
+
+        <rect x="50" y="580" width="500" height="75" rx="12" fill="#FFFFFF" opacity="0.94"/>
+        <text x="80" y="614" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#241E1C">${opts.title || pal.name}</text>
+        <text x="80" y="636" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" letter-spacing="1.5" fill="#8C7A70">ZARAH NAILS &amp; BEAUTY MASSEY</text>
+        <text x="470" y="625" font-family="'Playfair Display', serif" font-size="20" font-weight="700" fill="#B58A7E" text-anchor="end">${opts.price || '$60 NZD'}</text>
+      </svg>
+    `;
+
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.trim());
+  }
+
+  function runPromptGeneration(customPrompt) {
+    const promptText = customPrompt || document.getElementById('ai-prompt-input')?.value || 'Glazed pearlescent chrome over bare rose almond nails';
+    const parsed = parseNailPrompt(promptText);
+
+    const shapeSelect = document.getElementById('tune-shape');
+    const techSelect = document.getElementById('tune-technique');
+    const colorSelect = document.getElementById('tune-color');
+    const embSelect = document.getElementById('tune-embellish');
+
+    if (shapeSelect) shapeSelect.value = parsed.shape;
+    if (techSelect) techSelect.value = parsed.technique;
+    if (colorSelect) colorSelect.value = parsed.colorTheme;
+    if (embSelect) embSelect.value = parsed.embellish;
+
+    const palName = COLOR_PALETTES[parsed.colorTheme]?.name || 'Nail Art';
+    const techNames = {
+      chrome: 'Glazed Chrome',
+      cateye: 'Velvet Cat-Eye',
+      aura: 'Aura Airbrush',
+      ombre: 'French Ombre Fade',
+      french: 'Micro French Tip',
+      solid: 'High-Gloss Gel'
+    };
+    const shapeNames = {
+      almond: 'Almond',
+      coffin: 'Coffin',
+      squoval: 'Squoval',
+      square: 'Square'
+    };
+
+    const generatedTitle = `${palName} ${techNames[parsed.technique]} (${shapeNames[parsed.shape]})`;
+    const generatedPrice = parsed.technique === 'cateye' || parsed.technique === 'aura' ? '$65 NZD' : '$60 NZD';
+    const generatedTags = [techNames[parsed.technique], shapeNames[parsed.shape], 'BIAB', 'Trend'];
+    const generatedDesc = `Bespoke ${techNames[parsed.technique].toLowerCase()} design crafted on ${shapeNames[parsed.shape].toLowerCase()} extensions with high-shine protective topcoat.`;
+
+    const svgDataUri = generateNailArtSVG({
+      shape: parsed.shape,
+      technique: parsed.technique,
+      colorTheme: parsed.colorTheme,
+      embellish: parsed.embellish,
+      title: generatedTitle,
+      price: generatedPrice
+    });
+
+    uploadedPhotoBase64 = svgDataUri;
+
+    if (geImagePreview) {
+      geImagePreview.src = svgDataUri;
+      geImagePreview.style.display = 'block';
+    }
+    if (gePlaceholder) gePlaceholder.style.display = 'none';
+
+    document.getElementById('ge-title').value = generatedTitle;
+    document.getElementById('ge-price').value = generatedPrice;
+    document.getElementById('ge-tags').value = generatedTags.join(', ');
+    document.getElementById('ge-desc').value = generatedDesc;
+  }
+
+  document.getElementById('btn-run-ai-generate')?.addEventListener('click', () => {
+    runPromptGeneration(null);
+  });
+
+  document.querySelectorAll('.prompt-chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      const p = e.currentTarget.getAttribute('data-prompt');
+      const input = document.getElementById('ai-prompt-input');
+      if (input) input.value = p;
+      runPromptGeneration(p);
+    });
+  });
+
+  ['tune-shape', 'tune-technique', 'tune-color', 'tune-embellish'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      const shape = document.getElementById('tune-shape').value;
+      const tech = document.getElementById('tune-technique').value;
+      const color = document.getElementById('tune-color').value;
+      const emb = document.getElementById('tune-embellish').value;
+
+      const palName = COLOR_PALETTES[color]?.name || 'Nail Art';
+      const techNames = {
+        chrome: 'Glazed Chrome',
+        cateye: 'Velvet Cat-Eye',
+        aura: 'Aura Airbrush',
+        ombre: 'French Ombre Fade',
+        french: 'Micro French Tip',
+        solid: 'High-Gloss Gel'
+      };
+      const shapeNames = {
+        almond: 'Almond',
+        coffin: 'Coffin',
+        squoval: 'Squoval',
+        square: 'Square'
+      };
+
+      const generatedTitle = `${palName} ${techNames[tech]} (${shapeNames[shape]})`;
+      const generatedPrice = tech === 'cateye' || tech === 'aura' ? '$65 NZD' : '$60 NZD';
+
+      const svgDataUri = generateNailArtSVG({
+        shape,
+        technique: tech,
+        colorTheme: color,
+        embellish: emb,
+        title: generatedTitle,
+        price: generatedPrice
+      });
+
+      uploadedPhotoBase64 = svgDataUri;
+      if (geImagePreview) {
+        geImagePreview.src = svgDataUri;
+        geImagePreview.style.display = 'block';
+      }
+      if (gePlaceholder) gePlaceholder.style.display = 'none';
+      document.getElementById('ge-title').value = generatedTitle;
+      document.getElementById('ge-price').value = generatedPrice;
+    });
+  });
+
+  document.getElementById('btn-close-gallery-modal')?.addEventListener('click', () => {
+    if (galleryModal) galleryModal.style.display = 'none';
+  });
+  document.getElementById('btn-cancel-gallery-edit')?.addEventListener('click', () => {
+    if (galleryModal) galleryModal.style.display = 'none';
+  });
+
+  document.getElementById('gallery-edit-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!uploadedPhotoBase64) {
+      alert('Please generate a design or select a photo from your device first.');
+      return;
+    }
+
+    const title = document.getElementById('ge-title').value;
+    const price = document.getElementById('ge-price').value;
+    const tagsRaw = document.getElementById('ge-tags').value;
+    const desc = document.getElementById('ge-desc').value;
+    const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+
+    const newLook = {
+      id: 'look-' + Date.now(),
+      title,
+      category: 'Nail Art',
+      serviceId: 'biab-full-overlay',
+      serviceName: 'Custom Nail Art Set',
+      price: price.startsWith('$') ? price : `$${price} NZD`,
+      duration: '60 mins',
+      description: desc,
+      tags: tags.length ? tags : ['Nail Art', 'Trending'],
+      image: uploadedPhotoBase64
+    };
+
+    activeGallery.unshift(newLook);
+    window.SalonStore.saveGallery(activeGallery);
+    alert(`Look "${title}" published live to the public gallery!`);
+    if (galleryModal) galleryModal.style.display = 'none';
+    renderAdminGallery();
+  });
+
+  // ==========================================
+  // ADMIN 3: STAFF ROSTER MANAGER
+  // ==========================================
+  function renderAdminTeam() {
+    const container = document.getElementById('admin-team-container');
+    if (!container) return;
+
+    const activeTechs = activeTeam.filter(t => t.id !== 'any-available');
+    container.innerHTML = activeTechs.map((staff, idx) => `
+      <div class="admin-staff-row" data-idx="${idx}">
+        <div class="staff-avatar-chip">
+          <span>${staff.name.charAt(0)}</span>
+        </div>
+        <div class="staff-info-col">
+          <strong>${staff.name}</strong>
+          <span class="staff-role-sub">${staff.role} • 📞 ${staff.phone}</span>
+          <p class="staff-spec-sub">Specialties: ${staff.specialties.join(', ')}</p>
+        </div>
+        <div class="staff-actions-col">
+          <button type="button" class="btn btn-subtle btn-sm btn-edit-staff" data-idx="${idx}">
+            Edit Profile
+          </button>
+          <button type="button" class="btn-delete-item btn-delete-staff" data-idx="${idx}" title="Remove staff member">
+            &times;
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    const statCount = document.getElementById('stat-active-staff-count');
+    const statNames = document.getElementById('stat-staff-names');
+    if (statCount) statCount.textContent = activeTechs.length.toString();
+    if (statNames) statNames.textContent = activeTechs.map(t => t.name).join(' • ');
+
+    document.querySelectorAll('.btn-edit-staff').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(e.currentTarget.getAttribute('data-idx') || '0', 10);
+        openStaffEditModal(idx);
+      });
+    });
+
+    document.querySelectorAll('.btn-delete-staff').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(e.currentTarget.getAttribute('data-idx') || '0', 10);
+        if (confirm(`Remove "${activeTechs[idx].name}" from your active salon roster?`)) {
+          const removedId = activeTechs[idx].id;
+          activeTeam = activeTeam.filter(t => t.id !== removedId);
+          window.SalonStore.saveTeam(activeTeam);
+          renderAdminTeam();
+          renderStaffRosters();
+          populateSelectDropdowns();
+        }
+      });
+    });
+  }
+
+  const staffModal = document.getElementById('staff-edit-modal');
+  let editingStaffIdx = -1;
+
+  function openStaffEditModal(idx) {
+    editingStaffIdx = idx;
+    const activeTechs = activeTeam.filter(t => t.id !== 'any-available');
+
+    if (idx >= 0 && activeTechs[idx]) {
+      const staff = activeTechs[idx];
+      document.getElementById('staff-modal-title').textContent = 'Edit Technician: ' + staff.name;
+      document.getElementById('ste-id').value = staff.id;
+      document.getElementById('ste-name').value = staff.name;
+      document.getElementById('ste-phone').value = staff.phone || '0210 839 8791';
+      document.getElementById('ste-role').value = staff.role;
+      document.getElementById('ste-specialties').value = staff.specialties.join(', ');
+      document.getElementById('ste-bio').value = staff.bio;
+    } else {
+      document.getElementById('staff-modal-title').textContent = 'Add New Technician';
+      document.getElementById('staff-edit-form').reset();
+      document.getElementById('ste-id').value = 'staff-' + Date.now();
+    }
+
+    if (staffModal) staffModal.style.display = 'flex';
+  }
+
+  document.getElementById('btn-add-new-staff')?.addEventListener('click', () => {
+    openStaffEditModal(-1);
+  });
+  document.getElementById('btn-close-staff-modal')?.addEventListener('click', () => {
+    if (staffModal) staffModal.style.display = 'none';
+  });
+  document.getElementById('btn-cancel-staff-edit')?.addEventListener('click', () => {
+    if (staffModal) staffModal.style.display = 'none';
+  });
+
+  document.getElementById('staff-edit-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('ste-id').value;
+    const name = document.getElementById('ste-name').value;
+    const phone = document.getElementById('ste-phone').value;
+    const role = document.getElementById('ste-role').value;
+    const specRaw = document.getElementById('ste-specialties').value;
+    const bio = document.getElementById('ste-bio').value;
+    const specialties = specRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+    const newStaff = {
+      id,
+      name,
+      role,
+      bio,
+      specialties,
+      phone,
+      active: true
+    };
+
+    const activeTechs = activeTeam.filter(t => t.id !== 'any-available');
+    if (editingStaffIdx >= 0) {
+      const oldId = activeTechs[editingStaffIdx].id;
+      const teamIdx = activeTeam.findIndex(t => t.id === oldId);
+      if (teamIdx >= 0) activeTeam[teamIdx] = newStaff;
+    } else {
+      activeTeam.unshift(newStaff);
+    }
+
+    window.SalonStore.saveTeam(activeTeam);
+    alert(`Technician profile for "${name}" saved!`);
+    if (staffModal) staffModal.style.display = 'none';
+    renderAdminTeam();
+    renderStaffRosters();
+    populateSelectDropdowns();
+  });
+
+  // ==========================================
+  // STAFF PORTAL LOGINS & PERMISSIONS CONTROLLER
+  // ==========================================
+  function renderStaffAccounts() {
+    const tbody = document.getElementById('staff-accounts-tbody');
+    if (!tbody || !window.SalonStore) return;
+
+    const accounts = window.SalonStore.getStaffAccounts();
+    if (accounts.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No staff logins created yet. Click "+ Create Staff Login" above to register technician credentials.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = accounts.map(a => `
+      <tr>
+        <td><strong>${a.name}</strong></td>
+        <td><code>${a.username}</code></td>
+        <td><code>${a.password}</code></td>
+        <td>
+          <span class="badge ${a.role === 'admin' ? 'badge-gold' : 'badge-rose'}">
+            ${a.role === 'admin' ? '👑 Owner / Admin' : '👥 Normal Staff'}
+          </span>
+        </td>
+        <td><span class="badge badge-success">Active</span></td>
+        <td>
+          <div style="display: flex; gap: 0.4rem;">
+            <button type="button" class="btn btn-subtle btn-sm btn-edit-staff-acc" data-id="${a.id}">Edit</button>
+            <button type="button" class="btn btn-subtle btn-sm btn-del-staff-acc" data-id="${a.id}" style="color: var(--state-danger);">&times;</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    // Attach actions
+    document.querySelectorAll('.btn-edit-staff-acc').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const acc = accounts.find(a => a.id === id);
+        if (acc) openStaffAccountModal(acc);
+      });
+    });
+
+    document.querySelectorAll('.btn-del-staff-acc').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this staff login? The staff member will no longer be able to log into the staff portal.')) {
+          window.SalonStore.deleteStaffAccount(id);
+          renderStaffAccounts();
+        }
+      });
+    });
+  }
+
+  function openStaffAccountModal(acc) {
+    const modal = document.getElementById('create-staff-account-modal');
+    const form = document.getElementById('staff-account-form');
+    const title = document.getElementById('staff-modal-form-title');
+    const select = document.getElementById('sa-staff-select');
+    if (!modal || !form || !select) return;
+
+    // Populate staff options from active team
+    const activeTechs = activeTeam.filter(t => t.id !== 'any-available');
+    select.innerHTML = activeTechs.map(t => `
+      <option value="${t.id}" data-name="${t.name}">${t.name} (${t.role})</option>
+    `).join('') + `<option value="other">Other / New Technician</option>`;
+
+    if (acc) {
+      title.textContent = `Edit Login: ${acc.name}`;
+      document.getElementById('sa-id').value = acc.id;
+      select.value = acc.staffId || '';
+      document.getElementById('sa-username').value = acc.username;
+      document.getElementById('sa-password').value = acc.password;
+      document.getElementById('sa-role').value = acc.role || 'staff';
+    } else {
+      title.textContent = 'Create Staff Portal Login';
+      form.reset();
+      document.getElementById('sa-id').value = '';
+      document.getElementById('sa-role').value = 'staff';
+      document.getElementById('sa-password').value = 'staff123';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  function setupStaffAccountListeners() {
+    document.getElementById('btn-create-staff-account')?.addEventListener('click', () => {
+      openStaffAccountModal(null);
+    });
+
+    document.getElementById('btn-close-staff-account-modal')?.addEventListener('click', () => {
+      document.getElementById('create-staff-account-modal').style.display = 'none';
+    });
+
+    document.getElementById('btn-cancel-staff-account')?.addEventListener('click', () => {
+      document.getElementById('create-staff-account-modal').style.display = 'none';
+    });
+
+    document.getElementById('staff-account-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('sa-id').value;
+      const select = document.getElementById('sa-staff-select');
+      const opt = select.options[select.selectedIndex];
+      const staffName = opt.getAttribute('data-name') || opt.text;
+      const staffId = select.value;
+      const username = document.getElementById('sa-username').value.trim();
+      const password = document.getElementById('sa-password').value.trim();
+      const role = document.getElementById('sa-role').value;
+
+      if (!username || !password) {
+        alert('Please provide both username and password.');
+        return;
+      }
+
+      window.SalonStore.addOrUpdateStaffAccount({
+        id: id || undefined,
+        staffId: staffId,
+        name: staffName,
+        username: username,
+        password: password,
+        role: role
+      });
+
+      alert(`Staff login for ${staffName} saved successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nThey can now sign in using the main website "Login" button.`);
+      document.getElementById('create-staff-account-modal').style.display = 'none';
+      renderStaffAccounts();
+    });
+  }
+
+  // ==========================================
+  // GOOGLE REVIEWS MANAGER (Admin Only)
+  // ==========================================
+  function renderAdminGoogleReviews() {
+    var tbody = document.getElementById('admin-reviews-tbody');
+    if (!tbody) return;
+
+    var reviews = window.SalonStore
+      ? window.SalonStore.getGoogleReviews(initialGoogleReviews)
+      : initialGoogleReviews;
+
+    var valid = reviews
+      .filter(function(r) { return (parseFloat(r.rating) || 5) >= 4; })
+      .sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+
+    var countEl = document.getElementById('admin-google-count');
+    if (countEl) countEl.textContent = valid.length;
+
+    var avgEl = document.getElementById('admin-google-avg-score');
+    if (avgEl && valid.length > 0) {
+      var sum = valid.reduce(function(acc, r) { return acc + (parseFloat(r.rating) || 5); }, 0);
+      avgEl.textContent = (sum / valid.length).toFixed(1);
+    }
+
+    if (valid.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No 4+ star Google reviews available.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = valid.map(function(rev) {
+      var starGold = '★'.repeat(rev.rating) + '☆'.repeat(5 - rev.rating);
+      var avatar = rev.profile_photo_url || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(rev.author_name) + '&background=C48B71&color=fff&size=60');
+      var dateLabel = rev.relative_time_description || 'Recently';
+      var serviceLabel = rev.service || 'Nail Treatment';
+
+      return [
+        '<tr>',
+          '<td>',
+            '<div style="display: flex; align-items: center; gap: 0.75rem;">',
+              '<img src="' + avatar + '" alt="" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />',
+              '<strong>' + rev.author_name + '</strong>',
+            '</div>',
+          '</td>',
+          '<td>',
+            '<span style="color: #D4AF37; letter-spacing: 0.1em; font-weight: 600;">' + starGold + '</span>',
+            '<span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.35rem;">(' + rev.rating + '.0)</span>',
+          '</td>',
+          '<td><span class="service-pill" style="display: inline-block; padding: 0.2rem 0.5rem; background: var(--bg-stone); border-radius: 12px; font-size: 0.8rem;">' + serviceLabel + '</span></td>',
+          '<td><span style="font-size: 0.85rem; color: var(--text-muted);">' + dateLabel + '</span></td>',
+          '<td style="max-width: 280px; font-size: 0.85rem; font-style: italic; color: var(--text-espresso); line-height: 1.4;">',
+            '"' + rev.text + '"',
+          '</td>',
+          '<td>',
+            '<span style="display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: #3D6A52; font-weight: 600;">',
+              '✓ Google Verified',
+            '</span>',
+          '</td>',
+          '<td>',
+            '<div style="display: flex; gap: 0.5rem;">',
+              '<a href="https://www.google.com/search?q=zara+nail+massey" target="_blank" rel="noopener noreferrer" class="btn btn-subtle btn-sm" title="View listing on Google">View</a>',
+              '<button type="button" class="btn btn-subtle btn-sm btn-delete-google-review" data-id="' + rev.id + '" style="color: #C53030;" title="Remove this review from site">Hide</button>',
+            '</div>',
+          '</td>',
+        '</tr>'
+      ].join('');
+    }).join('');
+  }
+
+  function setupGoogleReviewsListeners() {
+    var addBtn = document.getElementById('btn-add-google-review');
+    var modal = document.getElementById('google-review-modal');
+    var closeBtn = document.getElementById('btn-close-google-review-modal');
+    var cancelBtn = document.getElementById('btn-cancel-google-review');
+    var form = document.getElementById('google-review-form');
+
+    if (addBtn && modal) {
+      addBtn.addEventListener('click', function() {
+        if (form) form.reset();
+        document.getElementById('grev-id').value = '';
+        document.getElementById('grev-modal-title').textContent = 'Add Verified Google Review';
+        modal.style.display = 'flex';
+      });
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', function() { modal.style.display = 'none'; });
+    }
+
+    if (cancelBtn && modal) {
+      cancelBtn.addEventListener('click', function() { modal.style.display = 'none'; });
+    }
+
+    if (form && modal) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var id = document.getElementById('grev-id').value;
+        var author = document.getElementById('grev-author').value.trim();
+        var rating = parseFloat(document.getElementById('grev-rating').value) || 5;
+        var service = document.getElementById('grev-service').value.trim() || 'Nail Treatment';
+        var timeDesc = document.getElementById('grev-time').value.trim() || 'Recently';
+        var text = document.getElementById('grev-text').value.trim();
+
+        if (!author || !text) {
+          alert('Please enter reviewer name and review content.');
+          return;
+        }
+
+        if (rating < 4) {
+          alert('Per salon quality standard, only 4-star and 5-star reviews can be featured.');
+          return;
+        }
+
+        window.SalonStore.addGoogleReview({
+          id: id || undefined,
+          author_name: author,
+          rating: rating,
+          service: service,
+          relative_time_description: timeDesc,
+          text: text,
+          timestamp: Date.now()
+        });
+
+        alert('Google review by ' + author + ' has been saved and published to the website!');
+        modal.style.display = 'none';
+        renderAdminGoogleReviews();
+      });
+    }
+
+    // Delete / Hide review listener
+    var tbody = document.getElementById('admin-reviews-tbody');
+    if (tbody) {
+      tbody.addEventListener('click', function(e) {
+        var btn = e.target.closest('.btn-delete-google-review');
+        if (!btn) return;
+        var id = btn.getAttribute('data-id');
+        if (!id) return;
+        if (confirm('Are you sure you want to hide/remove this review from the public website?')) {
+          window.SalonStore.deleteGoogleReview(id);
+          renderAdminGoogleReviews();
+        }
+      });
+    }
+
+    // Reset to defaults
+    var resetBtn = document.getElementById('btn-reset-google-reviews');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function() {
+        if (confirm('Reset Google Reviews back to real verified defaults? This will restore original 4★ & 5★ reviews.')) {
+          window.SalonStore.resetGoogleReviews(initialGoogleReviews);
+          renderAdminGoogleReviews();
+          alert('Reviews reset to official Google Business listing defaults.');
+        }
+      });
+    }
+
+    // Copy SMS Review Request button
+    var copyBtn = document.getElementById('btn-copy-review-invite');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function() {
+        var smsText = 'Hi from Zarah Nails & Beauty Massey! Thank you for visiting our salon today. If you enjoyed your treatment, please take 30 seconds to leave us a 5-star Google review: https://www.google.com/search?q=zara+nail+massey Thank you for supporting our local Auckland studio! 💅✨';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(smsText).then(function() {
+            alert('Review request SMS message copied to clipboard!\n\nYou can now paste and send this via text/WhatsApp to your clients.');
+          }).catch(function() {
+            prompt('Copy this SMS review request for your client:', smsText);
+          });
+        } else {
+          prompt('Copy this SMS review request for your client:', smsText);
+        }
+      });
+    }
+  }
+
+  // Export Bookings
+  document.getElementById('btn-export-data')?.addEventListener('click', () => {
+    const appointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+    let csv = 'Reference,Client,Phone,Service,Price,Technician,Date,Time,Status,Source\n';
+    appointments.forEach(a => {
+      csv += `"${a.refCode}","${a.clientName}","${a.clientPhone}","${a.serviceName}","${a.price}","${a.staffName}","${a.date}","${a.time}","${a.status}","${a.source}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `zarah-schedule-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+</script>
+
+<style>
+  /* Role Selector at Login */
+  .role-selector-toggle {
+    display: flex;
+    background-color: var(--bg-stone);
+    border-radius: var(--radius-sm);
+    padding: 0.25rem;
+    margin-bottom: 1.5rem;
+    gap: 0.25rem;
+  }
+
+  .role-choice-btn {
+    flex: 1;
+    padding: 0.65rem 0.5rem;
+    background: transparent;
+    border: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-cocoa);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  .role-choice-btn.active {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+  }
+
+  .pin-credentials-guide {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-delicate);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .pin-credentials-guide code {
+    background-color: var(--bg-stone);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-espresso);
+    font-weight: 700;
+  }
+
+  /* Active Role Indicator */
+  .active-role-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    background-color: #E2E8F0;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+    margin-bottom: 0.45rem;
+  }
+
+  .active-role-indicator.admin {
+    background-color: #FEFCBF;
+    color: #744210;
+    border: 1px solid #ECC94B;
+  }
+
+  /* Admin Locked Tab */
+  .portal-tab.admin-locked {
+    color: #A0AEC0;
+  }
+
+  /* PIN Gate Overlay */
+  .pin-gate-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--text-espresso);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .pin-gate-modal {
+    background-color: #FFFFFF;
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    box-shadow: var(--shadow-modal);
+  }
+
+  .pin-emblem {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .pin-sub {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0 1.5rem 0;
+  }
+
+  .pin-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .pin-input {
+    flex: 1;
+    font-size: 1.5rem;
+    letter-spacing: 0.4em;
+    text-align: center;
+    padding: 0.65rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Toolbar */
+  .staff-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .toolbar-sub {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .toolbar-right {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* Stats Grid */
+  .stats-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .stat-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-value {
+    font-family: var(--font-serif);
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+  }
+
+  .stat-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* Tab Bar */
+  .portal-tab-bar {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border-delicate);
+    margin-bottom: 1.75rem;
+    overflow-x: auto;
+  }
+
+  .portal-tab {
+    padding: 0.75rem 1.25rem;
+    background: transparent;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    white-space: nowrap;
+  }
+
+  .portal-tab.active {
+    color: var(--text-espresso);
+    border-bottom-color: var(--accent-rose);
+  }
+
+  .tab-badge {
+    padding: 0.15rem 0.45rem;
+    background-color: var(--accent-rose);
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    border-radius: var(--radius-full);
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  /* Calendar Filters */
+  .calendar-header-filter {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .staff-filter-pills {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+  }
+
+  .staff-filter-pill {
+    padding: 0.4rem 0.85rem;
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .staff-filter-pill.active {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+  }
+
+  .staff-date-input {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+  }
+
+  /* Appointments List */
+  .appointments-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .appointment-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: 140px 1fr 240px;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .appointment-card.completed {
+    opacity: 0.75;
+    background-color: #FBFBF9;
+  }
+
+  .app-time-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .app-time {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+  }
+
+  .app-date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .app-badge {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-full);
+    font-size: 0.68rem;
+    font-weight: 600;
+    width: fit-content;
+  }
+
+  .app-badge.online {
+    background-color: #EBF8FF;
+    color: #2B6CB0;
+  }
+
+  .app-badge.walkin {
+    background-color: #FEFCBF;
+    color: #744210;
+  }
+
+  .app-details-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .app-client-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .app-client-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .app-ref {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background-color: var(--bg-stone);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .app-service-row {
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .app-price {
+    font-weight: 700;
+    color: var(--accent-rose);
+  }
+
+  .app-dur {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .app-contact-row {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .app-notes {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--text-cocoa);
+  }
+
+  .app-staff-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    align-items: flex-end;
+  }
+
+  .staff-tag {
+    font-size: 0.85rem;
+  }
+
+  .app-card-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .btn-action-reassign {
+    padding: 0.35rem 0.65rem;
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-action-reassign:hover {
+    background-color: var(--accent-rose-soft);
+    border-color: var(--accent-rose);
+    color: var(--accent-rose);
+  }
+
+  .btn-action-complete {
+    padding: 0.35rem 0.65rem;
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-action-cancel {
+    padding: 0.35rem 0.5rem;
+    background-color: transparent;
+    border: 1px solid var(--state-danger);
+    color: var(--state-danger);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .btn-action-cancel:hover {
+    background-color: var(--state-danger);
+    color: #FFFFFF;
+  }
+
+  /* Inbox Tab */
+  .inbox-header-box {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .inbox-sub {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+  }
+
+  .messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .message-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .message-sender-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .source-icon {
+    font-size: 1.4rem;
+  }
+
+  .msg-meta-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .msg-phone-chip {
+    font-size: 0.8rem;
+    font-weight: 600;
+    background-color: var(--bg-stone);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+  }
+
+  .message-body {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-espresso);
+    background-color: var(--bg-porcelain);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-rose);
+  }
+
+  .message-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* Admin Panels */
+  .admin-panel-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .admin-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-delicate);
+    flex-wrap: wrap;
+  }
+
+  .admin-panel-sub {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+  }
+
+  /* Admin Services Table */
+  .admin-category-box {
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .admin-cat-header {
+    background-color: var(--bg-stone);
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .admin-cat-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .admin-cat-header span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .admin-items-table {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-delicate);
+    gap: 1rem;
+  }
+
+  .admin-item-row:last-child {
+    border-bottom: none;
+  }
+
+  .item-main-col {
+    flex: 1;
+  }
+
+  .item-name-line {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .item-sub-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  .item-price-col {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-rose);
+  }
+
+  .item-actions-col {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .btn-delete-item {
+    background: transparent;
+    border: none;
+    font-size: 1.35rem;
+    color: var(--state-danger);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.25rem;
+  }
+
+  /* Admin Gallery Grid */
+  .admin-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .admin-gallery-card {
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-gallery-thumb {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: var(--bg-stone);
+  }
+
+  .admin-gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .admin-gallery-info {
+    padding: 1rem;
+    flex: 1;
+  }
+
+  .gallery-card-price {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    color: var(--accent-rose);
+    display: block;
+    margin: 0.25rem 0;
+  }
+
+  .gallery-card-tags {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .admin-gallery-actions {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border-delicate);
+    background-color: var(--bg-porcelain);
+  }
+
+  .btn-delete-gallery {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--state-danger);
+  }
+
+  .photo-preview-wrap {
+    margin-top: 0.75rem;
+    max-width: 200px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-delicate);
+  }
+
+  .photo-preview-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+
+  /* Admin Staff Rows */
+  .admin-team-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .admin-staff-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+  }
+
+  .staff-avatar-chip {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-rose) 0%, var(--gold-champagne) 100%);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .staff-info-col {
+    flex: 1;
+  }
+
+  .staff-role-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  .staff-spec-sub {
+    font-size: 0.8rem;
+    color: var(--text-cocoa);
+    margin-top: 0.2rem;
+  }
+
+  /* Modals */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(36, 30, 28, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .modal-dialog {
+    background-color: #FFFFFF;
+    border-radius: var(--radius-lg);
+    max-width: 580px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-modal);
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-delicate);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.75rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-delicate);
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+  }
+
+  .form-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    cursor: pointer;
+  }
+
+  /* Shifts Grid */
+  .shifts-panel {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+  }
+
+  .staff-roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .roster-card {
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .roster-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .roster-role {
+    font-size: 0.8rem;
+    color: var(--accent-rose);
+    font-weight: 600;
+  }
+
+  .status-chip {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-full);
+  }
+
+  .status-chip.active {
+    background-color: var(--state-success-bg);
+    color: var(--state-success);
+  }
+
+  /* SMS Box */
+  .reassign-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .reassign-summary-box {
+    background-color: var(--bg-stone);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.88rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .sms-preview-card {
+    background-color: #FAF8F5;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .sms-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .sms-tag {
+    color: var(--state-success);
+  }
+
+  .sms-bubble {
+    background-color: #EBF8FF;
+    border: 1px solid #BEE3F8;
+    color: #2C5282;
+    padding: 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+
+  .empty-state-card {
+    background-color: #FFFFFF;
+    border: 1px dashed var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  @media (max-width: 820px) {
+    .appointment-card {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .app-staff-col {
+      align-items: flex-start;
+    }
+    .admin-item-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  /* Gallery Mode Tabs */
+  .gallery-creator-mode-tabs {
+    display: flex;
+    background-color: var(--bg-stone);
+    border-bottom: 1px solid var(--border-delicate);
+    padding: 0.35rem 1.5rem 0 1.5rem;
+    gap: 0.5rem;
+  }
+
+  .creator-mode-btn {
+    padding: 0.65rem 1.25rem;
+    background: transparent;
+    border: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .creator-mode-btn.active {
+    color: var(--text-espresso);
+    border-bottom-color: var(--accent-rose);
+    background-color: #FFFFFF;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  }
+
+  /* Prompt Generator Box */
+  .ai-generator-inner-box {
+    background-color: var(--bg-porcelain);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .prompt-bar-row {
+    display: flex;
+    gap: 0.65rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .prompt-bar-row input {
+    flex: 1;
+  }
+
+  .prompt-presets-container {
+    margin-bottom: 1rem;
+  }
+
+  .presets-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .presets-chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .prompt-chip {
+    padding: 0.3rem 0.65rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-espresso);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .prompt-chip:hover {
+    border-color: var(--accent-rose);
+    background-color: var(--accent-rose-soft);
+  }
+
+  /* Tuning Accordion */
+  .tuning-accordion {
+    border-top: 1px dashed var(--border-delicate);
+    padding-top: 0.75rem;
+  }
+
+  .tuning-accordion summary {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+  }
+
+  .tuning-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .tuning-controls-grid .form-label {
+    font-size: 0.75rem;
+  }
+
+  .tuning-controls-grid .form-input {
+    font-size: 0.82rem;
+    padding: 0.45rem;
+  }
+
+  /* Look Editor Preview Card */
+  .look-editor-preview-card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 1.5rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    background-color: #FFFFFF;
+  }
+
+  .preview-media-frame {
+    aspect-ratio: 1 / 1.15;
+    background-color: var(--bg-stone);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-delicate);
+  }
+
+  .preview-empty-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .preview-details-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  @media (max-width: 640px) {
+    .look-editor-preview-card {
+      grid-template-columns: 1fr;
+    }
+    .prompt-bar-row {
+      flex-direction: column;
+    }
+  }
+
+  /* ========================================================
+     STAFF PORTAL — 10-DOT CUSTOMER LOYALTY & REWARDS STYLES
+     ======================================================== */
+  .loyalty-mgmt-panel {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .loyalty-mgmt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .loyalty-mgmt-sub {
+    font-size: 0.9rem;
+    color: var(--text-cocoa);
+    margin-top: 0.25rem;
+    line-height: 1.5;
+  }
+
+  .legend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background-color: var(--bg-stone);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.78rem;
+    margin: 0 0.2rem;
+  }
+
+  /* Search & Filter Bar */
+  .customer-search-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    background-color: var(--bg-stone);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-delicate);
+  }
+
+  .search-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 1rem;
+    color: var(--text-muted);
+  }
+
+  .search-field {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.92rem;
+    color: var(--text-espresso);
+    background: transparent;
+  }
+
+  .customer-filter-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .cust-filter-chip {
+    padding: 0.4rem 0.85rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-espresso);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .cust-filter-chip:hover {
+    border-color: var(--accent-rose);
+  }
+
+  .cust-filter-chip.active {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    border-color: var(--text-espresso);
+  }
+
+  .cust-filter-chip.highlight-gold {
+    border-color: #F59E0B;
+    color: #B45309;
+  }
+
+  .cust-filter-chip.highlight-gold.active {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: #FFFFFF;
+  }
+
+  /* Customer Directory Grid */
+  .customers-directory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .customer-mgmt-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all var(--transition-smooth);
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .customer-mgmt-card:hover {
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+  }
+
+  .customer-mgmt-card.reward-unlocked-card {
+    border: 2px solid #F59E0B;
+    background: linear-gradient(to bottom, #FFFDF8, #FFFFFF);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+  }
+
+  .cust-card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .cust-card-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .cust-avatar-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--bg-stone-dark);
+    color: var(--text-espresso);
+    font-weight: 700;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cust-avatar-circle.gold {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: #FFFFFF;
+  }
+
+  .cust-name-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .cust-name-title {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    color: var(--text-espresso);
+  }
+
+  .cust-contact-chips {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+  }
+
+  .cust-chip {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background-color: var(--bg-stone);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .cust-chip.provider-chip {
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--text-cocoa);
+  }
+
+  .points-pill-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-stone);
+    color: var(--text-cocoa);
+    display: inline-block;
+  }
+
+  .points-pill-label.gold {
+    background-color: #FEF3C7;
+    color: #B45309;
+    border: 1px solid #F59E0B;
+  }
+
+  .cust-dots-track-wrap {
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .cust-dots-caption {
+    display: flex;
+    gap: 0.85rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .cust-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    background-color: #FAFAFA;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.65rem;
+    text-align: center;
+  }
+
+  .c-stat-label {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .c-stat-val {
+    font-size: 0.95rem;
+    color: var(--text-espresso);
+  }
+
+  .c-stat-val-sm {
+    font-size: 0.78rem;
+    color: var(--text-espresso);
+    font-weight: 600;
+  }
+
+  .cust-notes-bar {
+    font-size: 0.8rem;
+    background-color: #FFFDF8;
+    border-left: 3px solid var(--gold-champagne);
+    padding: 0.35rem 0.65rem;
+    color: var(--text-cocoa);
+  }
+
+  .cust-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+
+  .empty-customers-box {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: var(--bg-stone);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-delicate);
+    color: var(--text-muted);
+  }
+
+  /* ========================================================
+     OVERLAY NOTIFICATION WINDOW: 10-DOT REWARD EARNED
+     ======================================================== */
+  .reward-overlay-backdrop {
+    background-color: rgba(36, 30, 28, 0.78);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: fadeIn 0.25s ease-out;
+  }
+
+  .reward-overlay-dialog {
+    background: linear-gradient(to bottom, #FFFFFF, #FAF8F5);
+    border: 2px solid #F59E0B;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 64px rgba(245, 158, 11, 0.35), 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 540px;
+    width: 100%;
+    padding: 2.25rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: popUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .celebration-confetti-ribbon {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 2.25rem;
+    margin-bottom: 0.5rem;
+    animation: bounceSparkle 1.8s ease-in-out infinite alternate;
+  }
+
+  @keyframes bounceSparkle {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-6px); }
+  }
+
+  .reward-eyebrow {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: #D97706;
+    text-transform: uppercase;
+  }
+
+  .reward-overlay-header h2 {
+    font-family: var(--font-serif);
+    font-size: 1.65rem;
+    color: var(--text-espresso);
+    margin: 0.35rem 0 0.5rem 0;
+  }
+
+  .reward-sub {
+    font-size: 0.92rem;
+    color: var(--text-cocoa);
+    margin-bottom: 1.5rem;
+  }
+
+  .reward-customer-spotlight {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    text-align: left;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .spotlight-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+  }
+
+  .spotlight-info {
+    flex: 1;
+  }
+
+  .spotlight-info h3 {
+    font-size: 1.2rem;
+    color: var(--text-espresso);
+    margin-bottom: 0.15rem;
+  }
+
+  .spotlight-info span {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .spotlight-free-tag {
+    background-color: #FEF3C7;
+    color: #92400E;
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--radius-full);
+    border: 1px solid #F59E0B;
+    letter-spacing: 0.08em;
+  }
+
+  .reward-dots-stage {
+    margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .reward-dots-stage .loyalty-dots-track {
+    background: #FFFFFF;
+    padding: 12px 20px;
+    gap: 10px;
+    border: 1.5px solid #F59E0B;
+  }
+
+  .reward-dots-stage .loyalty-dot {
+    width: 22px;
+    height: 22px;
+  }
+
+  .reward-completion-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #047857;
+  }
+
+  .reward-privilege-notice {
+    background-color: #EFF7F2;
+    border: 1px solid #34D399;
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+    color: #065F46;
+    margin-bottom: 1.75rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .reward-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .reward-modal-actions .btn-accent {
+    font-size: 1rem;
+    padding: 0.95rem 1.5rem;
+    background: linear-gradient(135deg, #D97706, #B45309);
+    box-shadow: 0 4px 16px rgba(217, 119, 6, 0.4);
+  }
+
+  .reward-modal-actions .btn-accent:hover {
+    background: linear-gradient(135deg, #B45309, #92400E);
+  }
+
+  @keyframes popUp {
+    from {
+      opacity: 0;
+      transform: scale(0.92) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Staff Accounts Table */
+  .staff-accounts-table-wrap {
+    overflow-x: auto;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    margin-top: 1rem;
+  }
+
+  .staff-accounts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    text-align: left;
+  }
+
+  .staff-accounts-table th {
+    background-color: var(--bg-stone);
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+    border-bottom: 1px solid var(--border-delicate);
+  }
+
+  .staff-accounts-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-delicate);
+    vertical-align: middle;
+  }
+
+  .staff-accounts-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .staff-accounts-table code {
+    background-color: var(--bg-stone);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+  }
+</style>

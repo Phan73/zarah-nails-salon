@@ -1,0 +1,286 @@
+---
+import Logo from './Logo.astro';
+import salonInfo from '../data/salon-info.json';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-content">
+    <!-- Column 1: Salon Identity & Story -->
+    <div class="footer-col brand-col">
+      <Logo variant="horizontal" theme="dark" class="footer-logo" />
+      <p class="footer-tagline">
+        Massey's premier salon for precision BIAB nail restructuring, bespoke hand-painted nail artistry, and restorative beauty rituals.
+      </p>
+      <div class="footer-social-links">
+        <a href={salonInfo.contact.facebook} target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Zarah Nails Facebook">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+          <span>Facebook Page</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Column 2: Quick Links -->
+    <div class="footer-col">
+      <h3 class="footer-heading">Explore</h3>
+      <ul class="footer-nav">
+        <li><a href="/services">Services &amp; Pricing</a></li>
+        <li><a href="/gallery">Nail Art Gallery</a></li>
+        <li><a href="/booking">Book Online</a></li>
+        <li><a href="/about">About Zarah &amp; Team</a></li>
+        <li><a href="/contact">Location &amp; Directions</a></li>
+        <li><a href="/policies">Policies &amp; FAQs</a></li>
+        <li><a href="/staff" class="staff-portal-footer-link">Staff &amp; Shift Portal</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 3: Hours -->
+    <div class="footer-col">
+      <h3 class="footer-heading">Opening Hours</h3>
+      <ul class="footer-hours">
+        {salonInfo.hours.map((item) => (
+          <li>
+            <span class="days">{item.days}</span>
+            <span class="hours">{item.hours}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="footer-notice">{salonInfo.bookingNotice}</p>
+    </div>
+
+    <!-- Column 4: Contact & Location -->
+    <div class="footer-col contact-col">
+      <h3 class="footer-heading">Visit Us</h3>
+      <address class="footer-address">
+        <p class="address-line"><strong>Zarah Nails &amp; Beauty</strong></p>
+        <p class="address-line">{salonInfo.address.street}</p>
+        <p class="address-line">{salonInfo.address.suburb}, {salonInfo.address.city} {salonInfo.address.postcode}</p>
+        <p class="address-parking">Free customer parking directly outside</p>
+      </address>
+
+      <div class="footer-direct-actions">
+        <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="footer-phone-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          <span>Call: {salonInfo.contact.phoneDisplay}</span>
+        </a>
+        <a href={salonInfo.address.googleMapsUrl} target="_blank" rel="noopener noreferrer" class="footer-maps-link">
+          Get Driving Directions &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Legal & Local Suburbs -->
+  <div class="footer-bottom">
+    <div class="container footer-bottom-content">
+      <p class="copyright">
+        &copy; {currentYear} {salonInfo.legalName}. All rights reserved. Massey, Auckland, New Zealand.
+      </p>
+      <p class="suburbs-served">
+        Proudly serving Massey, Westgate, Hobsonville, Whenuapai, Henderson, and greater West Auckland.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    padding-top: clamp(3rem, 6vw, 4.5rem);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: auto;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: 1.4fr 0.9fr 1.1fr 1.2fr;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    padding-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .footer-tagline {
+    color: #C8BFB8;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-top: 0.5rem;
+  }
+
+  .footer-social-links {
+    margin-top: 0.5rem;
+  }
+
+  .social-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    color: var(--gold-champagne-light);
+    font-weight: 500;
+  }
+  .social-icon:hover {
+    color: #FFFFFF;
+    text-decoration: underline;
+  }
+
+  .footer-heading {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    letter-spacing: 0.03em;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+
+  .footer-heading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 32px;
+    height: 1px;
+    background-color: var(--gold-champagne);
+  }
+
+  .footer-nav {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .footer-nav a {
+    color: #C8BFB8;
+    font-size: 0.88rem;
+    transition: color var(--transition-fast);
+  }
+
+  .footer-nav a:hover {
+    color: var(--gold-champagne-light);
+    padding-left: 2px;
+  }
+
+  .staff-portal-footer-link {
+    color: var(--gold-champagne) !important;
+    font-weight: 600;
+  }
+
+  .footer-hours {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    font-size: 0.86rem;
+  }
+
+  .footer-hours li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.35rem;
+  }
+
+  .footer-hours .days {
+    color: #FFFFFF;
+    font-weight: 500;
+  }
+
+  .footer-hours .hours {
+    color: var(--gold-champagne-light);
+  }
+
+  .footer-notice {
+    font-size: 0.8rem;
+    color: #A3968F;
+    line-height: 1.5;
+  }
+
+  .footer-address {
+    font-style: normal;
+    color: #C8BFB8;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .address-parking {
+    margin-top: 0.35rem;
+    color: var(--gold-champagne-light);
+    font-size: 0.8rem;
+  }
+
+  .footer-direct-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .footer-phone-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.15rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-sm);
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 0.88rem;
+    width: fit-content;
+  }
+
+  .footer-phone-btn:hover {
+    background-color: var(--accent-rose);
+    border-color: var(--accent-rose);
+  }
+
+  .footer-maps-link {
+    font-size: 0.85rem;
+    color: var(--gold-champagne-light);
+  }
+  .footer-maps-link:hover {
+    text-decoration: underline;
+  }
+
+  .footer-bottom {
+    background-color: #171312;
+    padding: 1.25rem 0;
+    margin-top: 2rem;
+    font-size: 0.78rem;
+    color: #8C8079;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .footer-bottom-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+
+  @media (max-width: 990px) {
+    .footer-content {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .footer-content {
+      grid-template-columns: 1fr;
+    }
+    .footer-bottom-content {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>

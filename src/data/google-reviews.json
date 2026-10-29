@@ -1,0 +1,68 @@
+[
+  {
+    "id": "g-rev-1",
+    "author_name": "Danielle M.",
+    "rating": 5,
+    "relative_time_description": "2 weeks ago",
+    "timestamp": 1740000000000,
+    "text": "Got me a new nail tech 🥰 Love their work! She was fast, efficient, and super gentle with my cuticles. The salon is clean, calm, and relaxing. Definitely coming back!",
+    "service": "Signature Gel Manicure",
+    "verified_google": true,
+    "profile_photo_url": "https://ui-avatars.com/api/?name=Danielle+M&background=C48B71&color=fff&size=100"
+  },
+  {
+    "id": "g-rev-2",
+    "author_name": "Kylie Harrison",
+    "rating": 5,
+    "relative_time_description": "3 weeks ago",
+    "timestamp": 1739500000000,
+    "text": "Thorough, relaxing, and super clean finish. Gave me exactly what I asked for from my photo reference and a lovely massage too! Hands down the best nail salon in the Massey/Westgate area.",
+    "service": "BIAB Builder Gel Overlay & Art",
+    "verified_google": true,
+    "profile_photo_url": "https://ui-avatars.com/api/?name=Kylie+Harrison&background=3D6A52&color=fff&size=100"
+  },
+  {
+    "id": "g-rev-3",
+    "author_name": "Tina Leilua",
+    "rating": 5,
+    "relative_time_description": "1 month ago",
+    "timestamp": 1738000000000,
+    "text": "Such a friendly and welcoming team right here on Red Hills Road. My deluxe spa pedicure was heavenly, and the gel polish on my toes still looks fresh weeks later. Free parking right outside is a huge bonus.",
+    "service": "Deluxe Spa Pedicure",
+    "verified_google": true,
+    "profile_photo_url": "https://ui-avatars.com/api/?name=Tina+Leilua&background=D4AF37&color=fff&size=100"
+  },
+  {
+    "id": "g-rev-4",
+    "author_name": "Jessica Wang",
+    "rating": 5,
+    "relative_time_description": "1 month ago",
+    "timestamp": 1737500000000,
+    "text": "Super fast and clean application. Beautiful almond shaping and great attention to detail. Great value for Auckland prices and lovely calming atmosphere.",
+    "service": "Full Set Gel Extensions",
+    "verified_google": true,
+    "profile_photo_url": "https://ui-avatars.com/api/?name=Jessica+Wang&background=7A6B63&color=fff&size=100"
+  },
+  {
+    "id": "g-rev-5",
+    "author_name": "Aroha P.",
+    "rating": 4,
+    "relative_time_description": "2 months ago",
+    "timestamp": 1736000000000,
+    "text": "Really happy with my nails! Very quick service and polite staff. Easy walk-in availability and will definitely be returning for my next infill.",
+    "service": "Gel Infill & Shape",
+    "verified_google": true,
+    "profile_photo_url": "https://ui-avatars.com/api/?name=Aroha+P&background=A35C4A&color=fff&size=100"
+  },
+  {
+    "id": "g-rev-6",
+    "author_name": "Chelsea B.",
+    "rating": 5,
+    "relative_time_description": "2 months ago",
+    "timestamp": 1735000000000,
+    "text": "I showed a picture of chrome glazed tips and they matched it perfectly. Really clean salon and they take time to make sure your natural nail beds don't get damaged.",
+    "service": "Glazed Chrome Nail Art",
+    "verified_google": true,
+    "profile_photo_url": "https://ui-avatars.com/api/?name=Chelsea+B&background=5C6B73&color=fff&size=100"
+  }
+]

@@ -1,0 +1,183 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CustomerAuthModal from '../components/CustomerAuthModal.astro';
+import salonInfo from '../data/salon-info.json';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  currentPath?: string;
+}
+
+const {
+  title = "Zarah Nails & Beauty | Auckland's BIAB & Nail Art Studio in Massey",
+  description = "Refined nail artistry, BIAB strengthening, custom acrylics, deluxe pedicures, and beauty rituals in Massey, Auckland. Book online or call 0210 839 8791.",
+  currentPath = "/"
+} = Astro.props;
+
+const siteUrl = "https://zarahnailsmassey.co.nz";
+const canonicalUrl = new URL(currentPath, siteUrl).href;
+
+// Schema.org Structured Data
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": ["NailSalon", "BeautySalon"],
+  "name": salonInfo.name,
+  "legalName": salonInfo.legalName,
+  "image": `${siteUrl}/logo.svg`,
+  "telephone": salonInfo.contact.phone,
+  "email": salonInfo.contact.email,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": salonInfo.address.street,
+    "addressLocality": salonInfo.address.suburb,
+    "addressRegion": salonInfo.address.city,
+    "postalCode": salonInfo.address.postcode,
+    "addressCountry": "NZ"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": -36.8378,
+    "longitude": 174.6053
+  },
+  "url": siteUrl,
+  "priceRange": "$$",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Friday", "Saturday"],
+      "opens": "09:30",
+      "closes": "18:00"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Thursday"],
+      "opens": "09:30",
+      "closes": "19:00"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Sunday"],
+      "opens": "10:00",
+      "closes": "17:00"
+    }
+  ],
+  "sameAs": [
+    salonInfo.contact.facebook
+  ]
+};
+---
+
+<!DOCTYPE html>
+<html lang="en-NZ">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`${siteUrl}/logo.svg`} />
+    <meta property="og:locale" content="en_NZ" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <meta name="theme-color" content="#241E1C" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script src="/js/salon-store.js" is:inline></script>
+    <script src="../scripts/auth-client.js"></script>
+  </head>
+  <body>
+    <Header currentPath={currentPath} />
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <!-- Customer Auth & Loyalty Pass Modal -->
+    <CustomerAuthModal />
+
+    <!-- Floating Mobile Quick-Action Bar -->
+    <div class="mobile-sticky-bar" aria-label="Quick Actions">
+      <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="sticky-action call-action">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        <span>Call Salon</span>
+      </a>
+      <a href="/booking" class="sticky-action book-action">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span>Book Appointment</span>
+      </a>
+    </div>
+
+    <style>
+      #main-content {
+        flex: 1;
+      }
+
+      /* Mobile Sticky Bar */
+      .mobile-sticky-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 80;
+        display: none;
+        background-color: rgba(36, 30, 28, 0.98);
+        backdrop-filter: blur(8px);
+        padding: 0.65rem 1rem;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+        gap: 0.75rem;
+      }
+
+      .sticky-action {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.75rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .sticky-action.call-action {
+        background-color: rgba(255, 255, 255, 0.12);
+        color: #FAF8F5;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .sticky-action.book-action {
+        background-color: var(--accent-rose);
+        color: #FFFFFF;
+      }
+
+      @media (max-width: 768px) {
+        .mobile-sticky-bar {
+          display: flex;
+        }
+        body {
+          padding-bottom: 60px; /* Space for sticky bar */
+        }
+      }
+    </style>
+  </body>
+</html>

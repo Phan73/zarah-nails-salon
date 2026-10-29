@@ -1,0 +1,366 @@
+/* ==========================================================================
+   ZARAH NAILS & BEAUTY — REFINED CONTEMPORARY STUDIO DESIGN SYSTEM
+   Auckland, New Zealand
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Color System */
+  --bg-porcelain: #FAF8F5;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FDFBF8;
+  --bg-stone: #F3EFEA;
+  --bg-stone-dark: #E9E3DA;
+
+  --text-espresso: #241E1C;
+  --text-cocoa: #5C4F48;
+  --text-muted: #82736C;
+  --text-light: #FAF8F5;
+
+  --accent-rose: #B58A7E;
+  --accent-rose-hover: #9E7468;
+  --accent-rose-soft: #F4EBE8;
+
+  --gold-champagne: #C5A880;
+  --gold-champagne-light: #DFCDAE;
+  --gold-champagne-dark: #A5865E;
+
+  --border-delicate: #EAE3D9;
+  --border-focus: #B58A7E;
+
+  --state-success: #3D6A52;
+  --state-success-bg: #EFF7F2;
+  --state-warning: #B37126;
+  --state-warning-bg: #FCF6EC;
+  --state-danger: #A33A38;
+  --state-danger-bg: #FDF1F0;
+
+  /* Typography Scale */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Shadows & Spatial Layers */
+  --shadow-subtle: 0 2px 8px rgba(36, 30, 28, 0.04);
+  --shadow-card: 0 4px 20px rgba(36, 30, 28, 0.06);
+  --shadow-modal: 0 20px 48px rgba(36, 30, 28, 0.16);
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-porcelain);
+  color: var(--text-espresso);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Headings */
+h1, h2, h3, h4, .font-serif {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-espresso);
+}
+
+h1 {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+}
+
+p {
+  max-width: 68ch;
+  color: var(--text-cocoa);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Accessibility Focus States */
+:focus-visible {
+  outline: 2px solid var(--accent-rose);
+  outline-offset: 3px;
+}
+
+/* Shared Utility Layouts */
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1.25rem, 4vw, 2.5rem);
+  padding-right: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1.25rem, 4vw, 2rem);
+  padding-right: clamp(1.25rem, 4vw, 2rem);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: var(--text-espresso);
+  color: var(--bg-porcelain);
+  border-color: var(--text-espresso);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-rose);
+  border-color: var(--accent-rose);
+  color: #FFFFFF;
+}
+
+.btn-accent {
+  background-color: var(--accent-rose);
+  color: #FFFFFF;
+  border-color: var(--accent-rose);
+}
+
+.btn-accent:hover {
+  background-color: var(--accent-rose-hover);
+  border-color: var(--accent-rose-hover);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-espresso);
+  border-color: var(--text-espresso);
+}
+
+.btn-secondary:hover {
+  background-color: var(--text-espresso);
+  color: var(--bg-porcelain);
+}
+
+.btn-subtle {
+  background-color: var(--bg-stone);
+  color: var(--text-espresso);
+  border-color: var(--border-delicate);
+}
+
+.btn-subtle:hover {
+  background-color: var(--bg-stone-dark);
+}
+
+/* Subtitle Eyebrow (used strictly where semantic, without excessive cliches) */
+.eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-rose);
+  margin-bottom: 0.6rem;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+}
+
+.badge-gold {
+  background-color: rgba(197, 168, 128, 0.15);
+  color: var(--gold-champagne-dark);
+  border: 1px solid rgba(197, 168, 128, 0.3);
+}
+
+.badge-rose {
+  background-color: var(--accent-rose-soft);
+  color: var(--accent-rose);
+}
+
+.badge-success {
+  background-color: var(--state-success-bg);
+  color: var(--state-success);
+}
+
+/* ==========================================================================
+   10-DOT CUSTOMER LOYALTY STAMP SYSTEM (White, Orange, Green)
+   ========================================================================== */
+.loyalty-dots-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(243, 239, 234, 0.75);
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-delicate);
+  transition: all var(--transition-fast);
+}
+
+.loyalty-dots-track.compact {
+  padding: 4px 8px;
+  gap: 4px;
+}
+
+.loyalty-dots-track.large {
+  padding: 10px 16px;
+  gap: 10px;
+  background-color: #FFFFFF;
+  box-shadow: inset 0 1px 3px rgba(36, 30, 28, 0.05);
+}
+
+.loyalty-dot {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.loyalty-dots-track.compact .loyalty-dot {
+  width: 11px;
+  height: 11px;
+}
+
+.loyalty-dots-track.large .loyalty-dot {
+  width: 24px;
+  height: 24px;
+}
+
+/* 1. White Dot: No point / empty slot */
+.loyalty-dot.dot-white {
+  background-color: #FFFFFF;
+  border: 2px solid #D5CBC3;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* 2. Orange Dot: Booking pending (temporary point held) */
+.loyalty-dot.dot-orange {
+  background: radial-gradient(circle at 35% 35%, #F59E0B, #D97706);
+  border: 1.5px solid #B45309;
+  box-shadow: 0 0 6px rgba(217, 119, 6, 0.45);
+  animation: pulseOrange 2.4s ease-in-out infinite;
+}
+
+/* 3. Green Dot: Completed service at salon (permanently earned) */
+.loyalty-dot.dot-green {
+  background: radial-gradient(circle at 35% 35%, #34D399, #059669);
+  border: 1.5px solid #047857;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.35);
+}
+
+.loyalty-dot:hover {
+  transform: scale(1.25);
+  z-index: 2;
+}
+
+@keyframes pulseOrange {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 4px rgba(217, 119, 6, 0.3);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(217, 119, 6, 0.7);
+  }
+}
+
+.loyalty-dots-track.milestone-unlocked {
+  border-color: #F59E0B;
+  background-color: #FEF3C7;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
+  animation: goldGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes goldGlow {
+  0% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.25); }
+  100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.55); }
+}
+
+/* Free Reward Available Badge */
+.free-reward-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

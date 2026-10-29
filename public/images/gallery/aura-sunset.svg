@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBF9F6"/>
+      <stop offset="100%" stop-color="#ECE3D7"/>
+    </linearGradient>
+    <radialGradient id="auraGlow" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#E87D65" stop-opacity="0.95"/>
+      <stop offset="30%" stop-color="#DE8C73" stop-opacity="0.8"/>
+      <stop offset="65%" stop-color="#ECC6A7" stop-opacity="0.5"/>
+      <stop offset="90%" stop-color="#F7EBE4" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow3" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#241E1C" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="600" height="700" fill="url(#bg3)"/>
+  <circle cx="450" cy="200" r="160" fill="#F4E9DC" opacity="0.6"/>
+
+  <g filter="url(#softShadow3)" transform="translate(190, 110)">
+    <!-- Base Almond nail -->
+    <path d="M60,30 C110,30 150,75 150,190 L150,390 C150,410 70,410 70,390 L70,190 C70,75 60,30 60,30 Z" 
+          fill="#FFF9F5"/>
+    <!-- Aura Radial Gradient -->
+    <circle cx="105" cy="210" r="95" fill="url(#auraGlow)"/>
+    <!-- Star sparkle in center -->
+    <path d="M105,190 Q105,210 125,210 Q105,210 105,230 Q105,210 85,210 Q105,210 105,190 Z" fill="#D4AF37"/>
+    <!-- Highlight -->
+    <path d="M85,60 Q115,130 120,300" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+  </g>
+
+  <!-- Title Badge overlay -->
+  <rect x="50" y="580" width="500" height="75" rx="12" fill="#FFFFFF" opacity="0.92" filter="url(#softShadow3)"/>
+  <text x="80" y="614" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#241E1C">Aura Airbrush Sunset</text>
+  <text x="80" y="636" font-family="sans-serif" font-size="13" font-weight="500" letter-spacing="1.5" fill="#8C7A70">TERRACOTTA &amp; CHAMPAGNE HALO</text>
+  <text x="470" y="625" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#B58A7E" text-anchor="end">$80</text>
+</svg>

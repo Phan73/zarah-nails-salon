@@ -1,0 +1,2062 @@
+---
+import customersData from '../data/customers.json';
+---
+
+<!-- ========================================================
+     PRODUCTION CUSTOMER AUTH & DIGITAL 10-DOT LOYALTY CARD
+     Universal authentication for Google, Apple, SMS, and Staff
+     ======================================================== -->
+<div id="customer-auth-container">
+  <!-- Invisible reCAPTCHA container for Phone SMS Bot Protection -->
+  <div id="recaptcha-container"></div>
+
+  <!-- 1. SIGN IN & REGISTRATION MODAL -->
+  <div class="auth-modal-backdrop" id="auth-login-modal" style="display: none;" aria-hidden="true">
+    <div class="auth-modal-card">
+      <div class="auth-modal-header">
+        <div class="auth-brand-badge">ZARAH NAILS &amp; BEAUTY • IDENTITY</div>
+        <button type="button" class="auth-close-btn" id="btn-close-auth-modal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <!-- Config Notice (Displayed when Firebase environment keys are not configured yet) -->
+      <div id="auth-unconfigured-banner" class="auth-config-banner" style="display: none;">
+        <div class="banner-icon">ℹ️</div>
+        <div class="banner-body">
+          <strong>Production Auth In Setup Mode</strong>
+          <p>Cloud identity keys are required in <code>.env</code> for live Google, Apple, and real telecom SMS.</p>
+          <button type="button" class="btn-text-link" id="btn-open-setup-guide" style="color: #92400E; margin-top: 4px;">
+            View Configuration Checklist &rarr;
+          </button>
+        </div>
+      </div>
+
+      <div class="auth-modal-body">
+        <div class="auth-intro-heading">
+          <h3 id="auth-main-title">Sign In to Your Account</h3>
+          <p id="auth-main-sub">Access your digital 10-Dot Loyalty Card, rewards pass, and appointments.</p>
+        </div>
+
+        <!-- Mode Switch: Sign In vs Create Account -->
+        <div class="auth-mode-tabs">
+          <button type="button" class="auth-mode-tab active" id="tab-mode-signin">
+            Sign In
+          </button>
+          <button type="button" class="auth-mode-tab" id="tab-mode-register">
+            Create Free Account
+          </button>
+        </div>
+
+        <!-- Universal Account Sign-In Form (Clients & Staff/Admin) -->
+        <form id="universal-login-form" class="auth-subform">
+          <div class="auth-input-group">
+            <label for="auth-identifier-input">Email or Staff Username</label>
+            <input
+              type="text"
+              id="auth-identifier-input"
+              class="form-input"
+              placeholder="e.g. name@example.com or staff username"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="auth-input-group">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <label for="auth-password-input">Password</label>
+              <button type="button" class="btn-text-link" id="btn-forgot-password-link" style="font-size: 0.78rem;">
+                Forgot password?
+              </button>
+            </div>
+            <input
+              type="password"
+              id="auth-password-input"
+              class="form-input"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <div id="login-error-box" class="auth-error-box" style="display: none;"></div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btn-submit-universal-login">
+            Sign In &rarr;
+          </button>
+        </form>
+
+        <!-- Create Free Customer Account Form -->
+        <form id="create-account-form" class="auth-subform" style="display: none;">
+          <div class="auth-input-group">
+            <label for="reg-name-input">Full Name *</label>
+            <input
+              type="text"
+              id="reg-name-input"
+              class="form-input"
+              placeholder="e.g. Carl Un"
+              required
+            />
+          </div>
+
+          <div class="auth-input-group">
+            <label for="reg-email-input">Email Address *</label>
+            <input
+              type="email"
+              id="reg-email-input"
+              class="form-input"
+              placeholder="e.g. carl@example.com"
+              required
+            />
+          </div>
+
+          <div class="auth-input-group">
+            <label for="reg-phone-input">NZ Mobile Phone *</label>
+            <div class="phone-input-wrap">
+              <span class="phone-prefix">+64</span>
+              <input
+                type="tel"
+                id="reg-phone-input"
+                class="form-input"
+                placeholder="021 555 1234"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="auth-input-group">
+            <label for="reg-password-input">Password (Minimum 6 characters) *</label>
+            <input
+              type="password"
+              id="reg-password-input"
+              class="form-input"
+              placeholder="••••••••"
+              minlength="6"
+              required
+            />
+          </div>
+
+          <div id="register-error-box" class="auth-error-box" style="display: none;"></div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btn-submit-register">
+            Create Account &amp; Activate 10-Dot Pass &rarr;
+          </button>
+        </form>
+
+        <div class="auth-divider" id="social-auth-divider">
+          <span>or continue with</span>
+        </div>
+
+        <!-- Real OAuth SSO Buttons for Clients -->
+        <div class="auth-social-buttons" id="social-auth-buttons">
+          <button type="button" class="btn-sso btn-sso-google" id="btn-login-google" title="Sign in with your Google account">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span id="google-btn-text">Continue with Google</span>
+          </button>
+
+          <button type="button" class="btn-sso btn-sso-apple" id="btn-login-apple" title="Sign in with your Apple Account">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.56.65-1.06 1.71-.93 2.72 1 .08 2.02-.47 2.64-1.22z"/>
+            </svg>
+            <span id="apple-btn-text">Continue with Apple</span>
+          </button>
+        </div>
+
+        <!-- Phone Login Accordion Trigger -->
+        <div style="margin-top: 1rem; text-align: center;" id="phone-auth-toggle-wrap">
+          <button type="button" class="btn-text-link" id="btn-toggle-phone-login">
+            📱 Or sign in with NZ Mobile Phone &amp; SMS
+          </button>
+        </div>
+
+        <!-- Genuine Passwordless Phone SMS Authentication Form -->
+        <div id="phone-login-card" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-delicate);">
+          <!-- Step 1: Mobile Entry -->
+          <form id="phone-send-form">
+            <div class="auth-input-group">
+              <label for="auth-phone-input">New Zealand Mobile Number</label>
+              <div class="phone-input-wrap">
+                <span class="phone-prefix">+64</span>
+                <input
+                  type="tel"
+                  id="auth-phone-input"
+                  class="form-input"
+                  placeholder="021 555 1234"
+                  autocomplete="tel"
+                  required
+                />
+              </div>
+              <span class="auth-hint">Enter your NZ mobile. We will send a secure 6-digit one-time verification SMS.</span>
+            </div>
+
+            <div id="phone-send-error-box" class="auth-error-box" style="display: none;"></div>
+
+            <button type="submit" class="btn btn-subtle btn-block" id="btn-submit-phone-send">
+              Send SMS Verification Code &rarr;
+            </button>
+          </form>
+
+          <!-- Step 2: 6-Digit SMS OTP Verification (Strictly NO local code leakage) -->
+          <form id="phone-verify-form" style="display: none; margin-top: 1rem;">
+            <div class="auth-sent-badge">
+              <span>✓ Real SMS sent to <strong id="phone-confirmed-target">+64...</strong></span>
+              <button type="button" class="btn-text-link" id="btn-change-phone-num" style="font-size: 0.78rem; margin-left: 0.5rem;">
+                Change
+              </button>
+            </div>
+
+            <div class="auth-input-group" style="margin-top: 0.85rem;">
+              <label for="auth-otp-input">Enter 6-Digit Verification Code</label>
+              <input
+                type="text"
+                id="auth-otp-input"
+                class="form-input otp-field"
+                placeholder="••••••"
+                maxlength="6"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                autocomplete="one-time-code"
+                required
+              />
+              <span class="auth-hint">Check your phone's SMS messages. Carrier rates may apply.</span>
+            </div>
+
+            <div id="phone-verify-error-box" class="auth-error-box" style="display: none;"></div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="btn-submit-phone-verify">
+              Verify Code &amp; Sign In ✓
+            </button>
+
+            <div style="margin-top: 0.85rem; text-align: center; font-size: 0.82rem; color: var(--text-muted);">
+              Didn't receive the code?
+              <button type="button" class="btn-text-link" id="btn-resend-sms" disabled style="margin-left: 0.35rem;">
+                Resend (<span id="resend-countdown">60</span>s)
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. FORGOT PASSWORD MODAL -->
+  <div class="auth-modal-backdrop" id="auth-forgot-modal" style="display: none; z-index: 230;" aria-hidden="true">
+    <div class="auth-modal-card" style="max-width: 440px;">
+      <div class="auth-modal-header">
+        <div class="auth-brand-badge">PASSWORD RECOVERY</div>
+        <button type="button" class="auth-close-btn" id="btn-close-forgot-modal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="auth-modal-body">
+        <h3 style="font-family: var(--font-serif); font-size: 1.35rem; margin-bottom: 0.5rem; color: var(--text-espresso);">Reset Your Password</h3>
+        <p style="font-size: 0.88rem; color: var(--text-cocoa); line-height: 1.5; margin-bottom: 1.25rem;">
+          Enter the email address registered with your salon account. We'll send you a secure link to reset your password.
+        </p>
+
+        <form id="forgot-password-form">
+          <div class="auth-input-group">
+            <label for="forgot-email-input">Your Account Email</label>
+            <input
+              type="email"
+              id="forgot-email-input"
+              class="form-input"
+              placeholder="e.g. yourname@example.com"
+              required
+            />
+          </div>
+
+          <div id="forgot-error-box" class="auth-error-box" style="display: none;"></div>
+          <div id="forgot-success-box" class="auth-success-box" style="display: none;"></div>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+            <button type="button" class="btn btn-subtle" id="btn-cancel-forgot" style="flex: 1;">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-forgot" style="flex: 2;">
+              Send Reset Link &rarr;
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. HONEST CONFIGURATION / SETUP CHECKLIST MODAL -->
+  <div class="auth-modal-backdrop" id="auth-setup-modal" style="display: none; z-index: 240;" aria-hidden="true">
+    <div class="auth-modal-card" style="max-width: 520px;">
+      <div class="auth-modal-header">
+        <div class="auth-brand-badge">AUTHENTICATION CONFIGURATION GUIDE</div>
+        <button type="button" class="auth-close-btn" id="btn-close-setup-modal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="auth-modal-body">
+        <h3 style="font-family: var(--font-serif); font-size: 1.35rem; color: var(--text-espresso); margin-bottom: 0.5rem;">
+          Firebase Cloud Setup Checklist
+        </h3>
+        <p style="font-size: 0.88rem; color: var(--text-cocoa); line-height: 1.5; margin-bottom: 1rem;">
+          To enable live Google OAuth, Sign in with Apple, and genuine carrier SMS verification, add your Firebase keys to your environment file (<code>.env</code>) or Vercel dashboard:
+        </p>
+
+        <div class="setup-code-block">
+          <pre><code>PUBLIC_FIREBASE_API_KEY=AIzaSy...
+PUBLIC_FIREBASE_AUTH_DOMAIN=zarah-nails.firebaseapp.com
+PUBLIC_FIREBASE_PROJECT_ID=zarah-nails
+PUBLIC_FIREBASE_STORAGE_BUCKET=zarah-nails.appspot.com
+PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+PUBLIC_FIREBASE_APP_ID=1:...</code></pre>
+        </div>
+
+        <ol class="setup-steps-list">
+          <li><strong>Google Sign-In:</strong> Enable Google provider under Firebase Console &rarr; Authentication &rarr; Sign-in method.</li>
+          <li><strong>Apple Sign-In:</strong> Register your Apple Services ID &amp; Team ID under Firebase Apple Provider.</li>
+          <li><strong>Phone SMS:</strong> Enable Phone provider under Firebase Authentication to trigger real SMS via Firebase's carrier gateway.</li>
+          <li><strong>Domain Auth:</strong> Add your custom domain (e.g. <code>zarahnailsmassey.co.nz</code>) to Firebase Authorized Domains.</li>
+        </ol>
+
+        <div style="margin-top: 1.25rem; text-align: right;">
+          <button type="button" class="btn btn-primary" id="btn-ack-setup">
+            Got It, Close Guide
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. STAFF / ADMIN ACTIVE SESSION MODAL -->
+  <div class="auth-modal-backdrop" id="auth-staff-session-modal" style="display: none;" aria-hidden="true">
+    <div class="auth-modal-card staff-card" style="max-width: 440px; text-align: center;">
+      <div class="auth-modal-header" style="justify-content: center; position: relative;">
+        <div class="auth-brand-badge" id="staff-modal-badge">WORKSPACE ACTIVE</div>
+        <button type="button" class="auth-close-btn" id="btn-close-staff-modal" aria-label="Close modal" style="position: absolute; right: 0;">&times;</button>
+      </div>
+
+      <div class="auth-modal-body" style="padding-top: 0.5rem;">
+        <div class="staff-avatar-large" id="staff-session-emblem">👑</div>
+        <h3 id="staff-session-name" style="font-family: var(--font-serif); font-size: 1.4rem; margin: 0.5rem 0 0.25rem 0;">Salon Admin</h3>
+        <span class="badge badge-gold" id="staff-session-role-pill">Administrator</span>
+        <p style="font-size: 0.88rem; color: var(--text-cocoa); margin: 1rem 0 1.5rem 0;">
+          You are currently signed into the salon workspace. Click below to manage calendars, clients, or visual pricing.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <a href="/staff" class="btn btn-primary btn-block">
+            🚀 Open Staff &amp; Admin Portal
+          </a>
+          <button type="button" class="btn btn-subtle btn-block" id="btn-staff-logout">
+            🚪 Sign Out of Workspace
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. CUSTOMER LOYALTY PASS & ACCOUNT MODAL (When Client Logged In) -->
+  <div class="auth-modal-backdrop" id="auth-account-modal" style="display: none;" aria-hidden="true">
+    <div class="auth-modal-card account-card">
+      <div class="auth-modal-header">
+        <div class="auth-brand-badge">MY SALON REWARDS CARD</div>
+        <button type="button" class="auth-close-btn" id="btn-close-account-modal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="account-profile-bar">
+        <div class="account-avatar" id="acc-avatar-letter">✦</div>
+        <div class="account-meta">
+          <h3 id="acc-client-name">My Rewards Account</h3>
+          <span class="account-contact" id="acc-client-contact">Active Salon Member</span>
+        </div>
+        <button type="button" class="btn-logout-chip" id="btn-customer-logout" title="Sign out of your account">
+          Sign Out
+        </button>
+      </div>
+
+      <!-- DIGITAL 10-DOT LOYALTY STAMP CARD -->
+      <div class="loyalty-stamp-card" id="acc-stamp-card">
+        <div class="stamp-card-top">
+          <div class="stamp-card-title">
+            <span class="eyebrow" style="color: #FAF8F5; margin-bottom: 0;">ZARAH NAILS MASSEY</span>
+            <h4>10-Dot Loyalty Stamp Card</h4>
+          </div>
+          <div class="stamp-status-badge" id="acc-badge-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- The 10 Dots Track -->
+        <div class="stamp-dots-wrapper" id="acc-dots-track-container">
+          <!-- 10 Dots rendered dynamically -->
+        </div>
+
+        <!-- Stamp Legend -->
+        <div class="stamp-legend">
+          <div class="legend-item">
+            <span class="loyalty-dot dot-green"></span>
+            <span>Completed Visit (Earned Point)</span>
+          </div>
+          <div class="legend-item">
+            <span class="loyalty-dot dot-orange"></span>
+            <span>Booked (Temporary Point)</span>
+          </div>
+          <div class="legend-item">
+            <span class="loyalty-dot dot-white"></span>
+            <span>Unearned Slot</span>
+          </div>
+        </div>
+
+        <!-- Reward Milestone Message -->
+        <div class="stamp-milestone-box" id="acc-milestone-message">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Quick Stats & Actions -->
+      <div class="account-stats-grid">
+        <div class="account-stat-box">
+          <span class="stat-num" id="acc-stat-visits">0</span>
+          <span class="stat-label">Total Visits</span>
+        </div>
+        <div class="account-stat-box">
+          <span class="stat-num" id="acc-stat-spent">$0</span>
+          <span class="stat-label">Lifetime Spend</span>
+        </div>
+        <div class="account-stat-box">
+          <span class="stat-num" id="acc-stat-redeemed">0</span>
+          <span class="stat-label">Free Services Earned</span>
+        </div>
+      </div>
+
+      <!-- ACCOUNT SECURITY & LINKED IDENTITY SECTION -->
+      <div class="account-security-section">
+        <div class="security-header">
+          <h5>Connected Identity Providers</h5>
+          <span class="security-badge" id="acc-primary-auth-badge">Verified</span>
+        </div>
+        <p class="security-desc">Link your Google or Apple account to access your loyalty points from any device.</p>
+        <div class="linked-providers-grid" id="linked-providers-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Upcoming Bookings Section -->
+      <div class="account-bookings-section">
+        <h5>Upcoming Salon Reservations</h5>
+        <div id="acc-upcoming-bookings-list">
+          <!-- Populated from localStorage bookings -->
+        </div>
+      </div>
+
+      <div class="account-modal-actions">
+        <a href="/booking" class="btn btn-primary btn-block">
+          📅 Book Next Appointment (Auto-Fill Details)
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Initial Customer Seed Data Script -->
+<script is:inline define:vars={{ initialCustomers: customersData }}>
+  if (window.SalonStore) {
+    window.SalonStore.getCustomers(initialCustomers);
+    window.SalonStore.getStaffAccounts();
+  }
+</script>
+
+<script is:inline>
+  // ========================================================
+  // PRODUCTION-READY AUTHENTICATION CONTROLLER
+  // Zero mock bypasses, pure Firebase SSO & NZ Phone SMS
+  // ========================================================
+  (function() {
+    // Purge legacy mock Sarah Jenkins account
+    try {
+      var cur = localStorage.getItem('zarah_current_customer');
+      if (cur && (cur.indexOf('Sarah Jenkins') !== -1 || cur.indexOf('cust-1') !== -1 || cur.indexOf('sarah.jenkins') !== -1)) {
+        localStorage.removeItem('zarah_current_customer');
+      }
+      var custs = localStorage.getItem('zarah_customers');
+      if (custs && custs.indexOf('Sarah Jenkins') !== -1) {
+        var list = JSON.parse(custs).filter(function(c) {
+          return c.id !== 'cust-1' && c.name !== 'Sarah Jenkins';
+        });
+        localStorage.setItem('zarah_customers', JSON.stringify(list));
+      }
+    } catch (e) {}
+
+    // Modals
+    const loginModal = document.getElementById('auth-login-modal');
+    const staffSessionModal = document.getElementById('auth-staff-session-modal');
+    const accountModal = document.getElementById('auth-account-modal');
+    const forgotModal = document.getElementById('auth-forgot-modal');
+    const setupModal = document.getElementById('auth-setup-modal');
+    const unconfiguredBanner = document.getElementById('auth-unconfigured-banner');
+
+    // Close buttons
+    const btnCloseLogin = document.getElementById('btn-close-auth-modal');
+    const btnCloseStaff = document.getElementById('btn-close-staff-modal');
+    const btnCloseAccount = document.getElementById('btn-close-account-modal');
+    const btnCloseForgot = document.getElementById('btn-close-forgot-modal');
+    const btnCancelForgot = document.getElementById('btn-cancel-forgot');
+    const btnCloseSetup = document.getElementById('btn-close-setup-modal');
+    const btnAckSetup = document.getElementById('btn-ack-setup');
+    const btnOpenSetupGuide = document.getElementById('btn-open-setup-guide');
+
+    // Logout buttons
+    const btnStaffLogout = document.getElementById('btn-staff-logout');
+    const btnCustomerLogout = document.getElementById('btn-customer-logout');
+
+    // Tabs
+    const tabSignIn = document.getElementById('tab-mode-signin');
+    const tabRegister = document.getElementById('tab-mode-register');
+    const universalForm = document.getElementById('universal-login-form');
+    const createAccountForm = document.getElementById('create-account-form');
+    const socialDivider = document.getElementById('social-auth-divider');
+    const socialButtons = document.getElementById('social-auth-buttons');
+    const phoneToggleWrap = document.getElementById('phone-auth-toggle-wrap');
+    const authMainTitle = document.getElementById('auth-main-title');
+    const authMainSub = document.getElementById('auth-main-sub');
+
+    // Form Inputs & Error Boxes
+    const idInput = document.getElementById('auth-identifier-input');
+    const passInput = document.getElementById('auth-password-input');
+    const loginErrorBox = document.getElementById('login-error-box');
+    const registerErrorBox = document.getElementById('register-error-box');
+    const btnSubmitLogin = document.getElementById('btn-submit-universal-login');
+    const btnSubmitRegister = document.getElementById('btn-submit-register');
+
+    // SSO Buttons
+    const btnGoogle = document.getElementById('btn-login-google');
+    const btnApple = document.getElementById('btn-login-apple');
+    const googleBtnText = document.getElementById('google-btn-text');
+    const appleBtnText = document.getElementById('apple-btn-text');
+
+    // Phone Elements
+    const btnTogglePhone = document.getElementById('btn-toggle-phone-login');
+    const phoneCard = document.getElementById('phone-login-card');
+    const formPhoneSend = document.getElementById('phone-send-form');
+    const formPhoneVerify = document.getElementById('phone-verify-form');
+    const phoneInput = document.getElementById('auth-phone-input');
+    const phoneSendErrorBox = document.getElementById('phone-send-error-box');
+    const phoneVerifyErrorBox = document.getElementById('phone-verify-error-box');
+    const phoneConfirmedTarget = document.getElementById('phone-confirmed-target');
+    const otpInput = document.getElementById('auth-otp-input');
+    const btnSubmitPhoneSend = document.getElementById('btn-submit-phone-send');
+    const btnSubmitPhoneVerify = document.getElementById('btn-submit-phone-verify');
+    const btnChangePhoneNum = document.getElementById('btn-change-phone-num');
+    const btnResendSms = document.getElementById('btn-resend-sms');
+    const resendCountdownSpan = document.getElementById('resend-countdown');
+
+    // Forgot Password Elements
+    const btnForgotLink = document.getElementById('btn-forgot-password-link');
+    const formForgot = document.getElementById('forgot-password-form');
+    const forgotEmailInput = document.getElementById('forgot-email-input');
+    const forgotErrorBox = document.getElementById('forgot-error-box');
+    const forgotSuccessBox = document.getElementById('forgot-success-box');
+    const btnSubmitForgot = document.getElementById('btn-submit-forgot');
+
+    let normalizedPhoneState = '';
+    let resendInterval = null;
+
+    // Helper: Check if Firebase Auth is fully initialized
+    function isAuthReady() {
+      return Boolean(window.ZarahAuth && typeof window.ZarahAuth.isConfigured === 'function' && window.ZarahAuth.isConfigured());
+    }
+
+    function checkConfigurationState() {
+      if (unconfiguredBanner) {
+        if (!isAuthReady()) {
+          unconfiguredBanner.style.display = 'flex';
+        } else {
+          unconfiguredBanner.style.display = 'none';
+        }
+      }
+    }
+
+    function showSetupModal() {
+      if (setupModal) setupModal.style.display = 'flex';
+    }
+
+    // Switch between Sign In and Create Account tabs
+    tabSignIn?.addEventListener('click', () => {
+      tabSignIn.classList.add('active');
+      tabRegister.classList.remove('active');
+
+      universalForm.style.display = 'block';
+      createAccountForm.style.display = 'none';
+      if (socialDivider) socialDivider.style.display = 'flex';
+      if (socialButtons) socialButtons.style.display = 'flex';
+      if (phoneToggleWrap) phoneToggleWrap.style.display = 'block';
+      if (authMainTitle) authMainTitle.textContent = 'Sign In to Your Account';
+      if (authMainSub) authMainSub.textContent = 'Access your digital 10-Dot Loyalty Card, rewards pass, and appointments.';
+      if (loginErrorBox) loginErrorBox.style.display = 'none';
+    });
+
+    tabRegister?.addEventListener('click', () => {
+      tabRegister.classList.add('active');
+      tabSignIn.classList.remove('active');
+
+      universalForm.style.display = 'none';
+      createAccountForm.style.display = 'block';
+      if (socialDivider) socialDivider.style.display = 'none';
+      if (socialButtons) socialButtons.style.display = 'none';
+      if (phoneToggleWrap) phoneToggleWrap.style.display = 'none';
+      if (phoneCard) phoneCard.style.display = 'none';
+      if (authMainTitle) authMainTitle.textContent = 'Create Your Free Rewards Pass';
+      if (authMainSub) authMainSub.textContent = 'Earn stamps on every visit to Zarah Nails & unlock complimentary treatments.';
+      if (registerErrorBox) registerErrorBox.style.display = 'none';
+    });
+
+    // Toggle Phone Login Form
+    btnTogglePhone?.addEventListener('click', () => {
+      if (phoneCard.style.display === 'none') {
+        phoneCard.style.display = 'block';
+        if (phoneInput) phoneInput.focus();
+      } else {
+        phoneCard.style.display = 'none';
+      }
+    });
+
+    // Close Modals
+    btnCloseLogin?.addEventListener('click', () => { loginModal.style.display = 'none'; });
+    btnCloseStaff?.addEventListener('click', () => { staffSessionModal.style.display = 'none'; });
+    btnCloseAccount?.addEventListener('click', () => { accountModal.style.display = 'none'; });
+    btnCloseForgot?.addEventListener('click', () => { forgotModal.style.display = 'none'; });
+    btnCancelForgot?.addEventListener('click', () => { forgotModal.style.display = 'none'; });
+    btnCloseSetup?.addEventListener('click', () => { setupModal.style.display = 'none'; });
+    btnAckSetup?.addEventListener('click', () => { setupModal.style.display = 'none'; });
+    btnOpenSetupGuide?.addEventListener('click', showSetupModal);
+
+    btnForgotLink?.addEventListener('click', () => {
+      if (forgotModal) {
+        if (forgotEmailInput && idInput && idInput.value.includes('@')) {
+          forgotEmailInput.value = idInput.value.trim();
+        }
+        if (forgotErrorBox) forgotErrorBox.style.display = 'none';
+        if (forgotSuccessBox) forgotSuccessBox.style.display = 'none';
+        forgotModal.style.display = 'flex';
+      }
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === loginModal) loginModal.style.display = 'none';
+      if (e.target === staffSessionModal) staffSessionModal.style.display = 'none';
+      if (e.target === accountModal) accountModal.style.display = 'none';
+      if (e.target === forgotModal) forgotModal.style.display = 'none';
+      if (e.target === setupModal) setupModal.style.display = 'none';
+    });
+
+    // Main Open Modal Entry Point
+    window.openCustomerAuthModal = function() {
+      checkConfigurationState();
+      const loggedUser = window.SalonStore ? window.SalonStore.getLoggedInUser() : null;
+
+      if (loggedUser) {
+        if (loggedUser.role === 'admin' || loggedUser.role === 'staff') {
+          renderStaffSessionModal(loggedUser);
+          if (staffSessionModal) staffSessionModal.style.display = 'flex';
+        } else {
+          renderAccountModal(loggedUser);
+          if (accountModal) accountModal.style.display = 'flex';
+        }
+      } else {
+        if (loginModal) loginModal.style.display = 'flex';
+        if (idInput) idInput.focus();
+      }
+    };
+
+    // ========================================================
+    // 1. UNIVERSAL SIGN-IN SUBMISSION
+    // ========================================================
+    universalForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const identifier = idInput.value.trim();
+      const password = passInput.value.trim();
+      if (loginErrorBox) loginErrorBox.style.display = 'none';
+
+      // Step A: First verify if it is an Admin or Staff credential
+      if (window.SalonStore) {
+        const staffRes = window.SalonStore.loginWithCredentials(identifier, password);
+        if (staffRes.success) {
+          loginModal.style.display = 'none';
+          universalForm.reset();
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect') || '/staff';
+          window.location.href = redirect;
+          return;
+        }
+      }
+
+      // Step B: Authenticate customer with Firebase Email & Password
+      if (!identifier.includes('@')) {
+        if (loginErrorBox) {
+          loginErrorBox.textContent = 'Please enter a valid email address or sign in via mobile SMS.';
+          loginErrorBox.style.display = 'block';
+        }
+        return;
+      }
+
+      if (!isAuthReady()) {
+        showSetupModal();
+        return;
+      }
+
+      const originalBtnText = btnSubmitLogin.textContent;
+      try {
+        btnSubmitLogin.disabled = true;
+        btnSubmitLogin.textContent = 'Verifying credentials...';
+        const user = await window.ZarahAuth.signInWithEmail(identifier, password);
+        
+        loginModal.style.display = 'none';
+        universalForm.reset();
+        
+        const customer = window.SalonStore.syncAuthenticatedCustomer(user);
+        renderAccountModal(customer);
+        accountModal.style.display = 'flex';
+        updateHeaderAuthButton();
+      } catch (err) {
+        if (loginErrorBox) {
+          loginErrorBox.textContent = err.message || 'Incorrect email or password. Please try again.';
+          loginErrorBox.style.display = 'block';
+        }
+      } finally {
+        btnSubmitLogin.disabled = false;
+        btnSubmitLogin.textContent = originalBtnText;
+      }
+    });
+
+    // ========================================================
+    // 2. CREATE FREE CUSTOMER ACCOUNT (EMAIL / PASSWORD)
+    // ========================================================
+    createAccountForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('reg-name-input').value.trim();
+      const email = document.getElementById('reg-email-input').value.trim();
+      const rawPhone = document.getElementById('reg-phone-input').value.trim();
+      const password = document.getElementById('reg-password-input').value.trim();
+      if (registerErrorBox) registerErrorBox.style.display = 'none';
+
+      if (!name || !email || !password) {
+        if (registerErrorBox) {
+          registerErrorBox.textContent = 'Please complete all required fields.';
+          registerErrorBox.style.display = 'block';
+        }
+        return;
+      }
+
+      if (!isAuthReady()) {
+        showSetupModal();
+        return;
+      }
+
+      let formattedPhone = '';
+      if (window.ZarahPhoneUtils) {
+        try {
+          formattedPhone = window.ZarahPhoneUtils.normalizeNZPhoneNumber(rawPhone);
+        } catch (phoneErr) {
+          if (registerErrorBox) {
+            registerErrorBox.textContent = phoneErr.message;
+            registerErrorBox.style.display = 'block';
+          }
+          return;
+        }
+      }
+
+      const originalBtnText = btnSubmitRegister.textContent;
+      try {
+        btnSubmitRegister.disabled = true;
+        btnSubmitRegister.textContent = 'Creating secure account...';
+
+        const user = await window.ZarahAuth.registerWithEmail(email, password, name, formattedPhone);
+        const customer = window.SalonStore.syncAuthenticatedCustomer(user, {
+          name: name,
+          email: email,
+          phone: formattedPhone
+        });
+
+        createAccountForm.reset();
+        loginModal.style.display = 'none';
+        alert(`Welcome to Zarah Nails & Beauty, ${name}! Your 10-Dot Loyalty Card is now active.`);
+        renderAccountModal(customer);
+        accountModal.style.display = 'flex';
+        updateHeaderAuthButton();
+      } catch (err) {
+        if (registerErrorBox) {
+          registerErrorBox.textContent = err.message || 'Registration failed. Please try again.';
+          registerErrorBox.style.display = 'block';
+        }
+      } finally {
+        btnSubmitRegister.disabled = false;
+        btnSubmitRegister.textContent = originalBtnText;
+      }
+    });
+
+    // ========================================================
+    // 3. GENUINE GOOGLE OAUTH 2.0 / OPENID CONNECT
+    // ========================================================
+    btnGoogle?.addEventListener('click', async () => {
+      if (!isAuthReady()) {
+        showSetupModal();
+        return;
+      }
+
+      const originalText = googleBtnText.textContent;
+      try {
+        btnGoogle.disabled = true;
+        googleBtnText.textContent = 'Connecting to Google...';
+        const user = await window.ZarahAuth.signInWithGoogle();
+
+        if (!user) {
+          // Clean cancellation by user popup
+          return;
+        }
+
+        const customer = window.SalonStore.syncAuthenticatedCustomer(user, {
+          loginProvider: 'google.com'
+        });
+
+        loginModal.style.display = 'none';
+        renderAccountModal(customer);
+        accountModal.style.display = 'flex';
+        updateHeaderAuthButton();
+      } catch (err) {
+        alert(err.message || 'Google sign-in could not be completed. Please try again.');
+      } finally {
+        btnGoogle.disabled = false;
+        googleBtnText.textContent = originalText;
+      }
+    });
+
+    // ========================================================
+    // 4. GENUINE SIGN IN WITH APPLE
+    // ========================================================
+    btnApple?.addEventListener('click', async () => {
+      if (!isAuthReady()) {
+        showSetupModal();
+        return;
+      }
+
+      const originalText = appleBtnText.textContent;
+      try {
+        btnApple.disabled = true;
+        appleBtnText.textContent = 'Connecting to Apple...';
+        const user = await window.ZarahAuth.signInWithApple();
+
+        if (!user) {
+          // Clean cancellation
+          return;
+        }
+
+        const customer = window.SalonStore.syncAuthenticatedCustomer(user, {
+          loginProvider: 'apple.com'
+        });
+
+        loginModal.style.display = 'none';
+        renderAccountModal(customer);
+        accountModal.style.display = 'flex';
+        updateHeaderAuthButton();
+      } catch (err) {
+        alert(err.message || 'Apple sign-in could not be completed. Please try again.');
+      } finally {
+        btnApple.disabled = false;
+        appleBtnText.textContent = originalText;
+      }
+    });
+
+    // ========================================================
+    // 5. GENUINE NZ PHONE SMS AUTHENTICATION
+    // ========================================================
+    function startResendCountdown() {
+      let secondsLeft = 60;
+      if (btnResendSms) btnResendSms.disabled = true;
+      if (resendCountdownSpan) resendCountdownSpan.textContent = String(secondsLeft);
+
+      if (resendInterval) clearInterval(resendInterval);
+      resendInterval = setInterval(() => {
+        secondsLeft--;
+        if (resendCountdownSpan) resendCountdownSpan.textContent = String(secondsLeft);
+        if (secondsLeft <= 0) {
+          clearInterval(resendInterval);
+          if (btnResendSms) {
+            btnResendSms.disabled = false;
+            btnResendSms.innerHTML = 'Resend SMS';
+          }
+        }
+      }, 1000);
+    }
+
+    formPhoneSend?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawPhone = phoneInput.value.trim();
+      if (phoneSendErrorBox) phoneSendErrorBox.style.display = 'none';
+
+      if (!isAuthReady()) {
+        showSetupModal();
+        return;
+      }
+
+      let e164Phone = '';
+      try {
+        e164Phone = window.ZarahPhoneUtils.normalizeNZPhoneNumber(rawPhone);
+      } catch (err) {
+        if (phoneSendErrorBox) {
+          phoneSendErrorBox.textContent = err.message;
+          phoneSendErrorBox.style.display = 'block';
+        }
+        return;
+      }
+
+      normalizedPhoneState = e164Phone;
+      const originalText = btnSubmitPhoneSend.textContent;
+      try {
+        btnSubmitPhoneSend.disabled = true;
+        btnSubmitPhoneSend.textContent = 'Sending real SMS...';
+
+        await window.ZarahAuth.sendPhoneVerificationSMS(e164Phone, 'recaptcha-container');
+
+        formPhoneSend.style.display = 'none';
+        formPhoneVerify.style.display = 'block';
+        if (phoneConfirmedTarget) {
+          phoneConfirmedTarget.textContent = window.ZarahPhoneUtils.formatPhoneDisplay(e164Phone);
+        }
+        if (otpInput) {
+          otpInput.value = '';
+          otpInput.focus();
+        }
+        startResendCountdown();
+      } catch (err) {
+        if (phoneSendErrorBox) {
+          phoneSendErrorBox.textContent = err.message || 'SMS delivery failed. Please check the number and try again.';
+          phoneSendErrorBox.style.display = 'block';
+        }
+      } finally {
+        btnSubmitPhoneSend.disabled = false;
+        btnSubmitPhoneSend.textContent = originalText;
+      }
+    });
+
+    btnResendSms?.addEventListener('click', async () => {
+      if (!normalizedPhoneState || !isAuthReady()) return;
+      try {
+        btnResendSms.disabled = true;
+        btnResendSms.textContent = 'Sending...';
+        await window.ZarahAuth.sendPhoneVerificationSMS(normalizedPhoneState, 'recaptcha-container');
+        startResendCountdown();
+      } catch (err) {
+        alert(err.message || 'Unable to resend SMS code at this time.');
+        btnResendSms.disabled = false;
+        btnResendSms.textContent = 'Resend SMS';
+      }
+    });
+
+    btnChangePhoneNum?.addEventListener('click', () => {
+      if (resendInterval) clearInterval(resendInterval);
+      formPhoneVerify.style.display = 'none';
+      formPhoneSend.style.display = 'block';
+      if (phoneInput) phoneInput.focus();
+    });
+
+    formPhoneVerify?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = otpInput.value.trim();
+      if (phoneVerifyErrorBox) phoneVerifyErrorBox.style.display = 'none';
+
+      if (!/^\d{6}$/.test(code)) {
+        if (phoneVerifyErrorBox) {
+          phoneVerifyErrorBox.textContent = 'Please enter the complete 6-digit code sent to your phone.';
+          phoneVerifyErrorBox.style.display = 'block';
+        }
+        return;
+      }
+
+      const originalText = btnSubmitPhoneVerify.textContent;
+      try {
+        btnSubmitPhoneVerify.disabled = true;
+        btnSubmitPhoneVerify.textContent = 'Verifying code...';
+
+        const user = await window.ZarahAuth.confirmPhoneCode(code);
+        const customer = window.SalonStore.syncAuthenticatedCustomer(user, {
+          phone: normalizedPhoneState,
+          loginProvider: 'phone'
+        });
+
+        formPhoneVerify.reset();
+        formPhoneVerify.style.display = 'none';
+        formPhoneSend.style.display = 'block';
+        phoneCard.style.display = 'none';
+        loginModal.style.display = 'none';
+
+        renderAccountModal(customer);
+        accountModal.style.display = 'flex';
+        updateHeaderAuthButton();
+      } catch (err) {
+        if (phoneVerifyErrorBox) {
+          phoneVerifyErrorBox.textContent = err.message || 'Invalid verification code. Please check and try again.';
+          phoneVerifyErrorBox.style.display = 'block';
+        }
+      } finally {
+        btnSubmitPhoneVerify.disabled = false;
+        btnSubmitPhoneVerify.textContent = originalText;
+      }
+    });
+
+    // ========================================================
+    // 6. FORGOT PASSWORD HANDLER
+    // ========================================================
+    formForgot?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = forgotEmailInput.value.trim();
+      if (forgotErrorBox) forgotErrorBox.style.display = 'none';
+      if (forgotSuccessBox) forgotSuccessBox.style.display = 'none';
+
+      if (!isAuthReady()) {
+        showSetupModal();
+        return;
+      }
+
+      const originalText = btnSubmitForgot.textContent;
+      try {
+        btnSubmitForgot.disabled = true;
+        btnSubmitForgot.textContent = 'Sending email...';
+
+        await window.ZarahAuth.sendPasswordReset(email);
+        if (forgotSuccessBox) {
+          forgotSuccessBox.textContent = '✓ If an account matches this email, password reset instructions have been sent to your inbox.';
+          forgotSuccessBox.style.display = 'block';
+        }
+        formForgot.reset();
+      } catch (err) {
+        if (forgotErrorBox) {
+          forgotErrorBox.textContent = err.message || 'Password reset could not be completed.';
+          forgotErrorBox.style.display = 'block';
+        }
+      } finally {
+        btnSubmitForgot.disabled = false;
+        btnSubmitForgot.textContent = originalText;
+      }
+    });
+
+    // ========================================================
+    // 7. ACCOUNT MODAL RENDERING & LINKING
+    // ========================================================
+    function renderAccountModal(customer) {
+      if (!customer) return;
+
+      const letterEl = document.getElementById('acc-avatar-letter');
+      const nameEl = document.getElementById('acc-client-name');
+      const contactEl = document.getElementById('acc-client-contact');
+
+      if (letterEl) letterEl.textContent = (customer.name || 'C').charAt(0).toUpperCase();
+      if (nameEl) nameEl.textContent = customer.name;
+      if (contactEl) contactEl.textContent = `${customer.phone || 'No mobile linked'} • ${customer.email || 'No email linked'}`;
+
+      const dots = window.SalonStore.calculateDots(customer);
+      const dotsContainer = document.getElementById('acc-dots-track-container');
+      const badgeContainer = document.getElementById('acc-badge-container');
+      const milestoneMsg = document.getElementById('acc-milestone-message');
+      const cardEl = document.getElementById('acc-stamp-card');
+
+      if (dotsContainer) {
+        dotsContainer.innerHTML = window.SalonStore.renderDotsHtml(customer, false);
+      }
+
+      if (cardEl) {
+        if (dots.isEligibleForFree) {
+          cardEl.classList.add('milestone-unlocked');
+        } else {
+          cardEl.classList.remove('milestone-unlocked');
+        }
+      }
+
+      if (badgeContainer) {
+        if (dots.isEligibleForFree) {
+          badgeContainer.innerHTML = `<span class="free-reward-badge">🎉 FREE SERVICE EARNED!</span>`;
+        } else {
+          badgeContainer.innerHTML = `<span class="stamp-count-pill">${dots.green}/10 Completed • ${dots.orange} Booked</span>`;
+        }
+      }
+
+      if (milestoneMsg) {
+        if (dots.isEligibleForFree) {
+          milestoneMsg.innerHTML = `
+            <div class="milestone-box-congrats">
+              <span class="congrats-emoji">🎁</span>
+              <div>
+                <strong>Congratulations, ${customer.name}!</strong>
+                <p>You have completed 10 qualifying visits! You are entitled to 1 FREE salon treatment. Inform your technician or present this pass at the front desk to redeem.</p>
+              </div>
+            </div>
+          `;
+        } else {
+          const needed = 10 - dots.green;
+          milestoneMsg.innerHTML = `
+            <p><strong>${dots.green} Completed Visits (🟢)</strong>, <strong>${dots.orange} Upcoming Booking (🟠)</strong>. Complete <strong>${needed} more visit${needed > 1 ? 's' : ''}</strong> (min. $50) to unlock your FREE salon treatment!</p>
+          `;
+        }
+      }
+
+      document.getElementById('acc-stat-visits').textContent = customer.totalVisits || 0;
+      document.getElementById('acc-stat-spent').textContent = '$' + (customer.totalSpent || 0);
+      document.getElementById('acc-stat-redeemed').textContent = customer.rewardsRedeemed || 0;
+
+      // Render Connected Providers Card
+      renderLinkedProviders(customer);
+
+      // Bookings list
+      const bookingsListEl = document.getElementById('acc-upcoming-bookings-list');
+      if (bookingsListEl) {
+        const allAppointments = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+        const cleanPhone = (customer.phone || '').replace(/\D/g, '');
+        const cleanEmail = (customer.email || '').toLowerCase();
+
+        const myBookings = allAppointments.filter(a => {
+          if (a.clientPhone && cleanPhone && a.clientPhone.replace(/\D/g, '') === cleanPhone) return true;
+          if (a.clientEmail && cleanEmail && a.clientEmail.toLowerCase() === cleanEmail) return true;
+          return false;
+        });
+
+        if (myBookings.length === 0) {
+          bookingsListEl.innerHTML = `<div class="empty-bookings-box">No active bookings found. Book below to earn your next loyalty stamp!</div>`;
+        } else {
+          bookingsListEl.innerHTML = myBookings.map(b => `
+            <div class="user-booking-item ${b.status === 'completed' ? 'completed' : 'active'}">
+              <div class="b-item-top">
+                <strong>${b.serviceName}</strong>
+                <span class="b-item-status ${b.status}">${b.status === 'completed' ? '✓ Completed (🟢 Earned)' : '🟠 Scheduled'}</span>
+              </div>
+              <div class="b-item-details">
+                <span>📅 ${b.date} at ${b.time}</span>
+                <span>👤 Tech: ${b.staffName}</span>
+                <span class="ref-code">Ref: ${b.refCode || 'ZN-0000'}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    function renderLinkedProviders(customer) {
+      const container = document.getElementById('linked-providers-list');
+      if (!container) return;
+
+      const provider = customer.loginProvider || 'email';
+      const isGoogleLinked = provider.includes('google') || (customer.email && customer.email.endsWith('@gmail.com'));
+      const isAppleLinked = provider.includes('apple') || (customer.email && (customer.email.endsWith('@icloud.com') || customer.email.endsWith('@privaterelay.appleid.com')));
+      const hasPhone = Boolean(customer.phone);
+      const hasEmail = Boolean(customer.email);
+
+      container.innerHTML = `
+        <div class="provider-row ${isGoogleLinked ? 'linked' : ''}">
+          <div class="provider-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          </div>
+          <div class="provider-info">
+            <strong>Google Account</strong>
+            <span>${isGoogleLinked ? 'Connected (' + (customer.email || 'Verified') + ')' : 'Not connected'}</span>
+          </div>
+          ${!isGoogleLinked ? '<button type="button" class="btn-link-action" id="btn-action-link-google">Connect</button>' : '<span class="status-pill connected">✓ Active</span>'}
+        </div>
+
+        <div class="provider-row ${isAppleLinked ? 'linked' : ''}">
+          <div class="provider-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.56.65-1.06 1.71-.93 2.72 1 .08 2.02-.47 2.64-1.22z"/></svg>
+          </div>
+          <div class="provider-info">
+            <strong>Sign in with Apple</strong>
+            <span>${isAppleLinked ? 'Connected' : 'Not connected'}</span>
+          </div>
+          ${!isAppleLinked ? '<button type="button" class="btn-link-action" id="btn-action-link-apple">Connect</button>' : '<span class="status-pill connected">✓ Active</span>'}
+        </div>
+
+        <div class="provider-row ${hasPhone ? 'linked' : ''}">
+          <div class="provider-icon">📱</div>
+          <div class="provider-info">
+            <strong>NZ Phone SMS</strong>
+            <span>${hasPhone ? customer.phone : 'No phone linked'}</span>
+          </div>
+          ${hasPhone ? '<span class="status-pill connected">✓ Verified</span>' : '<span class="status-pill muted">Optional</span>'}
+        </div>
+      `;
+
+      // Wire account linking buttons
+      document.getElementById('btn-action-link-google')?.addEventListener('click', async () => {
+        if (!isAuthReady()) {
+          showSetupModal();
+          return;
+        }
+        try {
+          const user = await window.ZarahAuth.linkProvider('google');
+          alert('Google account successfully linked!');
+          window.SalonStore.syncAuthenticatedCustomer(user);
+        } catch (err) {
+          alert(err.message || 'Could not link Google account.');
+        }
+      });
+
+      document.getElementById('btn-action-link-apple')?.addEventListener('click', async () => {
+        if (!isAuthReady()) {
+          showSetupModal();
+          return;
+        }
+        try {
+          const user = await window.ZarahAuth.linkProvider('apple');
+          alert('Apple Account successfully linked!');
+          window.SalonStore.syncAuthenticatedCustomer(user);
+        } catch (err) {
+          alert(err.message || 'Could not link Apple Account.');
+        }
+      });
+    }
+
+    // Render Staff Session Modal
+    function renderStaffSessionModal(user) {
+      if (!user) return;
+      const emblemEl = document.getElementById('staff-session-emblem');
+      const nameEl = document.getElementById('staff-session-name');
+      const pillEl = document.getElementById('staff-session-role-pill');
+      const badgeEl = document.getElementById('staff-modal-badge');
+
+      if (user.role === 'admin') {
+        if (emblemEl) emblemEl.textContent = '👑';
+        if (nameEl) nameEl.textContent = user.name || 'Salon Admin / Owner';
+        if (pillEl) {
+          pillEl.textContent = 'Owner / Administrator';
+          pillEl.className = 'badge badge-gold';
+        }
+        if (badgeEl) badgeEl.textContent = 'ADMIN WORKSPACE ACTIVE';
+      } else {
+        if (emblemEl) emblemEl.textContent = '👥';
+        if (nameEl) nameEl.textContent = user.name || 'Staff Member';
+        if (pillEl) {
+          pillEl.textContent = 'Normal Staff';
+          pillEl.className = 'badge badge-rose';
+        }
+        if (badgeEl) badgeEl.textContent = 'STAFF WORKSPACE ACTIVE';
+      }
+    }
+
+    // Staff / Admin Logout
+    btnStaffLogout?.addEventListener('click', () => {
+      if (confirm('Sign out of the salon workspace?')) {
+        window.SalonStore.logoutAll();
+        staffSessionModal.style.display = 'none';
+        updateHeaderAuthButton();
+      }
+    });
+
+    // Customer Logout
+    btnCustomerLogout?.addEventListener('click', async () => {
+      if (confirm('Sign out of your rewards pass?')) {
+        if (window.ZarahAuth && typeof window.ZarahAuth.signOut === 'function') {
+          try {
+            await window.ZarahAuth.signOut();
+          } catch (e) {}
+        }
+        window.SalonStore.logoutCustomer();
+        accountModal.style.display = 'none';
+        updateHeaderAuthButton();
+      }
+    });
+
+    // Update Header Auth Trigger button
+    function updateHeaderAuthButton() {
+      const user = window.SalonStore ? window.SalonStore.getLoggedInUser() : null;
+      const headerBtns = document.querySelectorAll('.customer-auth-trigger');
+
+      headerBtns.forEach(btn => {
+        if (!user) {
+          btn.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Login</span>
+          `;
+          btn.classList.remove('logged-in', 'admin-session', 'staff-session', 'reward-available');
+        } else if (user.role === 'admin') {
+          btn.innerHTML = `
+            <span class="user-dot gold"></span>
+            <span class="user-name">👑 Admin Workspace</span>
+          `;
+          btn.classList.add('logged-in', 'admin-session');
+          btn.classList.remove('reward-available', 'staff-session');
+        } else if (user.role === 'staff') {
+          btn.innerHTML = `
+            <span class="user-dot green"></span>
+            <span class="user-name">👥 Staff: ${(user.name || '').split(' ')[0]}</span>
+          `;
+          btn.classList.add('logged-in', 'staff-session');
+          btn.classList.remove('reward-available', 'admin-session');
+        } else {
+          // Customer
+          const dots = window.SalonStore.calculateDots(user);
+          btn.innerHTML = `
+            <span class="user-dot ${dots.isEligibleForFree ? 'gold' : 'green'}"></span>
+            <span class="user-name">${(user.name || 'Client').split(' ')[0]}</span>
+            <span class="user-dots-summary">${dots.green}/10 🟢</span>
+          `;
+          btn.classList.add('logged-in');
+          if (dots.isEligibleForFree) btn.classList.add('reward-available');
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkConfigurationState();
+      updateHeaderAuthButton();
+
+      document.querySelectorAll('.customer-auth-trigger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.openCustomerAuthModal();
+        });
+      });
+
+      // Auto-open modal if requested via URL param (e.g. ?openLogin=1)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('openLogin') === '1' || urlParams.get('login') === '1') {
+        setTimeout(() => {
+          if (window.openCustomerAuthModal) window.openCustomerAuthModal();
+        }, 120);
+      }
+    });
+
+    window.addEventListener('zarah:auth-changed', updateHeaderAuthButton);
+    window.addEventListener('zarah:customers-updated', () => {
+      const user = window.SalonStore ? window.SalonStore.getLoggedInUser() : null;
+      if (user && user.role !== 'admin' && user.role !== 'staff') {
+        const updated = window.SalonStore.findCustomer(user.id);
+        if (updated) {
+          window.SalonStore.setCurrentCustomer(updated);
+          if (accountModal.style.display === 'flex') {
+            renderAccountModal(updated);
+          }
+        }
+      }
+      updateHeaderAuthButton();
+    });
+  })();
+</script>
+
+<style>
+  /* ========================================================
+     AUTH MODAL STYLING
+     ======================================================== */
+  .auth-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(36, 30, 28, 0.7);
+    backdrop-filter: blur(6px);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .auth-modal-card {
+    background-color: #FAF8F5;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+    width: 100%;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 2rem;
+  }
+
+  .auth-modal-card.account-card {
+    max-width: 580px;
+  }
+
+  .auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .auth-brand-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--gold-champagne-dark);
+    text-transform: uppercase;
+  }
+
+  .auth-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+
+  .auth-close-btn:hover {
+    color: var(--text-espresso);
+  }
+
+  .auth-config-banner {
+    display: flex;
+    gap: 0.75rem;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 0.85rem;
+    margin-bottom: 1.25rem;
+    text-align: left;
+  }
+
+  .auth-config-banner .banner-icon {
+    font-size: 1.2rem;
+  }
+
+  .auth-config-banner .banner-body strong {
+    display: block;
+    font-size: 0.85rem;
+    color: #92400E;
+    margin-bottom: 0.2rem;
+  }
+
+  .auth-config-banner .banner-body p {
+    font-size: 0.78rem;
+    color: #78350F;
+    margin: 0;
+    line-height: 1.35;
+  }
+
+  .auth-intro-heading h3 {
+    font-family: var(--font-serif);
+    font-size: 1.45rem;
+    color: var(--text-espresso);
+    margin-bottom: 0.35rem;
+  }
+
+  .auth-intro-heading p {
+    font-size: 0.88rem;
+    color: var(--text-cocoa);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .auth-mode-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    background: var(--bg-stone);
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .auth-mode-tab {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .auth-mode-tab.active {
+    background: #FFFFFF;
+    color: var(--text-espresso);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .btn-text-link {
+    background: none;
+    border: none;
+    color: var(--text-cocoa);
+    font-size: 0.82rem;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+    transition: color var(--transition-fast);
+  }
+  .btn-text-link:hover {
+    color: var(--accent-rose);
+  }
+
+  .auth-error-box {
+    background-color: #FEE2E2;
+    border: 1px solid #F87171;
+    color: #991B1B;
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.85rem;
+    font-size: 0.82rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .auth-success-box {
+    background-color: #ECFDF5;
+    border: 1px solid #34D399;
+    color: #065F46;
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.85rem;
+    font-size: 0.82rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .auth-sent-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    color: #1E40AF;
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+  }
+
+  /* Staff Session Card */
+  .staff-avatar-large {
+    font-size: 3rem;
+    margin: 0 auto 0.5rem auto;
+  }
+
+  /* SSO Buttons */
+  .auth-social-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .btn-sso {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .btn-sso-google {
+    background-color: #FFFFFF;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .btn-sso-google:hover {
+    background-color: #f8f9fa;
+    border-color: #c6c9cc;
+  }
+
+  .btn-sso-apple {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid #000000;
+  }
+
+  .btn-sso-apple:hover {
+    background-color: #1a1a1a;
+  }
+
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.25rem 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .auth-divider::before, .auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-delicate);
+  }
+
+  .auth-divider span {
+    padding: 0 0.85rem;
+  }
+
+  /* Inputs */
+  .auth-input-group {
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  .auth-input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-espresso);
+    margin-bottom: 0.35rem;
+  }
+
+  .phone-input-wrap {
+    display: flex;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    background-color: #FFFFFF;
+    overflow: hidden;
+  }
+
+  .phone-prefix {
+    padding: 0.75rem 0.85rem;
+    background-color: var(--bg-stone);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-espresso);
+    border-right: 1px solid var(--border-delicate);
+  }
+
+  .phone-input-wrap .form-input {
+    border: none;
+    outline: none;
+    padding: 0.75rem 0.85rem;
+    width: 100%;
+    font-size: 0.92rem;
+  }
+
+  .auth-hint {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+  }
+
+  .otp-field {
+    text-align: center;
+    letter-spacing: 0.35em;
+    font-size: 1.35rem;
+    font-weight: 700;
+    padding: 0.75rem;
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  /* Setup Checklist Modal */
+  .setup-code-block {
+    background: #1E1E1E;
+    color: #4ADE80;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+
+  .setup-steps-list {
+    text-align: left;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    padding-left: 1.25rem;
+    color: var(--text-cocoa);
+  }
+
+  .setup-steps-list li {
+    margin-bottom: 0.45rem;
+  }
+
+  /* Account Security / Linked section */
+  .account-security-section {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+
+  .security-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .security-header h5 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+    margin: 0;
+  }
+
+  .security-badge {
+    background-color: #ECFDF5;
+    color: #065F46;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
+  }
+
+  .security-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+
+  .linked-providers-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .provider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    background-color: var(--bg-stone);
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+  }
+
+  .provider-row.linked {
+    border-color: #E2E8F0;
+  }
+
+  .provider-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+  }
+
+  .provider-info {
+    flex: 1;
+  }
+
+  .provider-info strong {
+    display: block;
+    font-size: 0.84rem;
+    color: var(--text-espresso);
+  }
+
+  .provider-info span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .btn-link-action {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-espresso);
+    cursor: pointer;
+  }
+
+  .btn-link-action:hover {
+    background-color: var(--gold-champagne-light);
+    border-color: var(--gold-champagne);
+  }
+
+  .status-pill {
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+  }
+
+  .status-pill.connected {
+    background-color: #DCFCE7;
+    color: #166534;
+  }
+
+  .status-pill.muted {
+    background-color: #E2E8F0;
+    color: #475569;
+  }
+
+  /* Customer Profile & 10-Dot Stamp Card */
+  .account-profile-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-delicate);
+  }
+
+  .account-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--accent-rose);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .account-meta {
+    flex: 1;
+    text-align: left;
+  }
+
+  .account-meta h3 {
+    font-size: 1.15rem;
+    color: var(--text-espresso);
+    margin-bottom: 0.15rem;
+  }
+
+  .account-contact {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .btn-logout-chip {
+    padding: 0.35rem 0.75rem;
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    color: var(--text-cocoa);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .btn-logout-chip:hover {
+    background-color: var(--state-danger-bg);
+    color: var(--state-danger);
+    border-color: var(--state-danger);
+  }
+
+  .loyalty-stamp-card {
+    background: linear-gradient(145deg, #241E1C, #3A312E);
+    color: #FAF8F5;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 24px rgba(36, 30, 28, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stamp-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
+
+  .stamp-card-title {
+    text-align: left;
+  }
+
+  .stamp-card-title h4 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: #FAF8F5;
+    margin-top: 0.2rem;
+  }
+
+  .stamp-count-pill {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #FAF8F5;
+  }
+
+  .stamp-dots-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 1.25rem 0;
+  }
+
+  .stamp-dots-wrapper .loyalty-dots-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.18);
+    padding: 10px 18px;
+    gap: 12px;
+  }
+
+  .stamp-dots-wrapper .loyalty-dot {
+    width: 22px;
+    height: 22px;
+  }
+
+  .stamp-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .legend-item .loyalty-dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .stamp-milestone-box {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .milestone-box-congrats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
+  }
+
+  .congrats-emoji {
+    font-size: 2.2rem;
+  }
+
+  .milestone-box-congrats strong {
+    color: #F59E0B;
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .milestone-box-congrats p {
+    font-size: 0.82rem;
+    color: #FAF8F5;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Account Stats */
+  .account-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .account-stat-box {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+    text-align: center;
+  }
+
+  .stat-num {
+    display: block;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Bookings list */
+  .account-bookings-section h5 {
+    font-size: 0.9rem;
+    color: var(--text-espresso);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+  }
+
+  .user-booking-item {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem;
+    margin-bottom: 0.65rem;
+    text-align: left;
+  }
+
+  .b-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .b-item-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+  }
+
+  .b-item-status.completed {
+    background-color: var(--state-success-bg);
+    color: var(--state-success);
+  }
+
+  .b-item-status.confirmed {
+    background-color: #FEF3C7;
+    color: #B45309;
+  }
+
+  .b-item-details {
+    display: flex;
+    gap: 0.85rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+
+  .ref-code {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--text-espresso);
+  }
+
+  .empty-bookings-box {
+    background-color: #FFFFFF;
+    border: 1px dashed var(--border-delicate);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+  }
+</style>

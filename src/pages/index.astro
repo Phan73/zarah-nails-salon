@@ -1,0 +1,754 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import salonInfo from '../data/salon-info.json';
+import servicesData from '../data/services.json';
+import galleryData from '../data/gallery.json';
+import GoogleReviewsSection from '../components/GoogleReviewsSection.astro';
+import faqData from '../data/faq.json';
+
+// Pull signature services
+const signatureServices = [
+  servicesData[1].items[0], // BIAB Overlay
+  servicesData[0].items[1], // Signature Gel Manicure
+  servicesData[0].items[3], // Deluxe Gel Pedicure
+  servicesData[2].items[1], // Glazed Chrome
+  servicesData[3].items[0], // Dermaplaning
+  servicesData[4].items[2], // Brow Shape & Tint
+];
+
+const featuredLooks = galleryData.slice(0, 4);
+const topFaqs = faqData[0].questions.concat(faqData[1].questions.slice(0, 2));
+---
+
+<BaseLayout currentPath="/" title="Zarah Nails & Beauty | Auckland's BIAB & Nail Art Studio in Massey">
+  <!-- 1. HERO SECTION -->
+  <section class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          <span>Shop 12, 3 Red Hills Road, Massey • Auckland</span>
+        </div>
+
+        <h1 class="hero-title">
+          Where Meticulous Nail Artistry Meets Restorative Beauty.
+        </h1>
+
+        <p class="hero-description">
+          Specializing in healthy natural nail transformation with BIAB builder gel, bespoke hand-painted nail art, deluxe spa pedicures, and revitalizing skin rituals. Designed for the discerning client in West Auckland.
+        </p>
+
+        <div class="hero-actions">
+          <a href="/booking" class="btn btn-primary hero-btn-main">
+            Book Online
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+          </a>
+          <a href="/services" class="btn btn-secondary hero-btn-secondary">
+            View Pricing Menu
+          </a>
+        </div>
+
+        <div class="hero-amenities">
+          <div class="amenity-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span>Hospital-Grade Sterilization</span>
+          </div>
+          <div class="amenity-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span>Free Storefront Parking</span>
+          </div>
+          <div class="amenity-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span>Walk-ins &amp; Online Booking</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Art Frame -->
+      <div class="hero-visual">
+        <div class="hero-image-card">
+          <img src="/images/gallery/glazed-pearl.svg" alt="Glazed Pearlescent Chrome Nails by Zarah Nails" class="hero-main-img" />
+          <div class="hero-card-floating-badge">
+            <span class="floating-icon">✨</span>
+            <div>
+              <p class="floating-title">Trending Set of the Month</p>
+              <p class="floating-subtitle">Glazed Pearl Chrome over BIAB • $60 NZD</p>
+            </div>
+            <a href="/booking?service=glazed-chrome" class="floating-book-pill">Book</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. QUICK REASSURANCE / SALON PHILOSOPHY -->
+  <section class="philosophy-strip">
+    <div class="container philosophy-grid">
+      <div class="philosophy-card">
+        <span class="philosophy-icon">🌿</span>
+        <h3>Natural Nail Integrity</h3>
+        <p>We prioritize the long-term vitality of your natural nail bed with flexible BIAB overlays and non-damaging soak-off practices.</p>
+      </div>
+      <div class="philosophy-card">
+        <span class="philosophy-icon">🎨</span>
+        <h3>Bespoke Custom Art</h3>
+        <p>From micro-French smile lines to intricate Pinterest references, every set is tailored to your unique shape and personal aesthetic.</p>
+      </div>
+      <div class="philosophy-card">
+        <span class="philosophy-icon">🕊️</span>
+        <h3>Peaceful &amp; Unhurried</h3>
+        <p>No factory rush. Enjoy comfortable seating, soothing ambiance, and attentive technicians who listen to exactly what you want.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SIGNATURE SERVICES & PRICING -->
+  <section class="section signature-services-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">Curated Menu</p>
+        <h2>Signature Treatments &amp; Transparent Pricing</h2>
+        <p class="section-subtitle">
+          All appointments include comprehensive cuticle prep, nail shaping, and premium nourishing finishing oils.
+        </p>
+      </div>
+
+      <div class="services-grid">
+        {signatureServices.map((service) => (
+          <div class="service-card">
+            <div class="service-card-header">
+              <div class="service-title-wrap">
+                <h3 class="service-name">{service.name}</h3>
+                <span class="service-duration">{service.duration}</span>
+              </div>
+              <span class="service-price">{service.priceDisplay}</span>
+            </div>
+            <p class="service-desc">{service.description}</p>
+            <div class="service-card-footer">
+              <a href={`/booking?service=${service.id}`} class="btn btn-subtle btn-sm">
+                Book This Treatment
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="view-all-services-cta">
+        <a href="/services" class="btn btn-primary">
+          View Complete Salon Menu (6 Categories) &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. GALLERY SHOWCASE -->
+  <section class="section gallery-showcase-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">Studio Portfolio</p>
+        <h2>Handcrafted Looks From Our Massey Studio</h2>
+        <p class="section-subtitle">
+          See something you love? Tap any look to book the exact matching treatment with our technicians.
+        </p>
+      </div>
+
+      <div class="gallery-grid">
+        {featuredLooks.map((look) => (
+          <div class="gallery-item-card">
+            <div class="gallery-img-wrap">
+              <img src={look.image} alt={look.title} loading="lazy" />
+              <div class="gallery-overlay">
+                <a href={`/booking?service=${look.serviceId}`} class="btn btn-primary btn-sm">
+                  Book This Look ({look.price})
+                </a>
+              </div>
+            </div>
+            <div class="gallery-card-info">
+              <div class="look-tags">
+                {look.tags.map(t => <span class="tag-pill">{t}</span>)}
+              </div>
+              <h3 class="look-title">{look.title}</h3>
+              <p class="look-desc">{look.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="gallery-cta">
+        <a href="/gallery" class="btn btn-secondary">
+          Explore All Gallery Looks &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. REAL GOOGLE REVIEWS (4+ STARS ONLY) -->
+  <GoogleReviewsSection />
+
+  <!-- 6. FREQUENTLY ASKED QUESTIONS -->
+  <section class="section faq-section">
+    <div class="container-narrow">
+      <div class="section-header">
+        <p class="eyebrow">Help &amp; Advice</p>
+        <h2>Frequently Asked Questions</h2>
+        <p class="section-subtitle">
+          Have a question before your visit? Here is everything you need to know about our salon policies and treatments.
+        </p>
+      </div>
+
+      <div class="faq-accordion">
+        {topFaqs.map((faq) => (
+          <details class="faq-item">
+            <summary class="faq-question">
+              <span>{faq.q}</span>
+              <span class="faq-icon" aria-hidden="true">+</span>
+            </summary>
+            <div class="faq-answer">
+              <p>{faq.a}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+
+      <div class="faq-more-link">
+        <a href="/policies">Read Our Full Salon Policies &amp; Aftercare Guide &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. LOCATION & WALK-IN BANNER -->
+  <section class="location-banner-section">
+    <div class="container location-banner-inner">
+      <div class="banner-text">
+        <p class="eyebrow" style="color: var(--gold-champagne-light);">Convenient Massey Location</p>
+        <h2>Ready for Beautiful Nails &amp; Total Relaxation?</h2>
+        <p>
+          Visit us at Shop 12, 3 Red Hills Road, Massey (corner of Don Buck Road). Abundant free parking directly in front of the door.
+        </p>
+        <div class="banner-buttons">
+          <a href="/booking" class="btn btn-accent">Book Your Slot Now</a>
+          <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="btn btn-secondary" style="border-color: #FAF8F5; color: #FAF8F5;">
+            Call: {salonInfo.contact.phoneDisplay}
+          </a>
+        </div>
+      </div>
+      <div class="banner-hours-box">
+        <h3>Studio Hours</h3>
+        <ul>
+          {salonInfo.hours.map((h) => (
+            <li>
+              <span>{h.days}</span>
+              <strong>{h.hours}</strong>
+            </li>
+          ))}
+        </ul>
+        <a href={salonInfo.address.googleMapsUrl} target="_blank" rel="noopener noreferrer" class="banner-map-link">
+          Open in Google Maps &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero-section {
+    background: linear-gradient(180deg, var(--bg-porcelain) 0%, #F5EFE9 100%);
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    padding-bottom: clamp(3rem, 7vw, 5.5rem);
+    border-bottom: 1px solid var(--border-delicate);
+  }
+
+  .hero-container {
+    display: grid;
+    grid-template-columns: 1.15fr 0.95fr;
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-cocoa);
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--accent-rose);
+  }
+
+  .hero-title {
+    margin-bottom: 1.25rem;
+    color: var(--text-espresso);
+  }
+
+  .hero-description {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.65;
+    color: var(--text-cocoa);
+    margin-bottom: 2rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-btn-main {
+    padding: 1rem 2.25rem;
+    font-size: 1.05rem;
+  }
+
+  .hero-amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-delicate);
+  }
+
+  .amenity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--text-cocoa);
+  }
+
+  .amenity-item svg {
+    color: var(--accent-rose);
+  }
+
+  /* Hero Visual */
+  .hero-visual {
+    position: relative;
+  }
+
+  .hero-image-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-modal);
+    border: 8px solid #FFFFFF;
+  }
+
+  .hero-main-img {
+    width: 100%;
+    aspect-ratio: 4 / 4.6;
+    object-fit: cover;
+  }
+
+  .hero-card-floating-badge {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    right: 1.25rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    box-shadow: 0 8px 24px rgba(36, 30, 28, 0.12);
+  }
+
+  .floating-icon {
+    font-size: 1.4rem;
+  }
+
+  .floating-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+  }
+
+  .floating-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .floating-book-pill {
+    margin-left: auto;
+    padding: 0.4rem 0.9rem;
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    border-radius: var(--radius-full);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .floating-book-pill:hover {
+    background-color: var(--accent-rose);
+  }
+
+  /* Philosophy Strip */
+  .philosophy-strip {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--border-delicate);
+    padding: 3rem 0;
+  }
+
+  .philosophy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2.5rem;
+  }
+
+  .philosophy-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .philosophy-icon {
+    font-size: 1.8rem;
+  }
+
+  .philosophy-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .philosophy-card p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  /* Section Common */
+  .section {
+    padding-top: clamp(3.5rem, 7vw, 6rem);
+    padding-bottom: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .section-header {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto clamp(2.5rem, 5vw, 4rem) auto;
+  }
+
+  .section-subtitle {
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Signature Services */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .service-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+    transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  }
+
+  .service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+    border-color: var(--accent-rose);
+  }
+
+  .service-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .service-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .service-duration {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 0.2rem;
+  }
+
+  .service-price {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--accent-rose);
+    white-space: nowrap;
+  }
+
+  .service-desc {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-cocoa);
+  }
+
+  .btn-sm {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+  }
+
+  .view-all-services-cta {
+    text-align: center;
+    margin-top: 3rem;
+  }
+
+  /* Gallery Grid */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .gallery-item-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .gallery-img-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1 / 1.15;
+  }
+
+  .gallery-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-smooth);
+  }
+
+  .gallery-item-card:hover .gallery-img-wrap img {
+    transform: scale(1.04);
+  }
+
+  .gallery-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(36, 30, 28, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+
+  .gallery-item-card:hover .gallery-overlay {
+    opacity: 1;
+  }
+
+  .gallery-card-info {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .look-tags {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .tag-pill {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.15rem 0.45rem;
+    background-color: var(--bg-stone);
+    border-radius: var(--radius-full);
+    color: var(--text-cocoa);
+  }
+
+  .look-title {
+    font-size: 1.05rem;
+  }
+
+  .look-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .gallery-cta {
+    text-align: center;
+    margin-top: 3rem;
+  }
+
+
+  /* FAQs */
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .faq-item {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.15rem 1.5rem;
+    transition: border-color var(--transition-fast);
+  }
+
+  .faq-item[open] {
+    border-color: var(--accent-rose);
+  }
+
+  .faq-question {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-espresso);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-icon {
+    font-size: 1.35rem;
+    color: var(--accent-rose);
+    transition: transform var(--transition-fast);
+  }
+
+  .faq-item[open] .faq-icon {
+    transform: rotate(45deg);
+  }
+
+  .faq-answer {
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-delicate);
+    margin-top: 0.85rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-cocoa);
+  }
+
+  .faq-more-link {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .faq-more-link a {
+    color: var(--accent-rose);
+    font-weight: 600;
+  }
+
+  /* Location Banner */
+  .location-banner-section {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    padding: clamp(3rem, 6vw, 5rem) 0;
+  }
+
+  .location-banner-inner {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .banner-text h2 {
+    color: #FFFFFF;
+    margin-bottom: 1rem;
+  }
+
+  .banner-text p {
+    color: #D6CBC4;
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
+  }
+
+  .banner-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .banner-hours-box {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+  }
+
+  .banner-hours-box h3 {
+    color: #FFFFFF;
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+  }
+
+  .banner-hours-box ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    font-size: 0.88rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .banner-hours-box li {
+    display: flex;
+    justify-content: space-between;
+    color: #D6CBC4;
+  }
+
+  .banner-hours-box strong {
+    color: var(--gold-champagne-light);
+  }
+
+  .banner-map-link {
+    color: var(--gold-champagne-light);
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  @media (max-width: 900px) {
+    .hero-container {
+      grid-template-columns: 1fr;
+    }
+    .hero-visual {
+      order: -1;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .location-banner-inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

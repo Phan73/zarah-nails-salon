@@ -1,0 +1,254 @@
+[
+  {
+    "category": "Nails & Natural Care",
+    "description": "Nourishing, meticulous care for natural hands and feet using premium non-toxic polishes and fortifying botanicals.",
+    "items": [
+      {
+        "id": "classic-manicure",
+        "name": "Classic Spa Manicure",
+        "duration": "35 mins",
+        "price": 35,
+        "priceDisplay": "$35 NZD",
+        "description": "Nail trimming, shaping, warm cuticle soak, cuticle oil conditioning, light hand massage, and regular high-shine polish.",
+        "popular": false
+      },
+      {
+        "id": "gel-manicure",
+        "name": "Signature Gel / Shellac Manicure",
+        "duration": "45 mins",
+        "price": 45,
+        "priceDisplay": "$45 NZD",
+        "description": "Precision cuticle cleanup, dry prep, long-lasting LED-cured gel polish with zero dry time and up to 3 weeks of chip-free wear.",
+        "popular": true
+      },
+      {
+        "id": "classic-spa-pedicure",
+        "name": "Signature Spa Pedicure",
+        "duration": "45 mins",
+        "price": 50,
+        "priceDisplay": "$50 NZD",
+        "description": "Relaxing warm mineral foot soak, callus buffing, exfoliating scrub, nail shaping, cuticle care, and regular polish.",
+        "popular": false
+      },
+      {
+        "id": "deluxe-gel-pedicure",
+        "name": "Deluxe Gel Pedicure & Foot Massage",
+        "duration": "60 mins",
+        "price": 65,
+        "priceDisplay": "$65 NZD",
+        "description": "Full spa foot treatment including intensive callus smoothing, warm hot towel wrap, 15-minute leg massage, and LED gel polish.",
+        "popular": true
+      },
+      {
+        "id": "combo-gel-mani-pedi",
+        "name": "Luxe Gel Mani & Pedi Combo",
+        "duration": "90 mins",
+        "price": 99,
+        "priceDisplay": "$99 NZD",
+        "description": "The complete head-to-toe polish package with long-lasting gel finish on both hands and feet.",
+        "popular": true
+      }
+    ]
+  },
+  {
+    "category": "Nail Enhancements & BIAB",
+    "description": "Strength, architectural length, and natural nail fortification crafted by skilled nail technicians.",
+    "items": [
+      {
+        "id": "biab-full-overlay",
+        "name": "BIAB (Builder in a Bottle) Overlay",
+        "duration": "60 mins",
+        "price": 60,
+        "priceDisplay": "$60 NZD",
+        "description": "Thick strengthening builder gel applied over natural nails to promote healthy growth, prevent breaking, and deliver a sleek finish.",
+        "popular": true
+      },
+      {
+        "id": "biab-infill",
+        "name": "BIAB Rebalance & Infill",
+        "duration": "50 mins",
+        "price": 50,
+        "priceDisplay": "$50 NZD",
+        "description": "Maintenance fill-in for outgrown BIAB builder gel, reshaping, cuticle re-prep, and fresh gel color.",
+        "popular": false
+      },
+      {
+        "id": "acrylic-full-set",
+        "name": "Full Set Acrylic Extensions (with Gel)",
+        "duration": "75 mins",
+        "price": 70,
+        "priceDisplay": "$70 NZD",
+        "description": "Custom tip application or sculpted forms, high-grade acrylic overlay, custom length, shaping (almond, coffin, square), and gel color.",
+        "popular": true
+      },
+      {
+        "id": "acrylic-infill",
+        "name": "Acrylic Infill & Color Change",
+        "duration": "50 mins",
+        "price": 55,
+        "priceDisplay": "$55 NZD",
+        "description": "Rebalancing outgrown acrylics, re-contouring, and fresh choice of gel polish.",
+        "popular": false
+      },
+      {
+        "id": "sns-dipping-powder",
+        "name": "SNS Dipping Powder Set",
+        "duration": "50 mins",
+        "price": 55,
+        "priceDisplay": "$55 NZD",
+        "description": "Vitamin and calcium-enriched dip powder for lightweight strength without UV light curing.",
+        "popular": false
+      },
+      {
+        "id": "acrylic-removal",
+        "name": "Gentle Removal & Conditioning Treatment",
+        "duration": "30 mins",
+        "price": 25,
+        "priceDisplay": "$25 NZD",
+        "description": "Safe, non-damaging soak-off of acrylic or hard gel followed by keratin nail strengthener and nourishing cuticle elixir.",
+        "popular": false
+      }
+    ]
+  },
+  {
+    "category": "Bespoke Nail Art & Upgrades",
+    "description": "Hand-painted motifs, chrome powders, French tips, and 3D embellishments tailored to your aesthetic.",
+    "items": [
+      {
+        "id": "french-ombre",
+        "name": "Modern French / Baby Boomer Ombre",
+        "duration": "+15 mins",
+        "price": 15,
+        "priceDisplay": "+$15 NZD",
+        "description": "Soft gradient fade or crisp micro-French smile lines on all 10 fingers.",
+        "popular": true
+      },
+      {
+        "id": "glazed-chrome",
+        "name": "Glazed Donut / Mirror Chrome Finish",
+        "duration": "+10 mins",
+        "price": 15,
+        "priceDisplay": "+$15 NZD",
+        "description": "High-shine metallic or pearlescent chrome powder buffed over gel for an ethereal reflective sheen.",
+        "popular": true
+      },
+      {
+        "id": "feature-nail-art",
+        "name": "Feature Nail Art (2 Accent Nails)",
+        "duration": "+15 mins",
+        "price": 10,
+        "priceDisplay": "+$10 NZD",
+        "description": "Hand-drawn art, swirls, florals, aura airbrush, or foil accents on two selected nails.",
+        "popular": false
+      },
+      {
+        "id": "intricate-full-art",
+        "name": "Intricate Custom Nail Art (All 10 Nails)",
+        "duration": "+30 mins",
+        "price": 35,
+        "priceDisplay": "from $35 NZD",
+        "description": "Full set detailed custom artwork, 3D charms, crystals, abstract geometry, or character design.",
+        "popular": true
+      }
+    ]
+  },
+  {
+    "category": "Facials & Skin Rejuvenation",
+    "description": "Targeted clinical and relaxing facial treatments designed to restore natural radiance and clarity.",
+    "items": [
+      {
+        "id": "dermaplaning-glow",
+        "name": "Dermaplaning Radiance Facial",
+        "duration": "45 mins",
+        "price": 75,
+        "priceDisplay": "$75 NZD",
+        "description": "Medical-grade blade exfoliation to remove dead surface skin cells and peach fuzz for an ultra-smooth, glowing canvas.",
+        "popular": true
+      },
+      {
+        "id": "microdermabrasion",
+        "name": "Diamond Microdermabrasion Treatment",
+        "duration": "50 mins",
+        "price": 85,
+        "priceDisplay": "$85 NZD",
+        "description": "Gentle mechanical vacuum exfoliation to refine pores, soften fine lines, and even out uneven skin texture.",
+        "popular": false
+      },
+      {
+        "id": "deep-cleansing-facial",
+        "name": "Deep Pore Cleansing & Hydration Facial",
+        "duration": "60 mins",
+        "price": 70,
+        "priceDisplay": "$70 NZD",
+        "description": "Steam, gentle extractions, soothing botanical mask, and replenishing hyaluronic serum infusion.",
+        "popular": false
+      }
+    ]
+  },
+  {
+    "category": "Threading, Waxing & Brows",
+    "description": "Precise facial hair removal and brow sculpting tailored to your facial symmetry.",
+    "items": [
+      {
+        "id": "eyebrow-threading",
+        "name": "Eyebrow Threading & Shaping",
+        "duration": "15 mins",
+        "price": 15,
+        "priceDisplay": "$15 NZD",
+        "description": "Traditional thread technique for sharp, clean arches without chemicals or skin irritation.",
+        "popular": true
+      },
+      {
+        "id": "full-face-threading",
+        "name": "Full Face Threading",
+        "duration": "35 mins",
+        "price": 40,
+        "priceDisplay": "$40 NZD",
+        "description": "Forehead, eyebrows, upper lip, chin, and sides of face for a seamless finish.",
+        "popular": false
+      },
+      {
+        "id": "brow-shape-tint",
+        "name": "Eyebrow Shape & Henna/Custom Tint",
+        "duration": "25 mins",
+        "price": 30,
+        "priceDisplay": "$30 NZD",
+        "description": "Custom pigment matching to define and frame your natural brows, lasting up to 4 weeks.",
+        "popular": true
+      },
+      {
+        "id": "waxing-arms-legs",
+        "name": "Half Leg Wax",
+        "duration": "25 mins",
+        "price": 30,
+        "priceDisplay": "$30 NZD",
+        "description": "Smooth, hygienic strip waxing leaving skin silky for weeks.",
+        "popular": false
+      }
+    ]
+  },
+  {
+    "category": "Makeup & Special Occasions",
+    "description": "Celebration, formal, and bridal makeup artistry tailored to your skin tone and event lighting.",
+    "items": [
+      {
+        "id": "glamour-makeup",
+        "name": "Full Event & Evening Glamour Makeup",
+        "duration": "60 mins",
+        "price": 80,
+        "priceDisplay": "$80 NZD",
+        "description": "Flawless skin base, sculpted contour, custom eye look, and complimentary luxury strip lashes.",
+        "popular": true
+      },
+      {
+        "id": "bridal-makeup",
+        "name": "Bridal Consultation & Day Makeup",
+        "duration": "90 mins",
+        "price": 150,
+        "priceDisplay": "$150 NZD",
+        "description": "Long-wear HD camera-ready makeup, skin priming, waterproof finishing, and touch-up kit.",
+        "popular": false
+      }
+    ]
+  }
+]

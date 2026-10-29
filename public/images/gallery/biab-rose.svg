@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBF9F7"/>
+      <stop offset="100%" stop-color="#EBE3DC"/>
+    </linearGradient>
+    <linearGradient id="biab" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F7DFD8"/>
+      <stop offset="60%" stop-color="#ECCBC3"/>
+      <stop offset="100%" stop-color="#DEB6AC"/>
+    </linearGradient>
+    <filter id="softShadow4" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#241E1C" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="600" height="700" fill="url(#bg4)"/>
+  <circle cx="480" cy="480" r="140" fill="#EFE5DB" opacity="0.6"/>
+
+  <g filter="url(#softShadow4)" transform="translate(190, 110)">
+    <!-- Squoval BIAB Natural shape -->
+    <path d="M65,40 C105,40 145,40 145,100 L145,390 C145,410 65,410 65,390 L65,100 C65,40 65,40 65,40 Z" 
+          fill="url(#biab)"/>
+    <path d="M72,380 C95,395 115,395 138,380" fill="none" stroke="#C4968C" stroke-width="2" opacity="0.6"/>
+    <!-- Glass apex shine -->
+    <path d="M85,60 Q115,130 118,320" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.85"/>
+  </g>
+
+  <!-- Title Badge overlay -->
+  <rect x="50" y="580" width="500" height="75" rx="12" fill="#FFFFFF" opacity="0.92" filter="url(#softShadow4)"/>
+  <text x="80" y="614" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#241E1C">Structured BIAB Rose</text>
+  <text x="80" y="636" font-family="sans-serif" font-size="13" font-weight="500" letter-spacing="1.5" fill="#8C7A70">STRENGTHENING NATURAL APEX</text>
+  <text x="470" y="625" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#B58A7E" text-anchor="end">$60</text>
+</svg>

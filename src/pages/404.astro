@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import salonInfo from '../data/salon-info.json';
+---
+
+<BaseLayout
+  currentPath="/404"
+  title="Page Not Found | Zarah Nails & Beauty Massey"
+  description="Sorry, the page you are looking for cannot be found. Return to Zarah Nails & Beauty Massey."
+>
+  <section class="section not-found-section">
+    <div class="container text-center not-found-box">
+      <span class="eyebrow">404 Error</span>
+      <h1 class="font-serif">Page Not Found</h1>
+      <p class="not-found-desc">
+        We couldn't find the page you were looking for. It may have moved, or the link might be out of date.
+      </p>
+
+      <div class="not-found-actions">
+        <a href="/" class="btn btn-primary">Return to Homepage</a>
+        <a href="/services" class="btn btn-secondary">View Service Menu</a>
+        <a href="/booking" class="btn btn-accent">Book Appointment</a>
+      </div>
+
+      <div class="not-found-help">
+        <p>Need urgent assistance? Call our Massey salon directly:</p>
+        <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="phone-link">
+          {salonInfo.contact.phoneDisplay}
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found-section {
+    padding: 6rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .not-found-box {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .not-found-desc {
+    font-size: 1.05rem;
+    color: var(--text-cocoa);
+    line-height: 1.6;
+  }
+
+  .not-found-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+
+  .not-found-help {
+    border-top: 1px solid var(--border-delicate);
+    padding-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .phone-link {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+    display: block;
+    margin-top: 0.35rem;
+  }
+
+  .phone-link:hover {
+    color: var(--accent-rose);
+  }
+</style>

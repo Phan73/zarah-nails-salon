@@ -1,0 +1,17 @@
+{
+  "name": "zarahnails",
+  "version": "1.0.0",
+  "description": "Zarah Nails & Beauty Salon - Massey, Auckland",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host",
+    "start": "astro dev --host",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "node --test test/auth.test.js"
+  },
+  "dependencies": {
+    "astro": "^7.4.1",
+    "firebase": "^13.0.0"
+  }
+}

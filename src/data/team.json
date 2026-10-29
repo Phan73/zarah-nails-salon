@@ -1,0 +1,38 @@
+[
+  {
+    "id": "zarah",
+    "name": "Zarah",
+    "role": "Master Nail Artist & Salon Founder",
+    "bio": "Over 12 years of specialized artistry in complex nail sculpting, BIAB rejuvenation, and bespoke nail aesthetics.",
+    "specialties": ["BIAB Structure", "Intricate Nail Art", "Bridal Sets"],
+    "phone": "+64 210 839 8791",
+    "active": true
+  },
+  {
+    "id": "priya",
+    "name": "Priya",
+    "role": "Senior Beauty & Skincare Specialist",
+    "bio": "Certified aesthetician specialized in precision facial threading, dermaplaning, and revitalizing skin treatments.",
+    "specialties": ["Dermaplaning", "Brow Threading & Tint", "Hydrating Facials"],
+    "phone": "+64 21 368 1481",
+    "active": true
+  },
+  {
+    "id": "chloe",
+    "name": "Chloe",
+    "role": "Nail Technician & Pedicurist",
+    "bio": "Passionate about healthy cuticle care, soothing spa pedicure therapies, and sleek chrome finishes.",
+    "specialties": ["Deluxe Spa Pedicure", "Gel Polish", "Chrome Finishes"],
+    "phone": "+64 210 839 8791",
+    "active": true
+  },
+  {
+    "id": "any-available",
+    "name": "First Available Technician",
+    "role": "Fastest Booking Slot",
+    "bio": "Select this option to see the earliest available opening with any of our qualified artists.",
+    "specialties": ["All Treatments"],
+    "phone": "+64 210 839 8791",
+    "active": true
+  }
+]

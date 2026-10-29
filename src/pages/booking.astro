@@ -1,0 +1,1210 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import servicesData from '../data/services.json';
+import teamData from '../data/team.json';
+import salonInfo from '../data/salon-info.json';
+
+// Flatten all services for the dropdown / selector
+const allServices = servicesData.flatMap(cat => cat.items);
+---
+
+<BaseLayout
+  currentPath="/booking"
+  title="Book Appointment Online | Zarah Nails & Beauty Massey"
+  description="Reserve your appointment for BIAB nail care, gel manicures, luxury pedicures, or custom nail art with our skilled technicians in Massey, Auckland."
+>
+  <script src="/js/salon-store.js" is:inline></script>
+  <section class="booking-page-header">
+    <div class="container text-center">
+      <p class="eyebrow">Online Reservations</p>
+      <h1>Book Your Salon Appointment</h1>
+      <p class="header-desc">
+        Select your desired treatment and preferred technician below. You will receive an immediate confirmation with directions and appointment reminders.
+      </p>
+
+      <!-- Walk-in / Phone Reassurance Bar -->
+      <div class="booking-phone-strip">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        <span>Prefer to book by phone or have a custom question? Call us anytime:</span>
+        <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="phone-number-highlight">
+          {salonInfo.contact.phoneDisplay}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Booking App Island -->
+  <section class="section booking-app-section">
+    <div class="container-narrow">
+      <div class="booking-box" id="booking-widget">
+        <!-- Progress Steps -->
+        <div class="booking-steps-bar">
+          <div class="step-indicator active" id="step-ind-1">
+            <span class="step-num">1</span>
+            <span class="step-text">Treatment</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-indicator" id="step-ind-2">
+            <span class="step-num">2</span>
+            <span class="step-text">Technician &amp; Time</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-indicator" id="step-ind-3">
+            <span class="step-num">3</span>
+            <span class="step-text">Details</span>
+          </div>
+        </div>
+
+        <form id="booking-form" novalidate>
+          <!-- STEP 1: SELECT SERVICE -->
+          <div class="step-panel active" id="step-panel-1">
+            <h2 class="panel-heading">Choose Your Service</h2>
+            <p class="panel-sub">Select the primary treatment you would like to receive.</p>
+
+            <div class="service-selection-list">
+              {allServices.map((service) => (
+                <label class="service-option-label" data-service-id={service.id}>
+                  <input
+                    type="radio"
+                    name="selectedService"
+                    value={service.id}
+                    data-name={service.name}
+                    data-price={service.priceDisplay}
+                    data-duration={service.duration}
+                    required
+                  />
+                  <div class="service-option-content">
+                    <div class="service-opt-header">
+                      <span class="service-opt-name">{service.name}</span>
+                      <span class="service-opt-price">{service.priceDisplay}</span>
+                    </div>
+                    <span class="service-opt-duration">Duration: {service.duration}</span>
+                    <p class="service-opt-desc">{service.description}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div class="step-footer">
+              <button type="button" class="btn btn-primary" id="btn-to-step-2">
+                Continue to Technician &amp; Time &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: SELECT TECHNICIAN & DATE/TIME -->
+          <div class="step-panel" id="step-panel-2">
+            <h2 class="panel-heading">Technician &amp; Preferred Time</h2>
+            <p class="panel-sub">Choose your artist and when you would like to visit.</p>
+
+            <!-- Staff Picker -->
+            <div class="form-group">
+              <label class="form-label">Preferred Technician</label>
+              <div class="staff-picker-grid">
+                {teamData.map((staff) => (
+                  <label class="staff-option-card">
+                    <input
+                      type="radio"
+                      name="selectedStaff"
+                      value={staff.id}
+                      data-name={staff.name}
+                      checked={staff.id === 'any-available'}
+                    />
+                    <div class="staff-option-content">
+                      <span class="staff-opt-name">{staff.name}</span>
+                      <span class="staff-opt-role">{staff.role}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <!-- Date Picker -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="booking-date" class="form-label">Select Date</label>
+                <input
+                  type="date"
+                  id="booking-date"
+                  name="bookingDate"
+                  class="form-input"
+                  required
+                />
+              </div>
+
+              <!-- Time Slot Picker -->
+              <div class="form-group">
+                <label class="form-label">Available Time Slots</label>
+                <div class="time-slots-grid" id="time-slots-container">
+                  <button type="button" class="time-slot-btn" data-time="09:30 AM">09:30 AM</button>
+                  <button type="button" class="time-slot-btn" data-time="10:30 AM">10:30 AM</button>
+                  <button type="button" class="time-slot-btn" data-time="11:30 AM">11:30 AM</button>
+                  <button type="button" class="time-slot-btn" data-time="01:00 PM">01:00 PM</button>
+                  <button type="button" class="time-slot-btn" data-time="02:15 PM">02:15 PM</button>
+                  <button type="button" class="time-slot-btn" data-time="03:30 PM">03:30 PM</button>
+                  <button type="button" class="time-slot-btn" data-time="04:45 PM">04:45 PM</button>
+                </div>
+                <input type="hidden" name="selectedTime" id="selected-time-input" required />
+              </div>
+            </div>
+
+            <div class="step-footer split">
+              <button type="button" class="btn btn-subtle" id="btn-back-to-step-1">
+                &larr; Back to Services
+              </button>
+              <button type="button" class="btn btn-primary" id="btn-to-step-3">
+                Continue to Details &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: CONTACT INFORMATION -->
+          <div class="step-panel" id="step-panel-3">
+            <h2 class="panel-heading">Your Contact Details</h2>
+            <p class="panel-sub">We will send your booking confirmation and SMS reminder here.</p>
+
+            <!-- Loyalty Status & Auth Banner -->
+            <div class="booking-loyalty-banner" id="booking-loyalty-banner">
+              <div class="banner-left">
+                <span class="user-badge-icon" id="b-banner-icon">✨</span>
+                <div>
+                  <strong id="b-banner-title">Collect 10-Dot Loyalty Rewards</strong>
+                  <p class="b-auth-sub" id="b-banner-desc">Sign in with your account or phone to auto-fill details and earn your free service.</p>
+                </div>
+              </div>
+              <div id="b-banner-action-wrap">
+                <button type="button" class="btn btn-subtle btn-sm customer-auth-trigger" id="b-btn-auth-trigger">Login</button>
+              </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="booking-summary-banner" id="summary-banner">
+              <div class="summary-line">
+                <span class="sum-label">Selected Treatment:</span>
+                <strong id="sum-service-name">-</strong>
+              </div>
+              <div class="summary-line">
+                <span class="sum-label">Price &amp; Duration:</span>
+                <span id="sum-price-duration">-</span>
+              </div>
+              <div class="summary-line">
+                <span class="sum-label">Technician:</span>
+                <span id="sum-staff-name">-</span>
+              </div>
+              <div class="summary-line">
+                <span class="sum-label">Date &amp; Time:</span>
+                <span id="sum-datetime">-</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="client-name" class="form-label">Full Name *</label>
+              <input
+                type="text"
+                id="client-name"
+                name="clientName"
+                class="form-input"
+                placeholder="e.g. Sarah Jenkins"
+                required
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="client-phone" class="form-label">Mobile Phone (NZ) *</label>
+                <input
+                  type="tel"
+                  id="client-phone"
+                  name="clientPhone"
+                  class="form-input"
+                  placeholder="e.g. 021 123 4567"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="client-email" class="form-label">Email Address *</label>
+                <input
+                  type="email"
+                  id="client-email"
+                  name="clientEmail"
+                  class="form-input"
+                  placeholder="e.g. sarah@example.co.nz"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="client-notes" class="form-label">Special Requests / Nail Art Ideas (Optional)</label>
+              <textarea
+                id="client-notes"
+                name="clientNotes"
+                class="form-textarea"
+                rows="3"
+                placeholder="Let us know if you need existing gel/acrylic removal or have a specific design reference in mind."
+              ></textarea>
+            </div>
+
+            <div class="step-footer split">
+              <button type="button" class="btn btn-subtle" id="btn-back-to-step-2">
+                &larr; Back to Time Slot
+              </button>
+              <button type="submit" class="btn btn-accent" id="btn-confirm-booking">
+                Confirm &amp; Book Appointment
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- SUCCESS CONFIRMATION STATE -->
+        <div class="booking-success-card" id="booking-success-panel" style="display: none;">
+          <div class="success-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3D6A52" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <h2>Appointment Reserved!</h2>
+          <p class="success-subtitle">
+            Thank you, <span id="conf-client-name"></span>! Your reservation has been logged into our salon schedule.
+          </p>
+
+          <div class="confirmation-ticket">
+            <div class="ticket-row">
+              <span>Booking Reference:</span>
+              <strong id="conf-ref-code" class="ref-badge">ZN-7492</strong>
+            </div>
+            <div class="ticket-row">
+              <span>Service:</span>
+              <strong id="conf-service">-</strong>
+            </div>
+            <div class="ticket-row">
+              <span>Technician:</span>
+              <span id="conf-staff">-</span>
+            </div>
+            <div class="ticket-row">
+              <span>Date &amp; Time:</span>
+              <strong id="conf-datetime">-</strong>
+            </div>
+            <div class="ticket-row">
+              <span>Salon Location:</span>
+              <span>Shop 12, 3 Red Hills Road, Massey</span>
+            </div>
+            <div class="ticket-row loyalty-ticket-row">
+              <div class="loyalty-ticket-left">
+                <span>Loyalty Stamp Card:</span>
+                <span class="loyalty-ticket-sub">🟠 1 Pending Orange Stamp reserved!</span>
+              </div>
+              <div id="conf-loyalty-dots"></div>
+            </div>
+          </div>
+
+          <div class="success-instructions">
+            <p><strong>Reminders:</strong> We've prepared your confirmation text. Free customer parking is located directly outside the salon plaza on Red Hills Road. If you need to make changes, simply call 0210 839 8791.</p>
+          </div>
+
+          <div class="success-actions">
+            <a href="/" class="btn btn-primary">Return to Homepage</a>
+            <a href={salonInfo.address.googleMapsUrl} target="_blank" rel="noopener noreferrer" class="btn btn-subtle">
+              Open Directions in Google Maps
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  // Dynamic hydration from store (preserves server-rendered HTML if not customized)
+  function hydrateBookingOptions() {
+    // 1. Services - Only re-render if customized services exist in localStorage
+    try {
+      const stored = localStorage.getItem('zarah_services');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const serviceListEl = document.querySelector('.service-selection-list');
+          if (serviceListEl) {
+            const flattened = [];
+            parsed.forEach(cat => {
+              if (cat && Array.isArray(cat.items)) {
+                cat.items.forEach(item => flattened.push(item));
+              } else if (cat && cat.id && cat.name) {
+                flattened.push(cat);
+              }
+            });
+            if (flattened.length > 0) {
+              serviceListEl.innerHTML = flattened.map(service => `
+                <label class="service-option-label" data-service-id="${service.id}">
+                  <input
+                    type="radio"
+                    name="selectedService"
+                    value="${service.id}"
+                    data-name="${service.name}"
+                    data-price="${service.priceDisplay || '$' + service.price + ' NZD'}"
+                    data-duration="${service.duration}"
+                    required
+                  />
+                  <div class="service-option-content">
+                    <div class="service-opt-header">
+                      <span class="service-opt-name">${service.name}</span>
+                      <span class="service-opt-price">${service.priceDisplay || '$' + service.price + ' NZD'}</span>
+                    </div>
+                    <span class="service-opt-duration">Duration: ${service.duration}</span>
+                    <p class="service-opt-desc">${service.description || ''}</p>
+                  </div>
+                </label>
+              `).join('');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading stored services', e);
+    }
+
+    // 2. Staff - Only re-render if customized team exists in localStorage
+    try {
+      const stored = localStorage.getItem('zarah_team');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const staffGridEl = document.querySelector('.staff-picker-grid');
+          if (staffGridEl) {
+            staffGridEl.innerHTML = parsed.map(staff => `
+              <label class="staff-option-card">
+                <input
+                  type="radio"
+                  name="selectedStaff"
+                  value="${staff.id}"
+                  data-name="${staff.name}"
+                  ${staff.id === 'any-available' ? 'checked' : ''}
+                />
+                <div class="staff-option-content">
+                  <span class="staff-opt-name">${staff.name}</span>
+                  <span class="staff-opt-role">${staff.role || ''}</span>
+                </div>
+              </label>
+            `).join('');
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading stored team', e);
+    }
+
+    // Select service from URL param if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const preSelectedService = urlParams.get('service');
+    if (preSelectedService) {
+      const radio = document.querySelector(`input[name="selectedService"][value="${preSelectedService}"]`);
+      if (radio) {
+        radio.checked = true;
+        const label = radio.closest('.service-option-label');
+        if (label) label.classList.add('selected');
+      }
+    }
+
+    const preSelectedStaff = urlParams.get('staff');
+    if (preSelectedStaff) {
+      const staffRadio = document.querySelector(`input[name="selectedStaff"][value="${preSelectedStaff}"]`);
+      if (staffRadio) {
+        staffRadio.checked = true;
+        const card = staffRadio.closest('.staff-option-card');
+        if (card) card.classList.add('selected');
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', hydrateBookingOptions);
+  window.addEventListener('zarah:services-updated', hydrateBookingOptions);
+  window.addEventListener('zarah:team-updated', hydrateBookingOptions);
+
+  // Initialize min booking date to today
+  const dateInput = document.getElementById('booking-date');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    dateInput.value = today;
+  }
+
+  // Step Navigation Elements
+  const step1 = document.getElementById('step-panel-1');
+  const step2 = document.getElementById('step-panel-2');
+  const step3 = document.getElementById('step-panel-3');
+  const ind1 = document.getElementById('step-ind-1');
+  const ind2 = document.getElementById('step-ind-2');
+  const ind3 = document.getElementById('step-ind-3');
+
+  const btnTo2 = document.getElementById('btn-to-step-2');
+  const btnBack1 = document.getElementById('btn-back-to-step-1');
+  const btnTo3 = document.getElementById('btn-to-step-3');
+  const btnBack2 = document.getElementById('btn-back-to-step-2');
+  const timeInput = document.getElementById('selected-time-input');
+
+  // Service selection visual feedback
+  document.addEventListener('change', (e) => {
+    if (e.target && e.target.name === 'selectedService') {
+      document.querySelectorAll('.service-option-label').forEach(lbl => lbl.classList.remove('selected'));
+      const label = e.target.closest('.service-option-label');
+      if (label) label.classList.add('selected');
+    }
+    if (e.target && e.target.name === 'selectedStaff') {
+      document.querySelectorAll('.staff-option-card').forEach(card => card.classList.remove('selected'));
+      const card = e.target.closest('.staff-option-card');
+      if (card) card.classList.add('selected');
+    }
+  });
+
+  // Time slot selection (with event delegation)
+  const timeSlotsContainer = document.getElementById('time-slots-container');
+  timeSlotsContainer?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.time-slot-btn');
+    if (!btn) return;
+    document.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    const timeVal = btn.getAttribute('data-time') || '';
+    if (timeInput) timeInput.value = timeVal;
+  });
+
+  // Step Indicators Navigation (clickable)
+  ind1?.addEventListener('click', () => {
+    step2?.classList.remove('active');
+    step3?.classList.remove('active');
+    step1?.classList.add('active');
+    ind2?.classList.remove('active');
+    ind3?.classList.remove('active');
+    ind1?.classList.add('active');
+  });
+
+  ind2?.addEventListener('click', () => {
+    const selectedServiceRadio = document.querySelector('input[name="selectedService"]:checked');
+    if (!selectedServiceRadio) return;
+    step1?.classList.remove('active');
+    step3?.classList.remove('active');
+    step2?.classList.add('active');
+    ind1?.classList.remove('active');
+    ind3?.classList.remove('active');
+    ind2?.classList.add('active');
+  });
+
+  // Step 1 -> Step 2
+  btnTo2?.addEventListener('click', () => {
+    const selectedServiceRadio = document.querySelector('input[name="selectedService"]:checked');
+    if (!selectedServiceRadio) {
+      alert('Please select a service to continue.');
+      return;
+    }
+    step1?.classList.remove('active');
+    step2?.classList.add('active');
+    ind1?.classList.remove('active');
+    ind2?.classList.add('active');
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+  });
+
+  // Step 2 -> Step 1
+  btnBack1?.addEventListener('click', () => {
+    step2?.classList.remove('active');
+    step1?.classList.add('active');
+    ind2?.classList.remove('active');
+    ind1?.classList.add('active');
+  });
+
+  // Step 2 -> Step 3
+  btnTo3?.addEventListener('click', () => {
+    if (!timeInput || !timeInput.value) {
+      alert('Please pick an available time slot.');
+      return;
+    }
+
+    // Populate Step 3 Summary
+    const serviceRadio = document.querySelector('input[name="selectedService"]:checked');
+    const staffRadio = document.querySelector('input[name="selectedStaff"]:checked');
+
+    const sName = serviceRadio?.getAttribute('data-name') || '';
+    const sPrice = serviceRadio?.getAttribute('data-price') || '';
+    const sDur = serviceRadio?.getAttribute('data-duration') || '';
+    const stName = staffRadio?.getAttribute('data-name') || 'First Available';
+    const dateVal = dateInput?.value || '';
+    const timeVal = timeInput?.value || '';
+
+    const elSumName = document.getElementById('sum-service-name');
+    const elSumPrice = document.getElementById('sum-price-duration');
+    const elSumStaff = document.getElementById('sum-staff-name');
+    const elSumDt = document.getElementById('sum-datetime');
+
+    if (elSumName) elSumName.textContent = sName;
+    if (elSumPrice) elSumPrice.textContent = `${sPrice} (${sDur})`;
+    if (elSumStaff) elSumStaff.textContent = stName;
+    if (elSumDt) elSumDt.textContent = `${dateVal} at ${timeVal}`;
+
+    step2?.classList.remove('active');
+    step3?.classList.add('active');
+    ind2?.classList.remove('active');
+    ind3?.classList.add('active');
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+  });
+
+  // Step 3 -> Step 2
+  btnBack2?.addEventListener('click', () => {
+    step3?.classList.remove('active');
+    step2?.classList.add('active');
+    ind3?.classList.remove('active');
+    ind2?.classList.add('active');
+  });
+
+  // Pre-fill from logged-in customer session
+  function syncCustomerBookingDetails() {
+    const current = window.SalonStore ? window.SalonStore.getCurrentCustomer() : null;
+    const nameInput = document.getElementById('client-name');
+    const phoneInput = document.getElementById('client-phone');
+    const emailInput = document.getElementById('client-email');
+    const bannerEl = document.getElementById('booking-loyalty-banner');
+    const bIcon = document.getElementById('b-banner-icon');
+    const bTitle = document.getElementById('b-banner-title');
+    const bDesc = document.getElementById('b-banner-desc');
+    const bAction = document.getElementById('b-banner-action-wrap');
+
+    if (current) {
+      if (nameInput && !nameInput.value) nameInput.value = current.name || '';
+      if (phoneInput && !phoneInput.value) phoneInput.value = current.phone || '';
+      if (emailInput && !emailInput.value) emailInput.value = current.email || '';
+
+      if (bannerEl) bannerEl.className = 'booking-loyalty-banner logged-in';
+      if (bIcon) bIcon.textContent = '👑';
+      if (bTitle) bTitle.textContent = `Welcome back, ${current.name}!`;
+      if (bDesc) bDesc.textContent = `Your details are pre-filled. This reservation will hold 1 Pending Orange Stamp (🟠) on your 10-dot loyalty pass.`;
+      if (bAction) {
+        bAction.innerHTML = window.SalonStore.renderDotsHtml(current, true);
+      }
+    } else {
+      if (bannerEl) bannerEl.className = 'booking-loyalty-banner guest';
+      if (bIcon) bIcon.textContent = '✨';
+      if (bTitle) bTitle.textContent = 'Collect 10-Dot Loyalty Rewards';
+      if (bDesc) bDesc.textContent = 'Sign in with your account or phone to auto-fill details and claim your free service.';
+      if (bAction) {
+        bAction.innerHTML = `<button type="button" class="btn btn-subtle btn-sm customer-auth-trigger">Login</button>`;
+        bAction.querySelector('.customer-auth-trigger')?.addEventListener('click', () => {
+          if (window.openCustomerAuthModal) window.openCustomerAuthModal();
+        });
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', syncCustomerBookingDetails);
+  window.addEventListener('zarah:auth-changed', syncCustomerBookingDetails);
+
+  // Form Submission
+  const bookingForm = document.getElementById('booking-form');
+  bookingForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const clientNameInput = document.getElementById('client-name');
+    const clientPhoneInput = document.getElementById('client-phone');
+    const clientEmailInput = document.getElementById('client-email');
+    const clientNotesInput = document.getElementById('client-notes');
+
+    const clientName = clientNameInput ? clientNameInput.value.trim() : '';
+    const clientPhone = clientPhoneInput ? clientPhoneInput.value.trim() : '';
+    const clientEmail = clientEmailInput ? clientEmailInput.value.trim() : '';
+    const clientNotes = clientNotesInput ? clientNotesInput.value.trim() : '';
+
+    if (!clientName) {
+      alert('Please enter your full name.');
+      clientNameInput?.focus();
+      return;
+    }
+    if (!clientPhone) {
+      alert('Please enter your mobile phone number.');
+      clientPhoneInput?.focus();
+      return;
+    }
+    if (!clientEmail) {
+      alert('Please enter your email address.');
+      clientEmailInput?.focus();
+      return;
+    }
+
+    const serviceRadio = document.querySelector('input[name="selectedService"]:checked');
+    const staffRadio = document.querySelector('input[name="selectedStaff"]:checked');
+
+    if (!serviceRadio) {
+      alert('Please select a service first.');
+      btnBack2?.click();
+      btnBack1?.click();
+      return;
+    }
+
+    const sName = serviceRadio?.getAttribute('data-name') || '';
+    const sPrice = serviceRadio?.getAttribute('data-price') || '';
+    const sDur = serviceRadio?.getAttribute('data-duration') || '';
+    const stName = staffRadio?.getAttribute('data-name') || 'First Available';
+    const stId = staffRadio?.value || 'any-available';
+    const dateVal = dateInput?.value || '';
+    const timeVal = timeInput?.value || '';
+
+    if (!timeVal) {
+      alert('Please pick an appointment time slot.');
+      btnBack2?.click();
+      return;
+    }
+
+    const refCode = 'ZN-' + Math.floor(1000 + Math.random() * 9000);
+
+    // Save into localStorage appointment store
+    const newAppointment = {
+      id: 'app-' + Date.now(),
+      refCode,
+      clientName,
+      clientPhone,
+      clientEmail,
+      clientNotes,
+      serviceName: sName,
+      price: sPrice,
+      duration: sDur,
+      staffName: stName,
+      staffId: stId,
+      date: dateVal,
+      time: timeVal,
+      status: 'confirmed',
+      source: 'Website Online Booking',
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      const existing = JSON.parse(localStorage.getItem('zarah_appointments') || '[]');
+      existing.push(newAppointment);
+      localStorage.setItem('zarah_appointments', JSON.stringify(existing));
+    } catch (err) {
+      console.warn('Storage error', err);
+    }
+
+    // Award 1 Pending Loyalty Point (Orange Dot)
+    let updatedCust = null;
+    if (window.SalonStore) {
+      let cust = window.SalonStore.findCustomer(clientPhone) || window.SalonStore.findCustomer(clientEmail);
+      if (!cust) {
+        cust = window.SalonStore.addOrUpdateCustomer({
+          name: clientName,
+          phone: clientPhone,
+          email: clientEmail,
+          loginProvider: 'phone',
+          completedPoints: 0,
+          pendingPoints: 1,
+          totalSpent: 0,
+          totalVisits: 0
+        });
+      } else {
+        cust = window.SalonStore.addBookingPoint(cust.id);
+      }
+      updatedCust = cust;
+    }
+
+    // Show Confirmation Panel
+    bookingForm.style.display = 'none';
+    const stepsBar = document.querySelector('.booking-steps-bar');
+    if (stepsBar) stepsBar.style.display = 'none';
+
+    const successPanel = document.getElementById('booking-success-panel');
+    if (successPanel) {
+      successPanel.style.display = 'block';
+
+      const confName = document.getElementById('conf-client-name');
+      const confRef = document.getElementById('conf-ref-code');
+      const confServ = document.getElementById('conf-service');
+      const confSt = document.getElementById('conf-staff');
+      const confDt = document.getElementById('conf-datetime');
+
+      if (confName) confName.textContent = clientName;
+      if (confRef) confRef.textContent = refCode;
+      if (confServ) confServ.textContent = `${sName} (${sPrice})`;
+      if (confSt) confSt.textContent = stName;
+      if (confDt) confDt.textContent = `${dateVal} at ${timeVal}`;
+
+      // Loyalty dots in ticket
+      const confDotsEl = document.getElementById('conf-loyalty-dots');
+      if (confDotsEl && updatedCust && window.SalonStore) {
+        confDotsEl.innerHTML = window.SalonStore.renderDotsHtml(updatedCust, true);
+      }
+    }
+
+    window.scrollTo({ top: 100, behavior: 'smooth' });
+  });
+</script>
+
+<style>
+  .booking-page-header {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--border-delicate);
+    padding: clamp(2.5rem, 5vw, 4rem) 0 2rem 0;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .header-desc {
+    max-width: 650px;
+    margin: 1rem auto 1.5rem auto;
+    font-size: 1.05rem;
+  }
+
+  .booking-phone-strip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 1.25rem;
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-full);
+    font-size: 0.88rem;
+    color: var(--text-cocoa);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .phone-number-highlight {
+    color: var(--text-espresso);
+    font-weight: 700;
+  }
+  .phone-number-highlight:hover {
+    color: var(--accent-rose);
+  }
+
+  /* Booking App */
+  .booking-app-section {
+    padding: 3rem 0;
+  }
+
+  .booking-box {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+  }
+
+  /* Steps Bar */
+  .booking-steps-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-delicate);
+  }
+
+  .step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .step-indicator.active {
+    color: var(--text-espresso);
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--bg-stone);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+
+  .step-indicator.active .step-num {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+  }
+
+  .step-connector {
+    flex: 1;
+    height: 1px;
+    background-color: var(--border-delicate);
+    margin: 0 1rem;
+  }
+
+  /* Step Panels */
+  .step-panel {
+    display: none;
+  }
+
+  .step-panel.active {
+    display: block;
+  }
+
+  .panel-heading {
+    font-size: 1.45rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .panel-sub {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  /* Step 1: Services List */
+  .service-selection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .service-option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.15rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .service-option-label:hover {
+    border-color: var(--accent-rose);
+    background-color: var(--bg-porcelain);
+  }
+
+  .service-option-label.selected,
+  .service-option-label:has(input[type="radio"]:checked) {
+    border-color: var(--accent-rose);
+    background-color: #FDF9F7;
+    box-shadow: 0 0 0 1px var(--accent-rose);
+  }
+
+  .service-option-label input[type="radio"] {
+    margin-top: 0.3rem;
+    accent-color: var(--accent-rose);
+    width: 18px;
+    height: 18px;
+  }
+
+  .service-option-content {
+    flex: 1;
+  }
+
+  .service-opt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .service-opt-name {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--text-espresso);
+  }
+
+  .service-opt-price {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--accent-rose);
+  }
+
+  .service-opt-duration {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0.2rem 0;
+  }
+
+  .service-opt-desc {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-cocoa);
+  }
+
+  /* Step 2: Staff & Date */
+  .staff-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .staff-option-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+  }
+
+  .staff-option-card:hover {
+    border-color: var(--accent-rose);
+    background-color: var(--bg-porcelain);
+  }
+
+  .staff-option-card.selected,
+  .staff-option-card:has(input[type="radio"]:checked) {
+    border-color: var(--accent-rose);
+    background-color: #FDF9F7;
+    box-shadow: 0 0 0 1px var(--accent-rose);
+  }
+
+  .staff-option-card input[type="radio"] {
+    accent-color: var(--accent-rose);
+  }
+
+  .staff-opt-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .staff-opt-role {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-espresso);
+    margin-bottom: 0.45rem;
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    color: var(--text-espresso);
+    background-color: #FFFFFF;
+  }
+
+  .form-input:focus, .form-textarea:focus {
+    border-color: var(--accent-rose);
+    outline: none;
+  }
+
+  .time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 0.65rem;
+    margin-top: 0.35rem;
+  }
+
+  .time-slot-btn {
+    padding: 0.55rem;
+    border: 1px solid var(--border-delicate);
+    background-color: var(--bg-stone);
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-espresso);
+    cursor: pointer;
+    text-align: center;
+    transition: all var(--transition-fast);
+  }
+
+  .time-slot-btn:hover {
+    border-color: var(--accent-rose);
+  }
+
+  .time-slot-btn.selected {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    border-color: var(--text-espresso);
+  }
+
+  /* Step 3: Loyalty Banner */
+  .booking-loyalty-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+    transition: all var(--transition-fast);
+  }
+
+  .booking-loyalty-banner.guest {
+    background-color: var(--bg-stone);
+    border: 1px dashed var(--border-delicate);
+  }
+
+  .booking-loyalty-banner.logged-in {
+    background: linear-gradient(135deg, #EFF7F2, #F4EBE8);
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    box-shadow: 0 2px 8px rgba(61, 106, 82, 0.08);
+  }
+
+  .banner-left {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex: 1;
+  }
+
+  .user-badge-icon {
+    font-size: 1.5rem;
+  }
+
+  .b-auth-sub {
+    font-size: 0.82rem;
+    color: var(--text-cocoa);
+    margin: 0.15rem 0 0 0;
+  }
+
+  .loyalty-ticket-row {
+    align-items: center;
+    background-color: #FFFFFF;
+    padding: 0.75rem !important;
+    border-radius: var(--radius-sm);
+    margin-top: 0.35rem;
+  }
+
+  .loyalty-ticket-left {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .loyalty-ticket-sub {
+    font-size: 0.78rem;
+    color: #D97706;
+    font-weight: 600;
+  }
+
+  /* Step 3: Summary */
+  .booking-summary-banner {
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+  }
+
+  .sum-label {
+    color: var(--text-muted);
+  }
+
+  /* Step Footer Navigation */
+  .step-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-delicate);
+  }
+
+  .step-footer.split {
+    justify-content: space-between;
+  }
+
+  /* Success Card */
+  .booking-success-card {
+    text-align: center;
+    padding: 1.5rem 0;
+  }
+
+  .success-icon-wrap {
+    margin-bottom: 1rem;
+  }
+
+  .success-subtitle {
+    margin: 0.5rem auto 2rem auto;
+    max-width: 500px;
+    color: var(--text-cocoa);
+  }
+
+  .confirmation-ticket {
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    max-width: 520px;
+    margin: 0 auto 2rem auto;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .ticket-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.92rem;
+    border-bottom: 1px dashed rgba(36, 30, 28, 0.1);
+    padding-bottom: 0.5rem;
+  }
+
+  .ticket-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .ref-badge {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    padding: 0.15rem 0.55rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+  }
+
+  .success-instructions {
+    max-width: 560px;
+    margin: 0 auto 2rem auto;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .success-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    .booking-steps-bar {
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .step-connector {
+      display: none;
+    }
+  }
+</style>

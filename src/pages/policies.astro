@@ -1,0 +1,238 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import faqData from '../data/faq.json';
+import salonInfo from '../data/salon-info.json';
+---
+
+<BaseLayout
+  currentPath="/policies"
+  title="Salon Policies & FAQs | Zarah Nails & Beauty Massey"
+  description="Read our salon cancellation policy, 72-hour chip repair guarantee, hygiene sterilization standards, and frequently asked questions for Zarah Nails in Massey, Auckland."
+>
+  <section class="page-intro-section">
+    <div class="container text-center">
+      <p class="eyebrow">Studio Etiquette &amp; FAQ</p>
+      <h1>Salon Policies &amp; Client Care</h1>
+      <p class="intro-description">
+        We strive to provide a relaxed, transparent, and seamless experience for every guest. Here are our guidelines regarding cancellations, guarantees, and preparation.
+      </p>
+    </div>
+  </section>
+
+  <!-- Key Policy Cards -->
+  <section class="section policies-cards-section">
+    <div class="container">
+      <div class="policy-pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-badge">✨ 72-Hour Repair Guarantee</div>
+          <h3>Free Nail Repair Policy</h3>
+          <p>
+            We stand behind our craftsmanship. If a gel enhancement or polish chips within 72 hours of your service under normal wear, please contact us immediately. We will gladly repair the affected nail free of charge.
+          </p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-badge">⏱️ 24-Hour Notice</div>
+          <h3>Cancellations &amp; Rescheduling</h3>
+          <p>
+            We kindly ask for at least 24 hours notice for any appointment changes. This allows us to reallocate your time slot to our waiting list. You can reschedule easily online, via SMS, or by calling 0210 839 8791.
+          </p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-badge">🔔 Technician Guarantee</div>
+          <h3>Staff Reassignment &amp; Alerts</h3>
+          <p>
+            In the event that your booked technician is unavailable due to illness or family emergency, our team will immediately notify you via automated SMS alert. You may choose to be seen by another qualified artist or reschedule.
+          </p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-badge">🛡️ Hospital-Grade</div>
+          <h3>Sanitization &amp; Safety</h3>
+          <p>
+            All metal tools undergo medical ultrasonic cleaning and autoclave heat sterilization. Every client receives brand-new disposable files, buffers, and pedicure tub liners. We never compromise on hygiene.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Complete FAQ Accordions -->
+  <section class="section complete-faq-section">
+    <div class="container-narrow">
+      <div class="section-header text-center">
+        <p class="eyebrow">Common Inquiries</p>
+        <h2>Frequently Asked Questions</h2>
+      </div>
+
+      {faqData.map((category) => (
+        <div class="faq-group">
+          <h3 class="faq-cat-title">{category.category}</h3>
+          <div class="faq-accordion-list">
+            {category.questions.map((item) => (
+              <details class="faq-accordion-item">
+                <summary class="faq-item-question">
+                  <span>{item.q}</span>
+                  <span class="faq-plus">+</span>
+                </summary>
+                <div class="faq-item-answer">
+                  <p>{item.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <!-- Still Have Questions? -->
+      <div class="help-box">
+        <h3>Still have a question?</h3>
+        <p>Our friendly front desk is here to help during operating hours.</p>
+        <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="btn btn-primary">
+          Call {salonInfo.contact.phoneDisplay}
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-intro-section {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--border-delicate);
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .intro-description {
+    max-width: 650px;
+    margin: 1rem auto 0 auto;
+    font-size: 1.05rem;
+  }
+
+  .policies-cards-section {
+    padding: 3.5rem 0;
+  }
+
+  .policy-pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .pillar-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .pillar-badge {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-rose);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .pillar-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .pillar-card p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-cocoa);
+  }
+
+  /* FAQ */
+  .complete-faq-section {
+    background-color: var(--bg-stone);
+    border-top: 1px solid var(--border-delicate);
+    padding: 4rem 0;
+  }
+
+  .faq-group {
+    margin-bottom: 2.5rem;
+  }
+
+  .faq-cat-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--text-espresso);
+  }
+
+  .faq-accordion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .faq-accordion-item {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.15rem 1.5rem;
+  }
+
+  .faq-accordion-item[open] {
+    border-color: var(--accent-rose);
+  }
+
+  .faq-item-question {
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .faq-item-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-plus {
+    color: var(--accent-rose);
+    font-size: 1.35rem;
+    line-height: 1;
+    transition: transform var(--transition-fast);
+  }
+
+  .faq-accordion-item[open] .faq-plus {
+    transform: rotate(45deg);
+  }
+
+  .faq-item-answer {
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-delicate);
+    margin-top: 0.85rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-cocoa);
+  }
+
+  .help-box {
+    margin-top: 3.5rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 2.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+</style>

@@ -1,0 +1,384 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import salonInfo from '../data/salon-info.json';
+---
+
+<BaseLayout
+  currentPath="/contact"
+  title="Location, Hours & Directions | Zarah Nails & Beauty Massey"
+  description="Find Zarah Nails & Beauty at Shop 12, 3 Red Hills Road, Massey, Auckland. Free parking outside, opening hours, one-tap calling, and direct inquiries."
+>
+  <section class="page-intro-section">
+    <div class="container text-center">
+      <p class="eyebrow">Find Us in Massey</p>
+      <h1>Location, Hours &amp; Contact</h1>
+      <p class="intro-description">
+        We are conveniently situated in Massey on Red Hills Road, easily accessible with abundant free customer parking right outside our front door.
+      </p>
+    </div>
+  </section>
+
+  <section class="section contact-main-section">
+    <div class="container contact-grid">
+      <!-- Contact Details & Hours Card -->
+      <div class="contact-info-panel">
+        <div class="info-block">
+          <div class="info-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          </div>
+          <div>
+            <h3>Studio Address</h3>
+            <p class="address-text">
+              <strong>Zarah Nails &amp; Beauty</strong><br />
+              {salonInfo.address.street}<br />
+              {salonInfo.address.suburb}, {salonInfo.address.city} {salonInfo.address.postcode}<br />
+              New Zealand
+            </p>
+            <p class="parking-note">
+              🚗 {salonInfo.parking}
+            </p>
+            <a href={salonInfo.address.googleMapsUrl} target="_blank" rel="noopener noreferrer" class="btn btn-subtle btn-sm directions-btn">
+              Get Google Maps Directions &rarr;
+            </a>
+          </div>
+        </div>
+
+        <div class="info-block">
+          <div class="info-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          </div>
+          <div>
+            <h3>Direct Telephone</h3>
+            <p class="phone-desc">Call us for immediate bookings, walk-in status, or nail art consultations:</p>
+            <a href={`tel:${salonInfo.contact.phone.replace(/\s+/g, '')}`} class="main-phone-link">
+              {salonInfo.contact.phoneDisplay}
+            </a>
+            <span class="alt-phone">Alternate: {salonInfo.contact.phoneAlt}</span>
+          </div>
+        </div>
+
+        <div class="info-block">
+          <div class="info-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="hours-full-block">
+            <h3>Operating Hours</h3>
+            <ul class="hours-list">
+              {salonInfo.hours.map((h) => (
+                <li>
+                  <span class="day-col">{h.days}</span>
+                  <span class="time-col">{h.hours}</span>
+                </li>
+              ))}
+            </ul>
+            <span class="walkin-pill">Walk-ins Welcome Subject to Availability</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Message Form -->
+      <div class="contact-form-card">
+        <h2>Send Us a Message</h2>
+        <p class="form-intro">
+          Have a question about a treatment, wedding party booking, or nail design? Send us a note and our team will get back to you promptly.
+        </p>
+
+        <form id="contact-form" class="inquiry-form">
+          <div class="form-group">
+            <label for="contact-name" class="form-label">Your Name *</label>
+            <input type="text" id="contact-name" name="name" class="form-input" placeholder="e.g. Emma Clarke" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-phone" class="form-label">Phone Number *</label>
+              <input type="tel" id="contact-phone" name="phone" class="form-input" placeholder="e.g. 021 987 6543" required />
+            </div>
+            <div class="form-group">
+              <label for="contact-email" class="form-label">Email Address *</label>
+              <input type="email" id="contact-email" name="email" class="form-input" placeholder="e.g. emma@example.co.nz" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="contact-subject" class="form-label">Treatment or Topic</label>
+            <select id="contact-subject" name="subject" class="form-input">
+              <option value="BIAB / Gel Nails">BIAB / Gel Nails Inquiry</option>
+              <option value="Custom Nail Art">Custom Nail Art / Pinterest Design</option>
+              <option value="Pedicures & Spa">Spa Pedicures</option>
+              <option value="Facials / Threading">Facials &amp; Brow Threading</option>
+              <option value="Group / Bridal Booking">Group or Bridal Booking</option>
+              <option value="Other">General Question</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="contact-message" class="form-label">Message *</label>
+            <textarea id="contact-message" name="message" class="form-textarea" rows="4" placeholder="How can we help you?" required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btn-submit-inquiry">
+            Send Message
+          </button>
+
+          <div id="contact-feedback" class="form-feedback-alert" style="display: none;">
+            Thank you! Your message has been received by our salon front desk. We will respond shortly.
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const contactForm = document.getElementById('contact-form');
+  const feedback = document.getElementById('contact-feedback');
+
+  contactForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('contact-name')?.value || '';
+    const phone = document.getElementById('contact-phone')?.value || '';
+    const email = document.getElementById('contact-email')?.value || '';
+    const subject = document.getElementById('contact-subject')?.value || '';
+    const message = document.getElementById('contact-message')?.value || '';
+
+    // Log inquiry into localStorage so it also appears in Staff Portal
+    const inquiry = {
+      id: 'inq-' + Date.now(),
+      senderName: name,
+      senderPhone: phone,
+      senderEmail: email,
+      subject: subject,
+      message: message,
+      source: 'Website Contact Form',
+      date: new Date().toLocaleDateString('en-NZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      status: 'unread'
+    };
+
+    try {
+      const existing = JSON.parse(localStorage.getItem('zarah_messages') || '[]');
+      existing.unshift(inquiry);
+      localStorage.setItem('zarah_messages', JSON.stringify(existing));
+    } catch (err) {
+      console.warn('Storage error', err);
+    }
+
+    if (feedback) {
+      feedback.style.display = 'block';
+    }
+    contactForm.reset();
+  });
+</script>
+
+<style>
+  .page-intro-section {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--border-delicate);
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .intro-description {
+    max-width: 650px;
+    margin: 1rem auto 0 auto;
+    font-size: 1.05rem;
+  }
+
+  .contact-main-section {
+    padding: 3.5rem 0;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 3rem;
+  }
+
+  .contact-info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .info-block {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--bg-stone);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-rose);
+    flex-shrink: 0;
+  }
+
+  .info-block h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .address-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-cocoa);
+  }
+
+  .parking-note {
+    margin: 0.75rem 0;
+    font-size: 0.85rem;
+    color: var(--accent-rose);
+    font-weight: 600;
+  }
+
+  .directions-btn {
+    margin-top: 0.5rem;
+  }
+
+  .phone-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .main-phone-link {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-espresso);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .main-phone-link:hover {
+    color: var(--accent-rose);
+  }
+
+  .alt-phone {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .hours-full-block {
+    flex: 1;
+  }
+
+  .hours-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    font-size: 0.88rem;
+    margin: 0.75rem 0 1rem 0;
+  }
+
+  .hours-list li {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px dashed var(--border-delicate);
+  }
+
+  .day-col {
+    font-weight: 500;
+  }
+
+  .time-col {
+    color: var(--text-muted);
+  }
+
+  .walkin-pill {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    background-color: var(--state-success-bg);
+    color: var(--state-success);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+  }
+
+  /* Contact Form */
+  .contact-form-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    padding: clamp(1.75rem, 4vw, 2.5rem);
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .form-intro {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0 1.5rem 0;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+  }
+
+  .form-input:focus, .form-textarea:focus {
+    border-color: var(--accent-rose);
+    outline: none;
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  .form-feedback-alert {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    background-color: var(--state-success-bg);
+    color: var(--state-success);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  @media (max-width: 860px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

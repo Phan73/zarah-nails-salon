@@ -1,0 +1,38 @@
+[
+  {
+    "id": "review-1",
+    "name": "Sarah T.",
+    "suburb": "Westgate, Auckland",
+    "service": "BIAB Structured Overlay & Gel",
+    "rating": 5,
+    "date": "September 2025",
+    "content": "Zarah is an absolute perfectionist with builder gel! My natural nails used to break constantly, but since coming here they have grown so long and healthy. The salon is clean, calm, and welcoming."
+  },
+  {
+    "id": "review-2",
+    "name": "Michelle L.",
+    "suburb": "Massey, Auckland",
+    "service": "Deluxe Spa Pedicure",
+    "rating": 5,
+    "date": "August 2025",
+    "content": "Hands down the best pedicure in West Auckland. The foot massage alone is worth it, and the gel on my toes lasts for weeks without chipping. So happy having this gem right on Red Hills Road!"
+  },
+  {
+    "id": "review-3",
+    "name": "Aroha K.",
+    "suburb": "Hobsonville, Auckland",
+    "service": "Eyebrow Threading & Tint",
+    "rating": 5,
+    "date": "October 2025",
+    "content": "Quick, painless, and perfect brow shape every single visit. Priya listens to exactly how full you want your brows kept. Friendly staff and easy parking right outside."
+  },
+  {
+    "id": "review-4",
+    "name": "Jessica M.",
+    "suburb": "Henderson, Auckland",
+    "service": "Acrylic Full Set with Custom Chrome Art",
+    "rating": 5,
+    "date": "October 2025",
+    "content": "I showed a photo from Pinterest of glazed chrome micro tips and Zarah recreated it even better than the reference! Extremely detailed cuticle work and super sturdy acrylics."
+  }
+]

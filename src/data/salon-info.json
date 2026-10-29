@@ -1,0 +1,30 @@
+{
+  "name": "Zarah Nails & Beauty",
+  "legalName": "Zarah Nails Limited",
+  "tagline": "Refined Nail Artistry & Holistic Beauty Lounge",
+  "address": {
+    "street": "Shop 12, 3 Red Hills Road",
+    "suburb": "Massey",
+    "city": "Auckland",
+    "postcode": "0614",
+    "country": "New Zealand",
+    "full": "Shop 12, 3 Red Hills Road, Massey, Auckland 0614, New Zealand",
+    "googleMapsUrl": "https://maps.google.com/?q=3+Red+Hills+Road,+Massey,+Auckland+0614"
+  },
+  "contact": {
+    "phone": "+64 210 839 8791",
+    "phoneDisplay": "0210 839 8791",
+    "phoneAlt": "+64 21 368 1481",
+    "email": "hello@zarahnailsmassey.co.nz",
+    "facebook": "https://www.facebook.com/zarahnailsandbeauty/",
+    "instagram": "https://www.instagram.com/zarahnailsandbeauty/"
+  },
+  "hours": [
+    { "days": "Monday – Wednesday", "hours": "9:30 AM – 6:00 PM" },
+    { "days": "Thursday (Late Night)", "hours": "9:30 AM – 7:00 PM" },
+    { "days": "Friday – Saturday", "hours": "9:30 AM – 6:00 PM" },
+    { "days": "Sunday", "hours": "10:00 AM – 5:00 PM" }
+  ],
+  "bookingNotice": "Appointments recommended. Walk-ins warmly welcomed subject to technician availability.",
+  "parking": "Free customer parking available directly in front of the salon plaza on Red Hills Road."
+}

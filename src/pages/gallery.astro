@@ -1,0 +1,350 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import galleryData from '../data/gallery.json';
+import salonInfo from '../data/salon-info.json';
+---
+
+<BaseLayout
+  currentPath="/gallery"
+  title="Nail Art Lookbook & Gallery | Zarah Nails & Beauty Massey"
+  description="Explore our bespoke nail art portfolio, glazed chrome finishes, BIAB builder gel transformations, and french ombre sets created at Zarah Nails in Massey, Auckland."
+>
+  <script src="/js/salon-store.js" is:inline></script>
+
+  <!-- Header -->
+  <section class="page-intro-section">
+    <div class="container text-center">
+      <p class="eyebrow">Studio Lookbook</p>
+      <h1>Nail Artistry &amp; Inspiration</h1>
+      <p class="intro-description">
+        Browse curated designs created by our master technicians in Massey. Tap "Book This Look" on any style to reserve the exact treatment for your next appointment.
+      </p>
+
+      <!-- Tag Filters -->
+      <div class="gallery-filters" id="gallery-tag-filters">
+        <button class="filter-pill active" data-tag="all">All Styles</button>
+        <button class="filter-pill" data-tag="BIAB">BIAB &amp; Natural</button>
+        <button class="filter-pill" data-tag="Chrome">Glazed Chrome</button>
+        <button class="filter-pill" data-tag="French">French &amp; Ombre</button>
+        <button class="filter-pill" data-tag="Nail Art">Custom Art</button>
+        <button class="filter-pill" data-tag="Pedicure">Pedicures</button>
+        <button class="filter-pill" data-tag="Brows">Brows &amp; Beauty</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Grid -->
+  <section class="section gallery-content">
+    <div class="container">
+      <div class="gallery-full-grid" id="gallery-container">
+        {galleryData.map((look) => (
+          <article class="gallery-card" data-tags={JSON.stringify(look.tags)}>
+            <div class="gallery-card-media">
+              <img src={look.image} alt={look.title} loading="lazy" />
+              <div class="gallery-card-hover-actions">
+                <a href={`/booking?service=${look.serviceId}`} class="btn btn-primary btn-sm">
+                  Book This Look ({look.price})
+                </a>
+              </div>
+            </div>
+            <div class="gallery-card-details">
+              <div class="tag-list">
+                {look.tags.map((t) => <span class="tag-chip">{t}</span>)}
+              </div>
+              <h2 class="card-title">{look.title}</h2>
+              <p class="card-desc">{look.description}</p>
+              <div class="card-meta">
+                <span class="meta-service">{look.serviceName}</span>
+                <span class="meta-price">{look.price}</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <!-- Social Community Invite -->
+      <div class="social-invite-card">
+        <div class="invite-content">
+          <h3>Have a Specific Design in Mind?</h3>
+          <p>
+            We love bringing your dream nail sets to life! Bring screenshots from Pinterest or Instagram to your visit, or send us a message on Facebook beforehand so we can review the art complexity and recommend the right duration.
+          </p>
+          <div class="invite-actions">
+            <a href={salonInfo.contact.facebook} target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+              Message us on Facebook &rarr;
+            </a>
+            <a href="/booking" class="btn btn-accent">
+              Book Appointment Online
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline define:vars={{ initialGallery: galleryData }}>
+  function hydrateDynamicGallery() {
+    const storedGallery = window.SalonStore.getGallery(null);
+    if (!storedGallery) return;
+
+    const container = document.getElementById('gallery-container');
+    if (!container) return;
+
+    container.innerHTML = storedGallery.map((look) => `
+      <article class="gallery-card" data-tags='${JSON.stringify(look.tags || [])}'>
+        <div class="gallery-card-media">
+          <img src="${look.image}" alt="${look.title}" loading="lazy" />
+          <div class="gallery-card-hover-actions">
+            <a href="/booking?service=${look.serviceId || 'biab-full-overlay'}" class="btn btn-primary btn-sm">
+              Book This Look (${look.price})
+            </a>
+          </div>
+        </div>
+        <div class="gallery-card-details">
+          <div class="tag-list">
+            ${(look.tags || []).map(t => `<span class="tag-chip">${t}</span>`).join('')}
+          </div>
+          <h2 class="card-title">${look.title}</h2>
+          <p class="card-desc">${look.description}</p>
+          <div class="card-meta">
+            <span class="meta-service">${look.serviceName || 'Custom Nail Art'}</span>
+            <span class="meta-price">${look.price}</span>
+          </div>
+        </div>
+      </article>
+    `).join('');
+
+    bindGalleryFilters();
+  }
+
+  function bindGalleryFilters() {
+    const tagButtons = document.querySelectorAll('#gallery-tag-filters .filter-pill');
+    const galleryCards = document.querySelectorAll('.gallery-card');
+
+    tagButtons.forEach((btn) => {
+      btn.onclick = () => {
+        tagButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const selectedTag = btn.getAttribute('data-tag');
+        galleryCards.forEach((card) => {
+          const rawTags = card.getAttribute('data-tags');
+          const tags = rawTags ? JSON.parse(rawTags) : [];
+
+          if (selectedTag === 'all' || tags.includes(selectedTag)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      };
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    hydrateDynamicGallery();
+    bindGalleryFilters();
+  });
+  window.addEventListener('zarah:gallery-updated', hydrateDynamicGallery);
+</script>
+
+<style>
+  .page-intro-section {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid var(--border-delicate);
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .intro-description {
+    max-width: 650px;
+    margin: 1rem auto 2rem auto;
+    font-size: 1.05rem;
+  }
+
+  .gallery-filters {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .filter-pill {
+    padding: 0.55rem 1.15rem;
+    background-color: var(--bg-stone);
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-cocoa);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .filter-pill:hover {
+    background-color: var(--bg-stone-dark);
+    color: var(--text-espresso);
+  }
+
+  .filter-pill.active {
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    border-color: var(--text-espresso);
+  }
+
+  .gallery-content {
+    padding: 3.5rem 0;
+  }
+
+  .gallery-full-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .gallery-card {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-delicate);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-subtle);
+    transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  }
+
+  .gallery-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+    border-color: var(--accent-rose);
+  }
+
+  .gallery-card-media {
+    position: relative;
+    aspect-ratio: 1 / 1.15;
+    overflow: hidden;
+    background-color: var(--bg-stone);
+  }
+
+  .gallery-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-smooth);
+  }
+
+  .gallery-card:hover .gallery-card-media img {
+    transform: scale(1.05);
+  }
+
+  .gallery-card-hover-actions {
+    position: absolute;
+    inset: 0;
+    background: rgba(36, 30, 28, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+
+  .gallery-card:hover .gallery-card-hover-actions {
+    opacity: 1;
+  }
+
+  .gallery-card-details {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.65rem;
+  }
+
+  .tag-list {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .tag-chip {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    background-color: var(--bg-stone);
+    color: var(--text-cocoa);
+    border-radius: var(--radius-full);
+  }
+
+  .card-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .card-desc {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text-cocoa);
+    flex: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-delicate);
+    margin-top: 0.5rem;
+  }
+
+  .meta-service {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .meta-price {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent-rose);
+  }
+
+  /* Social Invite */
+  .social-invite-card {
+    margin-top: 4rem;
+    background-color: var(--text-espresso);
+    color: #FAF8F5;
+    border-radius: var(--radius-lg);
+    padding: clamp(2rem, 5vw, 3.5rem);
+    text-align: center;
+  }
+
+  .invite-content {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .invite-content h3 {
+    color: #FFFFFF;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-bottom: 1rem;
+  }
+
+  .invite-content p {
+    color: #D6CBC4;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0 auto 2rem auto;
+  }
+
+  .invite-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+</style>
